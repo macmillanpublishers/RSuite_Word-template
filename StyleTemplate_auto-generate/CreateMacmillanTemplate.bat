@@ -31,17 +31,17 @@ echo "Exporting VBA style-mappings to vba_style_config.json ... Should be <10 se
 PowerShell -NoProfile -ExecutionPolicy Bypass -Command "%mypath%runMacro_Wd-or-Xls_NoSave.ps1 excel WordTemplateStyles.xlsm autorun_VBAmappingsToJSON"
 echo "Done exporting to vba_style_config.json!" & echo.
 
-echo "(Re)creating macmillan.dotm ... this should take 60-90 seconds"
+echo "(Re)creating RSuite.dotx ... this should take 60-90 seconds"
 timeout /t 1 /nobreak > NUL & echo.
 echo "Keep your eye on this window for the all clear!"
 PowerShell -NoProfile -ExecutionPolicy Bypass -Command "%mypath%runMacro_Wd-or-Xls_NoSave.ps1 word StyleTemplateCreator.docm WriteTemplatefromJson"
-echo "OK, finished writing macmillan.dotm!" & echo.
+echo "OK, finished writing RSuite.dotx!" & echo.
 
-echo. & echo "(Re)creating macmillan_NoColor.dotm ... this should take  60-90 seconds again."
+echo. & echo "(Re)creating RSuite_NoColor.dotx ... this should take  60-90 seconds again."
 timeout /t 1 /nobreak > NUL
 echo. & echo "Keep your eye on this window for the all clear (again)!"
 PowerShell -NoProfile -ExecutionPolicy Bypass -Command "%mypath%runMacro_Wd-or-Xls_NoSave.ps1 word StyleTemplateCreator.docm WriteNoColorTemplatefromJson"
-echo "Yay, finished writing macmillan_NoColor.dotm!"
+echo "Yay, finished writing RSuite_NoColor.dotx!"
 
 echo. & echo.
 echo "All done!  This is so awesome!" & echo.
