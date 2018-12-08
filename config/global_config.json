@@ -1,8 +1,9 @@
 {
 	"owner": "macmillanpublishers",
 	"base_url": "https://github.com",
+  "regions": ["us", "uk"],
 	"files": {
-		"Word-template.dotm": {
+		"RSuite_Word-template.dotm": {
 			"repo": "RSuite_Word-template",
 			"latest_release": "v1.0"
 		},
