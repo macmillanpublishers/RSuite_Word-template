@@ -1,0 +1,28 @@
+{
+	"owner": "macmillanpublishers",
+	"base_url": "https://github.com",
+	"files": {
+		"Word-template.dotm": {
+			"repo": "RSuite_Word-template",
+			"latest_release": "v1.0"
+		},
+		"GtUpdater.dotm": {
+			"repo": "RSuite_Word-template",
+			"latest_release": "v1.0"
+		},
+		"RSuite.dotx": {
+			"repo": "RSuite_Word-template",
+			"subfolders": ["StyleTemplate_auto-generate"],
+			"latest_release": "v1.0"
+		},
+		"RSuite_NoColor.dotx": {
+			"repo": "RSuite_Word-template",
+			"subfolders": ["StyleTemplate_auto-generate"],
+			"latest_release": "v1.0"
+		},
+		"global_config.json": {
+			"repo": "RSuite_Word-template",
+			"subfolders": ["config"]
+		}
+	}
+}
