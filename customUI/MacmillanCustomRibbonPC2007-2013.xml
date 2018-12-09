@@ -58,6 +58,11 @@
           <button id="isty3" label="Insert Break" screentip="Inserts a break indicator" image="break" size="large" onAction="ApplyStyle.InsertBreak" />
         </group>
 
+        <group id="Styles4" label="Styles">
+          <comboBox idMso="StyleGalleryClassic"/>
+          <button id="nexel1" label="Find Next Element" screentip="Finds the next non-Tx element" size="normal" onAction="Clean.NextElement" />
+        </group>
+
       </tab>
       <tab id="CustomTab1" label="Macmillan Tools" insertAfterMso="TabHome">
         <group id="CustGrp1" label="Macmillan Styles" >
