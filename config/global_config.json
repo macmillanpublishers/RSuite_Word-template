@@ -11,11 +11,6 @@
 			"repo": "RSuite_Word-template",
 			"latest_release": "v1.0"
 		},
-    "AutoMacros.bas": {
-      "repo": "RSuite_Word-template",
-      "subfolders": ["modules"],
-      "latest_release": "v1.0"
-    },
 		"RSuite.dotx": {
 			"repo": "RSuite_Word-template",
 			"subfolders": ["StyleTemplate_auto-generate"],
