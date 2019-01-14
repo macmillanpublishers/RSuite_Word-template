@@ -45,16 +45,15 @@
 
           <button id="sty7" label="Ext1" screentip="Extract1" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Extract1 (Ext1)" />
           <button id="sty8" label="Ext2" screentip="Extract2" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Extract2 (Ext2)" />
-          <button id="sty9" label="Tmg" screentip="Text Message" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Text-Message (Tmg)" />
-
-
           <button id="sty10" label="Vrs1" screentip="Verse1" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Verse1 (Vrs1)" />
+
           <button id="sty11" label="Epi" screentip="Epigraph Non-Verse" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Epigraph-Non-Verse (Epi)" />
           <button id="sty12" label="Epiv" screentip="Epigraph Verse" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Epigraph-Verse (Epiv)" />
-
           <button id="sty13" label="Episrc" screentip="Epigraph Source" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Epigraph-Source (Episrc)" />
+
           <button id="sty14" label="Date" screentip="Dateline" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Dateline (Date)" />
           <button id="sty15" label="Loc" screentip="Location" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Location (Loc)" />
+          <button id="sty9" label="Tmg" screentip="Text Message" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Text-Message (Tmg)" />
 
           <button id="sty16" label="Bl1" screentip="Bullet List Level-1" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Bullet-Level-1-List (Bl1)" />
           <button id="sty17" label="Nl1" screentip="Number List Level-1" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Num-Level-1-List (Nl1)" />
@@ -64,13 +63,13 @@
 
         <group id="Styles2" label="Character Styles">
 
-          <button id="csty1" label="b" screentip="bold" size="normal" onAction="ApplyStyle.ApplyCharStyle" tag="bold (b)" />
-          <button id="csty2" label="i" screentip="italic" size="normal" onAction="ApplyStyle.ApplyCharStyle" tag="ital (i)" />
-          <button id="csty3" label="sc" screentip="smallcaps" size="normal" onAction="ApplyStyle.ApplyCharStyle" tag="smallcaps (sc)" />
+          <button id="csty1" label="bold" screentip="bold" size="normal" onAction="ApplyStyle.ApplyCharStyle" tag="bold (b)" />
+          <button id="csty2" label="ital" screentip="italic" size="normal" onAction="ApplyStyle.ApplyCharStyle" tag="ital (i)" />
+          <button id="csty6" label="bold-ital" screentip="bold-ital" size="normal" onAction="ApplyStyle.ApplyCharStyle" tag="bold-ital (bi) " />
 
+          <button id="csty3" label="sc" screentip="smallcaps" size="normal" onAction="ApplyStyle.ApplyCharStyle" tag="smallcaps (sc)" />
           <button id="csty4" label="sup" screentip="superscript" size="normal" onAction="ApplyStyle.ApplyCharStyle" tag="super (sup)" />
           <button id="csty5" label="sub" screentip="subscript" size="normal" onAction="ApplyStyle.ApplyCharStyle" tag="sub (sub)" />
-          <button id="csty6" label="bi" screentip="bold-ital" size="normal" onAction="ApplyStyle.ApplyCharStyle" tag="bold-ital (bi) " />
 
         </group>
 
