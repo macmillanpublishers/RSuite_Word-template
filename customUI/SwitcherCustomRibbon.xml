@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Custom Ribbon XML added using Custom UI Editor for Microsoft Office -->
+<!-- Available here: http://openxmldeveloper.org/blog/b/openxmldeveloper/archive/2009/08/07/7293.aspx -->
+<!-- RibbonControl is a VBA module in same template as this customUI.xml code -->
+<!-- NOTE! Add images for BOTH PC (transparent) and Mac (gray background) here-->
+
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="Switch.Onload">
+  <ribbon>
+    <tabs>
+      <tab idMso="TabHome"><!-- Adds HCML Toolkit-->
+        <group id="CT" label="Activate Tools" insertBeforeMso="GroupClipboard">
+          <button
+              id="button1"
+              size="large"
+              label="RSuite"
+              imageMso="NotebookColor7"
+              screentip="Click button to activate the RSuite tab."
+              onAction="Switch.EnableTemplate"
+              tag="RSuite"
+            />
+            <button
+              id="button2"
+              size="large"
+              label="Macmillan"
+              imageMso="NotebookColor4"
+              screentip="Click button to activate the RSuite tab."
+              onAction="Switch.EnableTemplate"
+              tag="Macmillan"
+            />
+        </group>
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>

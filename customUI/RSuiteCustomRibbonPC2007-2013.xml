@@ -11,21 +11,19 @@
       <tab id="CustomTab1" label="RSuite Tools" insertAfterMso="TabHome">
 
         <group id="CustGrp1" label="RSuite Styles" >
-          <button id="AttachTemplateMacro.zz_AttachStyleTemplate" label="Add Manuscript Styles" image="addfile" size="large" onAction="RibbonControl.LaunchMacros" />
+          <button id="AttachTemplateMacro.zz_AttachStyleTemplate" label="Activate Template" image="addfile" size="large" onAction="RibbonControl.LaunchMacros" />
           <button id="AttachTemplateMacro.zz_AttachBoundMSTemplate" label="Remove Color Guides" image="removefile" size="normal" onAction="RibbonControl.LaunchMacros" />
           <button id="PrintStyles.PrintStyles" label="Print Styles in Margin" image="print" size="normal" onAction="RibbonControl.LaunchMacros" />
           <button id="ViewStyles.StylesViewLaunch" size="normal" image="eye" onAction="RibbonControl.LaunchMacros" label="View Styles"/>
         </group>
 
-        <!--
         <group id="CustGrp2" label="Manuscript Tools" >
-          <button id="CastoffMacro.UniversalCastoff" label="Castoff" image="calculator" size="large" onAction="RibbonControl.LaunchMacros" />
-          <button id="Endnotes.EndnoteDeEmbed" label="Unlink Endnotes" image="unlink" size="large" onAction="RibbonControl.LaunchMacros" />
+          <!-- <button id="CastoffMacro.UniversalCastoff" label="Castoff" image="calculator" size="large" onAction="RibbonControl.LaunchMacros" /> -->
+          <!-- <button id="Endnotes.EndnoteDeEmbed" label="Unlink Endnotes" image="unlink" size="large" onAction="RibbonControl.LaunchMacros" /> -->
           <button id="Reports.MacmillanStyleReport" label="Style Report" image="file" size="normal" onAction="RibbonControl.LaunchMacros" />
           <button id="Reports.BookmakerReqs" label="Bookmaker Check" image="checkfile" size="normal" onAction="RibbonControl.LaunchMacros" />
           <button id="LOCtagsMacro.LibraryOfCongressTags" label="CIP Application" image="index" size="normal" onAction="RibbonControl.LaunchMacros" />
         </group>
-      -->
 
         <group id="CustGrp3" label="Macros" >
           <button id="Clean_Start.LaunchCleanup" label="Manuscript Cleanup" image="cleanup" size="large" onAction="RibbonControl.LaunchMacros" />
