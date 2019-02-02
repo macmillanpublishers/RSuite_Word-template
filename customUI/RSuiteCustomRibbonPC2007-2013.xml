@@ -4,7 +4,7 @@
 <!-- RibbonControl is a VBA module in same template as this customUI.xml code -->
 <!-- NOTE! Add images for BOTH PC (transparent) and Mac (gray background) here-->
 
-<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="RibbonControl.Onload">
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="MyAddInInitialize">
   <ribbon>
     <tabs>
 
@@ -13,7 +13,7 @@
         <group id="CustGrp1" label="RSuite Styles" >
           <button id="AttachTemplateMacro.zz_AttachStyleTemplate" label="Activate Template" image="addfile" size="large" onAction="RibbonControl.LaunchMacros" />
           <button id="AttachTemplateMacro.zz_AttachBoundMSTemplate" label="Remove Color Guides" image="removefile" size="normal" onAction="RibbonControl.LaunchMacros" />
-          <button id="PrintStyles.PrintStyles" label="Print Styles in Margin" image="print" size="normal" onAction="RibbonControl.LaunchMacros" />
+          <!--<button id="PrintStyles.PrintStyles" label="Print Styles in Margin" image="print" size="normal" onAction="RibbonControl.LaunchMacros" />-->
           <button id="ViewStyles.StylesViewLaunch" size="normal" image="eye" onAction="RibbonControl.LaunchMacros" label="View Styles"/>
         </group>
 
@@ -22,7 +22,7 @@
           <!-- <button id="Endnotes.EndnoteDeEmbed" label="Unlink Endnotes" image="unlink" size="large" onAction="RibbonControl.LaunchMacros" /> -->
           <button id="Reports.MacmillanStyleReport" label="Style Report" image="file" size="normal" onAction="RibbonControl.LaunchMacros" />
           <button id="Reports.BookmakerReqs" label="Bookmaker Check" image="checkfile" size="normal" onAction="RibbonControl.LaunchMacros" />
-          <button id="LOCtagsMacro.LibraryOfCongressTags" label="CIP Application" image="index" size="normal" onAction="RibbonControl.LaunchMacros" />
+          <!--<button id="LOCtagsMacro.LibraryOfCongressTags" label="CIP Application" image="index" size="normal" onAction="RibbonControl.LaunchMacros" />-->
         </group>
 
         <group id="CustGrp3" label="Macros" >
@@ -77,9 +77,18 @@
           <button id="isty3" label="Insert Break" screentip="Inserts a break indicator" image="break" size="large" onAction="ApplyStyle.InsertBreak" />
         </group>
 
-        <group id="Styles4" label="Styles">
+        <group label="PC Styles" id="Styles4" getVisible="AllStylesMod.GetVisible" tag="PCStylesGroup">
           <button id="nexel2" label="Find Next Element" screentip="Finds the next non-Tx element" size="normal" onAction="Clean.NextElement" />
           <comboBox idMso="StyleGalleryClassic"/>
+        </group>
+
+        <group label="Mac Styles" id="Styles5" getVisible="AllStylesMod.GetVisible" tag="MacStylesGroup">
+            <button id="nexel5" label="Find Next Element" screentip="Finds the next non-Tx element" size="normal" onAction="Clean.NextElement" />
+            <comboBox id="cboApplyStyles"
+                    getItemCount="AllStylesMod.OnGetItemCount"
+                    getItemLabel="AllStylesMod.OnGetItemLabel"
+                    onChange="AllStylesMod.ApplyTheStyle"
+                    getText="AllStylesMod.GetCurrentStyle"/>
         </group>
 
         <group id="CustGrp4" label="Help" >
