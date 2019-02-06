@@ -8,9 +8,9 @@
   <ribbon>
     <tabs>
       <tab idMso="TabHome"><!-- Adds HCML Toolkit-->
-        <group id="CT" label="Activate Tools" insertBeforeMso="GroupClipboard">
+        <group id="CT1" label="Activate Tools" insertBeforeMso="GroupClipboard" getVisible="Utils.isVisible" tag="PC">
           <button
-              id="button1"
+              id="button1-1"
               size="large"
               label="RSuite"
               imageMso="NotebookColor7"
@@ -19,13 +19,40 @@
               tag="RSuite"
             />
             <button
-              id="button2"
+              id="button2-1"
               size="large"
               label="Macmillan"
               imageMso="NotebookColor4"
               screentip="Click button to activate the RSuite tab."
               onAction="Switch.EnableTemplate"
               tag="Macmillan"
+            />
+            <button
+              id="button3-1"
+              size="large"
+              label="Inspect"
+              imageMso="NotebookColor2"
+              screentip="Click button to determine if correct tools are enabled."
+              onAction="Switch.Template_Inspector"
+            />
+        </group>
+        <group id="CT2" label="Activate Tools" insertBeforeMso="GroupClipboard" getVisible="Utils.isVisible" tag="Mac">
+          <button
+              id="button1-2"
+              size="large"
+              label="RSuite"
+              imageMso="NotebookColor7"
+              screentip="Click button to activate the RSuite tab."
+              onAction="Switch.EnableTemplate"
+              tag="RSuite"
+            />
+            <button
+              id="button3-2"
+              size="large"
+              label="Inspect"
+              imageMso="NotebookColor2"
+              screentip="Click button to determine if correct tools are enabled."
+              onAction="Switch.Template_Inspector"
             />
         </group>
       </tab>
