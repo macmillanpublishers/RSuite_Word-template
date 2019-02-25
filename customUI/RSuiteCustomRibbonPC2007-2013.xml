@@ -17,13 +17,13 @@
           <button id="ViewStyles.StylesViewLaunch" size="normal" image="eye" onAction="RibbonControl.LaunchMacros" label="View Styles"/>
         </group>
 
-        <group id="CustGrp2" label="Manuscript Tools" >
-          <!-- <button id="CastoffMacro.UniversalCastoff" label="Castoff" image="calculator" size="large" onAction="RibbonControl.LaunchMacros" /> -->
-          <!-- <button id="Endnotes.EndnoteDeEmbed" label="Unlink Endnotes" image="unlink" size="large" onAction="RibbonControl.LaunchMacros" /> -->
+        <!--<group id="CustGrp2" label="Manuscript Tools" >
+          <button id="CastoffMacro.UniversalCastoff" label="Castoff" image="calculator" size="large" onAction="RibbonControl.LaunchMacros" />
+          <button id="Endnotes.EndnoteDeEmbed" label="Unlink Endnotes" image="unlink" size="large" onAction="RibbonControl.LaunchMacros" />
           <button id="Reports.MacmillanStyleReport" label="Style Report" image="file" size="normal" onAction="RibbonControl.LaunchMacros" />
           <button id="Reports.BookmakerReqs" label="Bookmaker Check" image="checkfile" size="normal" onAction="RibbonControl.LaunchMacros" />
-          <!--<button id="LOCtagsMacro.LibraryOfCongressTags" label="CIP Application" image="index" size="normal" onAction="RibbonControl.LaunchMacros" />-->
-        </group>
+          <button id="LOCtagsMacro.LibraryOfCongressTags" label="CIP Application" image="index" size="normal" onAction="RibbonControl.LaunchMacros" />
+        </group>-->
 
         <group id="CustGrp3" label="Macros" >
           <button id="Clean_Start.LaunchCleanup" label="Manuscript Cleanup" image="cleanup" size="large" onAction="RibbonControl.LaunchMacros" />
