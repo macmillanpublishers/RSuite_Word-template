@@ -18,8 +18,7 @@ Instructions for manually installing &/or packaging the RSuite Word-template are
     * File: containers.txt
 * Folder:  MacmillanStyleTemplate, + all contents   (from RSuite_Word-template/oldStyleTemplate/MacmillanStyleTemplate)
 
-## Install Instructions - PC
-
+## PC Installation
 
 #### PC Installation Targets:
 * folders: MacmillanStyleTemplate and RSuiteStyleTemplate
@@ -45,7 +44,7 @@ _C:\Users\username\AppData\Roaming\Microsoft\Word\STARTUP_
 
 4. It would be nice if we had the 'standalone' installer, i.e. the .bat file to move files into location for our outside composition vendor, but this is also not critical.
 
-## Install Instructions - Mac
+## Mac Installation
 (Word 2016 specific)
 
 #### Manual install step-by-step
