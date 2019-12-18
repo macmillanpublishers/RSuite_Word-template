@@ -2,7 +2,7 @@
 
 This repo is for storing and maintaining assets related to the Macmillan RSuite Word template.
 
-Details for packaging and installing the RSuite Word-template below: on Word for PC or Word for Mac (2016).
+Instructions for manually installing &/or packaging the RSuite Word-template are below: for Word for PC (2010/2013) or Word for Mac (2016).
 
 ## Assets required for installation
 
@@ -19,17 +19,13 @@ Details for packaging and installing the RSuite Word-template below: on Word for
 * Folder:  MacmillanStyleTemplate, + all contents   (from RSuite_Word-template/oldStyleTemplate/MacmillanStyleTemplate)
 
 ## Install Instructions - PC
-These are the basic instructions we sent Rakesh for initial install of RSuite template; ideally pushed via deployment, but also available in Windows SelfService portal.
 
-Package name / Portal Display name (example):
-**RSuiteStyleTemplatev6.0**
-(The version number should match the one in file: *RSuite_Word-template/StyleTemplate_auto-generate/RSuite.txt*)
 
 #### PC Installation Targets:
 * folders: MacmillanStyleTemplate and RSuiteStyleTemplate
-Both (unzipped) folders and their contents should be installed here:  *C:\Users\username\AppData\Roaming*
+Both folders and their contents should be installed here:  *C:\Users\username\AppData\Roaming*
 * file: template_switcher.dotm
-This (unzipped) file should be installed here:
+This file should be installed here:
 _C:\Users\username\AppData\Roaming\Microsoft\Word\STARTUP_
 
 #### PC Installation Requirements
@@ -40,9 +36,14 @@ _C:\Users\username\AppData\Roaming\Microsoft\Word\STARTUP_
 -The rest of the files may pre-exist at time of installation, as long as the newer (installing) versions will overwrite existing.
 
 #### Notes for Macmillan packaging team (PC)
--If it's straightforward, hide the bluescreen (powershell?) window that pops up during installation via portal.
+1. Package name / Portal Display name (example): **RSuiteStyleTemplatev6.0**
+(The version number should match the one in file: *RSuite_Word-template/StyleTemplate_auto-generate/RSuite.txt*)
 
--It would be nice if we had the 'standalone' installer, i.e. the .bat file to move files into location for our outside composition vendor, but this is also not critical.
+2. Ideally pushed via deployment, but also available in Windows SelfService portal.
+
+3. If it's straightforward, hide the bluescreen (powershell?) window that pops up during installation via portal.
+
+4. It would be nice if we had the 'standalone' installer, i.e. the .bat file to move files into location for our outside composition vendor, but this is also not critical.
 
 ## Install Instructions - Mac
 (Word 2016 specific)
@@ -84,6 +85,9 @@ folder: _StyleTemplate_auto-generate_, with all of its contents
 /Users/username/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word/
 
 #### Notes for Macmillan packaging team (Mac):
--This should be available to run via Self-Service, as well as via policy / timed deployment.
+1. Package name / Self-Service Display name (example): **RSuiteStyleTemplatev6.0**
+(The version number should match the one in file: *RSuite_Word-template/StyleTemplate_auto-generate/RSuite.txt*)
 
--It would be nice to have a standalone installer pkg as well, for freelancers etc.
+2. This should be available to run via Self-Service, as well as via policy / timed deployment.
+
+3. It would be nice to have a standalone installer pkg as well, for freelancers etc.
