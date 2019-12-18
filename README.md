@@ -54,11 +54,11 @@ _C:\Users\username\AppData\Roaming\Microsoft\Word\STARTUP_
 
 3. Run this command to strip apple quarantine from downloaded files:
 
-  ```xattr -dr com.apple.quarantine ./```
+    ```xattr -dr com.apple.quarantine ./```
 
 4. Run this command to re-set Word doctype for .dotm files:
 
-  ```find ./ -type f -name "*.dotm" | xargs xattr -wx com.apple.FinderInfo "57 58 54 4D 4D 53 57 44 00 10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"```
+    ```find ./ -type f -name "*.dotm" | xargs xattr -wx com.apple.FinderInfo "57 58 54 4D 4D 53 57 44 00 10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"```
 
 5. Copy the file template_switcher.dotm on your Mac, here:
 _/Users/username/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word/_
