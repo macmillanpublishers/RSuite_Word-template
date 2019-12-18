@@ -2,7 +2,7 @@
 
 This repo is for storing and maintaining assets related to the Macmillan RSuite Word template.
 
-Details for packaging and installing the RSuite Word-template on Word for PC and Mac below.
+Details for packaging and installing the RSuite Word-template below: on Word for PC or Word for Mac (2016).
 
 ## Assets required for installation
 
@@ -39,7 +39,7 @@ _C:\Users\username\AppData\Roaming\Microsoft\Word\STARTUP_
 
 -The rest of the files may pre-exist at time of installation, as long as the newer (installing) versions will overwrite existing.
 
-##### Notes for Macmillan packaging team:
+#### Notes for Macmillan packaging team (PC)
 -If it's straightforward, hide the bluescreen (powershell?) window that pops up during installation via portal.
 
 -It would be nice if we had the 'standalone' installer, i.e. the .bat file to move files into location for our outside composition vendor, but this is also not critical.
@@ -83,7 +83,7 @@ folder: _StyleTemplate_auto-generate_, with all of its contents
 /Users/username/Library/Containers/com.microsoft.Word/Data/Documents
 /Users/username/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word/
 
-##### Notes for Macmillan packaging team:
+#### Notes for Macmillan packaging team (Mac):
 -This should be available to run via Self-Service, as well as via policy / timed deployment.
 
 -It would be nice to have a standalone installer pkg as well, for freelancers etc.
