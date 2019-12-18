@@ -54,11 +54,11 @@ _C:\Users\username\AppData\Roaming\Microsoft\Word\STARTUP_
 
 3. Run this command to strip apple quarantine from downloaded files:
 
-  _xattr -dr com.apple.quarantine ./_
+  ```xattr -dr com.apple.quarantine ./```
 
 4. Run this command to re-set Word doctype for .dotm files:
 
-  _find ./ -type f -name "*.dotm" | xargs xattr -wx com.apple.FinderInfo "57 58 54 4D 4D 53 57 44 00 10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"_
+  ```find ./ -type f -name "*.dotm" | xargs xattr -wx com.apple.FinderInfo "57 58 54 4D 4D 53 57 44 00 10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"```
 
 5. Copy the file template_switcher.dotm on your Mac, here:
 _/Users/username/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word/_
@@ -76,7 +76,7 @@ folder: _StyleTemplate_auto-generate_, with all of its contents
 9. Launch Word 2016. Make sure you see the 'RSuite' & 'Inspect' buttons, and or the 'RSuite Tools' tab in the ribbon, and try some RSuite Tools items out to make sure they work.
 
 
-#### Installer requirements
+#### Mac Installation requirements
 -Word should be quit for the installation.
 
 -Pre-existing contents of the following folders (files & folders) should be removed as a pre-install step:
