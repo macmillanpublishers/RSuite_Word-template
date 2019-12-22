@@ -29,6 +29,7 @@
           <button id="Clean_Start.LaunchCleanup" label="Manuscript Cleanup" image="cleanup" size="large" onAction="RibbonControl.LaunchMacros" />
           <button id="Clean_Start.LaunchTagCharacterStyles" label="Tag Character Styles" image="puzzle" size="large" onAction="RibbonControl.LaunchMacros" />
           <button id="TagUnstyledParas.TagUnstyledText" label="Style Body Text" image="pilcrow" size="large" onAction="RibbonControl.LaunchMacros" />
+          <button id="Clean.ValidateCharStyles" label="Validate Char Styles" image="charstyle" size="large" onAction="RibbonControl.LaunchMacros" />
         </group>
 
         <group id="Styles1" label="Paragraph Styles">
