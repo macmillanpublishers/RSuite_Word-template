@@ -9,7 +9,9 @@
   ],
   "extractparas": [
     ".Extract1Ext1",
-    ".Extract2Ext2"
+    ".Extract2Ext2",
+    ".Extract3Ext3",
+    ".Extract4Ext4"
   ],
   "epigraphparas": [
     ".Epigraph-Non-VerseEpi",
@@ -229,16 +231,14 @@
     ".Section-ChapterSCP": {
       "type": "chapter"
     },
+    ".Section-Chapter2SCP2": {
+      "type": "chapter"
+    },
     ".Section-RecipeSREC": {
       "type": "chapter",
       "label": "Recipe",
       "tocexclude": "True",
       "class": "recipe"
-    },
-    ".Section-InterludeSIN": {
-      "type": "chapter",
-      "label": "Interlude",
-      "class": "interlude"
     },
     ".Section-ConclusionSCL": {
       "type": "conclusion",

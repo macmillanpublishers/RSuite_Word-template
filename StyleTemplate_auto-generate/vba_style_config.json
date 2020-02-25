@@ -1,5 +1,9 @@
 {
-  "versatileparas": [
+  "sections_menu": [
+  ],
+  "breaks_menu": [
+  ],
+  "containers_menu": [
   ],
   "bookmakerstyles": [
     "Section-Book (BOOK)",
@@ -19,8 +23,8 @@
     "Section-Introduction (SIC)",
     "Section-Part (SPT)",
     "Section-Chapter (SCP)",
+    "Section-Chapter2 (SCP2)",
     "Section-Recipe (SREC)",
-    "Section-Interlude (SIN)",
     "Section-Conclusion (SCL)",
     "Section-Afterword (SAW)",
     "Section-Acknowledgments (SAK)",
@@ -34,7 +38,8 @@
     "Section-Back-Ad (SBA)",
     "Section-Index (SIN)",
     "Section-Back-Matter-General (SBM)",
-    "Body-Text (Tx)"
+    "Body-Text (Tx)",
+    "Body-Text2 (Tx2)"
   ],
   "allowedblankparas": [
     "Section-Book (BOOK)",
@@ -54,8 +59,8 @@
     "Section-Introduction (SIC)",
     "Section-Part (SPT)",
     "Section-Chapter (SCP)",
+    "Section-Chapter2 (SCP2)",
     "Section-Recipe (SREC)",
-    "Section-Interlude (SIN)",
     "Section-Conclusion (SCL)",
     "Section-Afterword (SAW)",
     "Section-Acknowledgments (SAK)",
@@ -88,8 +93,8 @@
     "Section-Introduction (SIC)",
     "Section-Part (SPT)",
     "Section-Chapter (SCP)",
+    "Section-Chapter2 (SCP2)",
     "Section-Recipe (SREC)",
-    "Section-Interlude (SIN)",
     "Section-Conclusion (SCL)",
     "Section-Afterword (SAW)",
     "Section-Acknowledgments (SAK)",
