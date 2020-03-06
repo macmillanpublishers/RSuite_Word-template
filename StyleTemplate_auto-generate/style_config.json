@@ -234,6 +234,11 @@
     ".Section-Chapter2SCP2": {
       "type": "chapter"
     },
+    ".Section-InterludeSIN": {
+      "type": "chapter",
+      "label": "Interlude",
+      "class": "interlude"
+    },
     ".Section-RecipeSREC": {
       "type": "chapter",
       "label": "Recipe",
@@ -294,6 +299,9 @@
       "label": "Back Matter General"
     }
   },
+  "legacy": [
+    ".Section-InterludeSIN"
+  ],
   "footnotetextselector": [
     "div.footnote"
   ],
