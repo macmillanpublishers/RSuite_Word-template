@@ -232,7 +232,8 @@
       "type": "chapter"
     },
     ".Section-Chapter2SCP2": {
-      "type": "chapter"
+      "type": "chapter",
+      "class": "chapter2"
     },
     ".Section-InterludeSIN": {
       "type": "chapter",
