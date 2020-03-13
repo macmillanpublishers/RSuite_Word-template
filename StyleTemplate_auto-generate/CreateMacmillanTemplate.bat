@@ -31,6 +31,10 @@ echo "Exporting VBA style-mappings to vba_style_config.json ... Should be <10 se
 PowerShell -NoProfile -ExecutionPolicy Bypass -Command "%mypath%runMacro_Wd-or-Xls_NoSave.ps1 excel WordTemplateStyles.xlsm autorun_VBAmappingsToJSON"
 echo "Done exporting to vba_style_config.json!" & echo.
 
+echo "Exporting VBA menu style-info to 4 text files ... Should be <10 seconds"
+PowerShell -NoProfile -ExecutionPolicy Bypass -Command "%mypath%runMacro_Wd-or-Xls_NoSave.ps1 excel WordTemplateStyles.xlsm autorun_VbaTxtFiles"
+echo "Done exporting menu info to text files!" & echo.
+
 echo "(Re)creating RSuite.dotx ... this should take 60-90 seconds"
 timeout /t 1 /nobreak > NUL & echo.
 echo "Keep your eye on this window for the all clear!"

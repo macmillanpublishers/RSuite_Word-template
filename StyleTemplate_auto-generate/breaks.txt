@@ -1,3 +1,5 @@
 Blank-Space-Break (Bsbrk), [blank]
+Blank-Space-Break2 (Bsbrk2), [blank]
 Ornamental-Space-Break (Osbrk), ***
-Separator (Sep), [separator]
+Ornamental-Space-Break2 (Osbrk2), #   #   #
+Separator (Sep), [Separator]

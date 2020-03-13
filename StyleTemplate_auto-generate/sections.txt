@@ -8,6 +8,7 @@ Section-Back-Matter-General (SBM), Back Matter General
 Section-Bibliography (SBI), Bibliography
 Section-Book (BOOK), Book
 Section-Chapter (SCP), Chapter
+Section-Chapter2 (SCP2), Chapter 2
 Section-Conclusion (SCL), Conclusion
 Section-Contents (STC), Contents
 Section-Copyright (SCR), Copyright
@@ -22,7 +23,6 @@ Section-Front-Sales (SFS), Front Sales
 Section-Glossary (SGL), Glossary
 Section-Halftitle (SHT), Halftitle Page
 Section-Index (SIN), Index
-Section-Interlude (SIN), Interlude
 Section-Introduction (SIC), Introduction
 Section-Notes (SNT), Notes
 Section-Part (SPT), Part
