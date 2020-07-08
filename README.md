@@ -116,21 +116,21 @@ To open all ‘RSuite_Word_Template’ dotm/docm files in the VBA editor for cod
 ### Export Modules and Binaries
 Once you're ready to commit some code, there's a tool to export a .dotm/.docm binary and all of its vba-components to the local git repo repository (*all components except custom ribbon).
 
-  1. run macro: **Export_or_Import_VBA_Components**
+  1. run macro: *Export_or_Import_VBA_Components*
 
   2. in the pop-up window, select any/all docs with updated code, and click either _'Export'_ option:
 
-##### "Export file(s) and modules to git repo"
+#### "Export file(s) and modules to git repo"
 For the .dotm/.docm files in this repo*, they are exported to dir: _'src/(file_basename)'_ in the same path as devSetup.dotm (which should be in the root of the cloned repo dir)
 
 The .dotm/.docm binary file is also copied: from its 'installed path' in MS Word supporting folders, back to its default location in the local git repo as well, (if the file has a defined path; see 'Export locations' below for details). An alert will notify if there is no defined path.  
 
 (*see 'Export locations' below for configuring new .docm filepaths, or exporting fils outside of this repo)
 
-##### "Export modules ONLY"
+#### "Export modules ONLY"
 This does the same as above re: modules, but does not write installed .docm .dotm files back to their default locations in the local repo.
 
-##### Setting Export locations for files
+#### Setting Export locations for files
 
 Any *new* .dotm/docm that you export via this macro will export to the same location as the file by default, in a dir called 'src_*(file_basename)*'. To pre-configure a different export path for a given file, add it to devSetup procedure: 'config.defineVBAProjectParams'.
 
