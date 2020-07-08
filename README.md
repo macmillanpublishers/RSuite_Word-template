@@ -96,16 +96,14 @@ folder: _StyleTemplate_auto-generate_, with all of its contents
 3. It would be nice to have a standalone installer pkg as well, for freelancers etc.
 
 # VBA Development
-In an effort to facilitate simpler vba code versioning/tracking in GitHub, some tools have been included in the "devSetup.docm" file to enable easy export / import of modules. Additionally any unit testing will be implemented in the devSetup.docm modules.
-
-Original dev notes for RSuite_Word-Template are available in ./Instructions.docx
+In an effort to facilitate simpler vba code versioning in GitHub, some tools have been added, via the "devSetup.docm" file to enable easy export / import of modules. Additionally any unit testing will be implemented in the devSetup.docm modules.
 
 ###### Dependencies
-* To use setup macros below, you may need to enable the following libraries in your VBA editor (Tools > References):
+* To use the 'setup' macros below, you may need to enable the following libraries in your VBA editor (Tools > References):
   * ``Microsoft Visual Basic For Applications Extensibility 5.3``
   * ``Microsoft Scripting Runtime``
   * ``Microsoft Forms 2.0 Object Library``
-* For Unit testing, download and install [RubberDuck](https://rubberduckvba.com/).
+* For *Unit testing*, download and install [RubberDuck](https://rubberduckvba.com/).
 
 
 ## Using devSetup tools
@@ -115,15 +113,21 @@ To begin, open 'devSetup.docm' in MS Word, _from its default location in the clo
 #### Open all Projects
 To open all ‘RSuite_Word_Template’ dotm/docm files in the VBA editor for code access, run macro:  *Open_All_Defined_VBA_Projects*
 
-#### Export Modules
-Once you're ready to commit some code, there's a tool to export a .dotm/.docm binary and all of its vba-components to the local git repo repository (everything except the ribbon).
+#### Export Modules and Binaries
+Once you're ready to commit some code, there's a tool to export a .dotm/.docm binary and all of its vba-components to the local git repo repository (*all components except custom ribbon).
 
   1. run macro: **Export_or_Import_VBA_Components**
 
-  2. in the pop-up window, select any/all docs with updated code, and click _'Export'_.
+  2. in the pop-up window, select any/all docs with updated code, and click either _'Export'_ option:
+
+###### Export file(s) and modules to git repo
+
+###### Export file(s) and modules to git repo
+
+###### Export locations / details
 
   3. For the .dotm/.docm files in this repo, they will be exported to dir: _'src/(file_basename)'_ in the same path as devSetup.dotm (which should be in the root of the cloned repo dir)
-    * NOTE: Any new .dotm/docm/project that you export via this macro will export to a default location: a dir in the same location as the file, called 'src_*(file_basename)*'. To pre-configure the default export path for a given file, add it to devSetup procedure: 'config.defineVBAProjectParams'.
+    * NOTE: Any *new* .dotm/docm that you export via this macro will default export to the same location as the file, in a dir called 'src_*(file_basename)*'. To pre-configure a different export path for a given file, add it to devSetup procedure: 'config.defineVBAProjectParams'.
 
 
   4. If applicable, the .dotm/.docm binary file is copied from its 'installed path' in MS Word to its default location in the local git repo as well, (if the file has a defined path: see note from #3 above re: setting file defaults). An alert will notify if there is no defined path.  
