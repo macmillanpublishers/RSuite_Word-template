@@ -110,29 +110,32 @@ In an effort to facilitate simpler vba code versioning in GitHub, some tools hav
 
 To begin, open 'devSetup.docm' in MS Word, _from its default location in the cloned repo_. Then open Word's VBA editor. Tools detailed below:
 
-#### Open all Projects
+### Open all Projects
 To open all ‘RSuite_Word_Template’ dotm/docm files in the VBA editor for code access, run macro:  *Open_All_Defined_VBA_Projects*
 
-#### Export Modules and Binaries
+### Export Modules and Binaries
 Once you're ready to commit some code, there's a tool to export a .dotm/.docm binary and all of its vba-components to the local git repo repository (*all components except custom ribbon).
 
   1. run macro: **Export_or_Import_VBA_Components**
 
   2. in the pop-up window, select any/all docs with updated code, and click either _'Export'_ option:
 
-###### Export file(s) and modules to git repo
+###### "Export file(s) and modules to git repo"
+For the .dotm/.docm files in this repo*, they are exported to dir: _'src/(file_basename)'_ in the same path as devSetup.dotm (which should be in the root of the cloned repo dir)
 
-###### Export file(s) and modules to git repo
+The .dotm/.docm binary file is also copied: from its 'installed path' in MS Word supporting folders, back to its default location in the local git repo as well, (if the file has a defined path; see 'Export locations' below for details). An alert will notify if there is no defined path.  
 
-###### Export locations / details
+(*see 'Export locations' below for configuring new .docm filepaths, or exporting fils outside of this repo)
 
-  3. For the .dotm/.docm files in this repo, they will be exported to dir: _'src/(file_basename)'_ in the same path as devSetup.dotm (which should be in the root of the cloned repo dir)
-    * NOTE: Any *new* .dotm/docm that you export via this macro will default export to the same location as the file, in a dir called 'src_*(file_basename)*'. To pre-configure a different export path for a given file, add it to devSetup procedure: 'config.defineVBAProjectParams'.
+###### "Export modules ONLY"
+This does the same as above re: modules, but does not write installed .docm .dotm files back to their default locations in the local repo.
+
+###### Setting Export locations for files
+
+Any *new* .dotm/docm that you export via this macro will export to the same location as the file by default, in a dir called 'src_*(file_basename)*'. To pre-configure a different export path for a given file, add it to devSetup procedure: 'config.defineVBAProjectParams'.
 
 
-  4. If applicable, the .dotm/.docm binary file is copied from its 'installed path' in MS Word to its default location in the local git repo as well, (if the file has a defined path: see note from #3 above re: setting file defaults). An alert will notify if there is no defined path.  
-
-#### Import modules
+### Import modules
 You may wish at some point to start fresh with a clean set of modules from the repo. To do this:
 1. run macro: **Export_or_Import_VBA_Components**
 
@@ -140,10 +143,10 @@ You may wish at some point to start fresh with a clean set of modules from the r
 
 3. First, for each selected document/project, backups  will be exported for all current vba components, to a default folder appended with suffix '\_BACKUP\_'.
 Then  
-  The Import feature uses the same paths as detailed in #3 under 'Export Modules', above.  
+  The Import feature uses the same paths as detailed in 'Setting Export Locations', above.  
 
-###### * Notes on the custom ribbon
-The custom ribbon is implemented via custom ribbon xml, stored as part of the document... it is not accessible via the MS VBA IDE (though there are other ui tools to build custom ribbons).  No straightforward way to auto-export/import this xml presents itself, but the xml itself is separately maintained in the "*custom_ui*" directory.
+### Notes on the custom ribbon
+The custom ribbon is implemented via custom ribbon xml, stored as part of the document... it is not accessible via the MS VBA IDE (though there are other ui tools to build custom ribbons).  No straightforward way to auto-export/import this xml presents itself, but the xml itself is separately maintained in the "*custom_ui*" directory, as well as in the binary.
 
 ###### * Notes for future development
 - Integration tests for macros, unittests.
