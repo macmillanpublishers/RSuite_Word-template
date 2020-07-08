@@ -120,17 +120,17 @@ Once you're ready to commit some code, there's a tool to export a .dotm/.docm bi
 
   2. in the pop-up window, select any/all docs with updated code, and click either _'Export'_ option:
 
-###### "Export file(s) and modules to git repo"
+##### "Export file(s) and modules to git repo"
 For the .dotm/.docm files in this repo*, they are exported to dir: _'src/(file_basename)'_ in the same path as devSetup.dotm (which should be in the root of the cloned repo dir)
 
 The .dotm/.docm binary file is also copied: from its 'installed path' in MS Word supporting folders, back to its default location in the local git repo as well, (if the file has a defined path; see 'Export locations' below for details). An alert will notify if there is no defined path.  
 
 (*see 'Export locations' below for configuring new .docm filepaths, or exporting fils outside of this repo)
 
-###### "Export modules ONLY"
+##### "Export modules ONLY"
 This does the same as above re: modules, but does not write installed .docm .dotm files back to their default locations in the local repo.
 
-###### Setting Export locations for files
+##### Setting Export locations for files
 
 Any *new* .dotm/docm that you export via this macro will export to the same location as the file by default, in a dir called 'src_*(file_basename)*'. To pre-configure a different export path for a given file, add it to devSetup procedure: 'config.defineVBAProjectParams'.
 
@@ -148,6 +148,7 @@ Then
 ### Notes on the custom ribbon
 The custom ribbon is implemented via custom ribbon xml, stored as part of the document... it is not accessible via the MS VBA IDE (though there are other ui tools to build custom ribbons).  No straightforward way to auto-export/import this xml presents itself, but the xml itself is separately maintained in the "*custom_ui*" directory, as well as in the binary.
 
+---
 ###### * Notes for future development
 - Integration tests for macros, unittests.
 - Build an installer for Mac & PC (gradle? VBA is overly-complicated for replacing in-use templates), consider possibilities for standalone / user-friendly version.
