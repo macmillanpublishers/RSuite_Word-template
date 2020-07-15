@@ -92,6 +92,15 @@ Public Function EndOfDocumentReached() As Boolean
     End Select
 End Function
 
+Public Function AtStartOfDocument() As Boolean
+    Select Case ActiveDocument.Content.Start
+        Case Selection.Start
+           AtStartOfDocument = True
+        Case Else
+           AtStartOfDocument = False
+    End Select
+End Function
+
 Sub TitleCase()
     
     Application.ScreenUpdating = False

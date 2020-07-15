@@ -1,4 +1,5 @@
 Attribute VB_Name = "Clean"
+
 Sub Ellipses()
 
         Application.ScreenUpdating = False
@@ -173,33 +174,26 @@ Sub DoubleQuotes()
     
     thisStatus = "Fixing double quotes"
     Clean_helpers.updateStatus (thisStatus)
-    
-    'singleprime-space-doubleprime
-    FindReplaceSimple SP & aSPACE & DP, SP & DP
-    'doubleprime-space-singleprime
-    FindReplaceSimple DP & aSPACE & SP, DP & SP
-    FindReplaceSimple SOQ & aSPACE & DOQ, SOQ & DOQ
-    FindReplaceSimple SCQ & aSPACE & DOQ, SCQ & DOQ
-    FindReplaceSimple DOQ & aSPACE & SOQ, DOQ & SOQ
-    FindReplaceSimple DCQ & aSPACE & SOQ, DCQ & SOQ
-    FindReplaceSimple SOQ & aSPACE & DCQ, SOQ & DCQ
-    FindReplaceSimple SCQ & aSPACE & DCQ, SCQ & DCQ
-    FindReplaceSimple DOQ & aSPACE & SCQ, DOQ & SCQ
-    FindReplaceSimple DCQ & aSPACE & SCQ, DCQ & SCQ
+
+    ' Combine double single-primes into Double-prime, also double-backticks
     FindReplaceSimple SP & SP, DP
     FindReplaceSimple "``", DP
     
     ActiveDocument.StoryRanges(MyStoryNo).Select
     Selection.Find.Execute findText:=DP
     Do While Selection.Find.Found
-
+        ' Find / Replace tool includes DOQ and DCQ as results in a search for DP
+        '   for some reason (Windows/Office2013)
+        '   we can filter them out here
+        If Selection.Text = DP Then
+            
             newPercentage = Selection.Range.Information(wdActiveEndPageNumber) / totalPages * 100
             If newPercentage > currPercentage Then
                 thisStatus = "Fixing double quotes: " & CStr(newPercentage) & "%"
                 Clean_helpers.updateStatus (thisStatus)
                 currPercentage = newPercentage
             End If
-        
+             
             ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
             Selection.MoveLeft unit:=wdCharacter, Count:=2
             Select Case Selection.Text
@@ -215,6 +209,7 @@ Sub DoubleQuotes()
                             Selection.TypeText DOQ
                     End Select
                 Case " "
+                    Debug.Print Selection.Text + "space case"
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.MoveRight unit:=wdCharacter, Count:=1
                     Selection.Expand unit:=wdCharacter
@@ -236,6 +231,7 @@ Sub DoubleQuotes()
                             Selection.TypeText DOQ
                     End Select
                 Case vbCr, vbTab, "("
+                    Debug.Print Selection.Text + "tab"
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.TypeText DOQ
                     Selection.Expand unit:=wdCharacter
@@ -249,7 +245,7 @@ Sub DoubleQuotes()
                             End Select
                     End Select
                 Case Else
-                    If boolStartOfDocument = True Then
+                    If Clean_helpers.AtStartOfDocument Then
                         ActiveDocument.Bookmarks("temp").Select
                         Selection.TypeText DOQ
                     Else
@@ -269,9 +265,11 @@ Sub DoubleQuotes()
                             End Select
                     End Select
                 End Select
-        Selection.MoveRight unit:=wdCharacter, Count:=3
-        If Clean_helpers.EndOfDocumentReached Then Exit Do
-        Selection.Find.Execute
+            Selection.MoveRight unit:=wdCharacter, Count:=3
+       End If
+            If Clean_helpers.EndOfDocumentReached Then Exit Do
+            Selection.Find.Execute
+        
     Loop
     
     completeStatus = completeStatus + vbNewLine + "Fixing double quotes: 100%"
@@ -311,7 +309,10 @@ Sub SingleQuotes()
     Dim StringFound, OpenQuo As Boolean
     Dim SearchString(), QuoStr
     
-    SearchString = Array(SP, SOQ, SCQ)
+    ' WDV-281: 7-14-20
+    '   "educating" already 'smart' single quotes results in some user-intended use-cases to be overridden
+    '   leaving the capability to search SOQ/SCQ via this array setup in csae we end up reversing/
+    SearchString = Array(SP) ', SOQ, SCQ)
            
     ActiveDocument.StoryRanges(MyStoryNo).Select
     For Each QuoStr In SearchString
@@ -323,150 +324,155 @@ Sub SingleQuotes()
         Selection.Find.Execute findText:=QuoStr
         
         While Selection.Find.Found
+            ' Find / Replace tool includes DOQ and DCQ as results in a search for DP
+            '   for some reason (Windows/Office2013)
+            '   we can filter them out here
+            If Selection.Text = SP Then
             
-            ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
-            Selection.MoveLeft unit:=wdCharacter, Count:=2
-            
-            Select Case Selection.Text
-                    Case DP, DOQ, SOQ
-                        OpenQuo = True
-            End Select
-            
-            Select Case Selection.Text
-                    Case " ", vbCr, vbTab, vbNewLine, "(", DP, DOQ, SOQ
-                        Selection.MoveRight unit:=wdCharacter, Count:=2
-                        Selection.ExtendMode = True
-                        
-                        '1 character
-                        Selection.MoveRight unit:=wdCharacter, Count:=1
-                        If LookAhead() = True Then
-                            Select Case Selection.Text
-                                Case DOQ, "K", "k"
-                                    ChangeQ = True
+                ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
+                Selection.MoveLeft unit:=wdCharacter, Count:=2
+                
+                Select Case Selection.Text
+                        Case DP, DOQ, SOQ
+                            OpenQuo = True
+                End Select
+                
+                Select Case Selection.Text
+                        Case " ", vbCr, vbTab, vbNewLine, "(", DP, DOQ, SOQ
+                            Selection.MoveRight unit:=wdCharacter, Count:=2
+                            Selection.ExtendMode = True
+                            
+                            '1 character
+                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            If LookAhead() = True Then
+                                Select Case Selection.Text
+                                    Case DOQ, "K", "k"
+                                        ChangeQ = True
+                                End Select
+                                GoTo SkipToHere
+                            End If
+                            
+                            '2 characters
+                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            If IsYear(Selection.Text) = True Then
+                                ChangeQ = True
+                                GoTo SkipToHere
+                            ElseIf LookAhead() = True Then
+                                Select Case Selection.Text
+                                    Case "em", "Em", "er", "Er", "Im", "im", "n" & SCQ, "N" & SCQ
+                                        ChangeQ = True
+                                End Select
+                                GoTo SkipToHere
+                            End If
+                            
+                            '3 characters
+                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            If LookAhead() = True Then
+                                Select Case Selection.Text
+                                    Case "Cuz", "cuz", "Net", "net", "Sup", "sup", "Tar", "tar", "Til", "til", "Tis", "tis"
+                                        ChangeQ = True
+                                End Select
+                                GoTo SkipToHere
+                            End If
+                            
+                            '4 characters
+                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            If LookAhead() = True Then
+                                Select Case Selection.Text
+                                    Case "Bout", "bout", "Cept", "cept", "Fore", "fore", "Nuff", "nuff", "Post", "post", "Tall", "tall", "Twas", "twas"
+                                        ChangeQ = True
+                                End Select
+                                GoTo SkipToHere
+                            End If
+                            
+                            '5 characters
+                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            If LookAhead() = True Then
+                                Select Case Selection.Text
+                                    Case "Cause", "cause", "Fraid", "fraid", "Night", "night", "Round", "round", "Scuse", "scuse", "Sides", "sides", "Spect", "spect", "Tever", "tever"
+                                        ChangeQ = True
+                                End Select
+                                GoTo SkipToHere
+                            End If
+        
+                            '6 characters
+                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            If LookAhead() = True Then
+                                Select Case Selection.Text
+                                    Case "Course", "course", "Gainst", "gainst", "Nother", "nother", "Splain", "splain", "Tain" & SCQ & "t", "tain" & SCQ & "t", "Tisn" & SCQ & "t", "tisn" & SCQ & "t"
+                                        ChangeQ = True
+                                End Select
+                                GoTo SkipToHere
+                            End If
+                            
+                            '7 characters
+                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            If LookAhead() = True Then
+                                Select Case Selection.Text
+                                    Case "Chother", "chother", "Druther", "druther", "Salmost", "salmost", "Snothin", "snothin", "Twasn" & SCQ & "t", "twasn" & SCQ & "t"
+                                        ChangeQ = True
+                                End Select
+                                GoTo SkipToHere
+                            End If
+                            
+                            '8 characters
+                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            If LookAhead() = True Then
+                                Select Case Selection.Text
+                                    Case "Druthers", "druthers", "Tweren" & SCQ & "t", "tweren" & SCQ & "t"
+                                        ChangeQ = True
+                                End Select
+                                GoTo SkipToHere
+                            End If
+                            
+                            '9 characters
+                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            If LookAhead() = True Then
+                                Select Case Selection.Text
+                                    Case "Specially", "specially", "Spossible", "spossible"
+                                        ChangeQ = True
+                                End Select
+                                GoTo SkipToHere
+                            End If
+                            
+                            '10 characters
+                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            'If LookAhead() = True Then
+                                'Select Case Selection.Text
+                                    'Case
+                                        'ChangeQ = True
+                                'End Select
+                                'GoTo SkipToHere
+                            'End If
+                                
+                            '11 characters
+                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            If LookAhead() = True Then
+                                Select Case Selection.Text
+                                    Case "Neverything", "neverything"
+                                        ChangeQ = True
+                                End Select
+                            End If
+                            
+SkipToHere:
+     
+                            Selection.ExtendMode = False
+                            ActiveDocument.Bookmarks("temp").Select
+                            Select Case ChangeQ
+                                Case True
+                                    Selection.TypeText SCQ
+                                Case False
+                                    Selection.TypeText SOQ
                             End Select
-                            GoTo SkipToHere
-                        End If
                         
-                        '2 characters
-                        Selection.MoveRight unit:=wdCharacter, Count:=1
-                        If IsYear(Selection.Text) = True Then
-                            ChangeQ = True
-                            GoTo SkipToHere
-                        ElseIf LookAhead() = True Then
-                            Select Case Selection.Text
-                                Case "em", "Em", "er", "Er", "Im", "im", "n" & SCQ, "N" & SCQ
-                                    ChangeQ = True
-                            End Select
-                            GoTo SkipToHere
-                        End If
-                        
-                        '3 characters
-                        Selection.MoveRight unit:=wdCharacter, Count:=1
-                        If LookAhead() = True Then
-                            Select Case Selection.Text
-                                Case "Cuz", "cuz", "Net", "net", "Sup", "sup", "Tar", "tar", "Til", "til", "Tis", "tis"
-                                    ChangeQ = True
-                            End Select
-                            GoTo SkipToHere
-                        End If
-                        
-                        '4 characters
-                        Selection.MoveRight unit:=wdCharacter, Count:=1
-                        If LookAhead() = True Then
-                            Select Case Selection.Text
-                                Case "Bout", "bout", "Cept", "cept", "Fore", "fore", "Nuff", "nuff", "Post", "post", "Tall", "tall", "Twas", "twas"
-                                    ChangeQ = True
-                            End Select
-                            GoTo SkipToHere
-                        End If
-                        
-                        '5 characters
-                        Selection.MoveRight unit:=wdCharacter, Count:=1
-                        If LookAhead() = True Then
-                            Select Case Selection.Text
-                                Case "Cause", "cause", "Fraid", "fraid", "Night", "night", "Round", "round", "Scuse", "scuse", "Sides", "sides", "Spect", "spect", "Tever", "tever"
-                                    ChangeQ = True
-                            End Select
-                            GoTo SkipToHere
+                    Case Else
+                        If Not (OpenQuo = True) Then
+                            ActiveDocument.Bookmarks("temp").Select
+                            Selection.TypeText SCQ
                         End If
     
-                        '6 characters
-                        Selection.MoveRight unit:=wdCharacter, Count:=1
-                        If LookAhead() = True Then
-                            Select Case Selection.Text
-                                Case "Course", "course", "Gainst", "gainst", "Nother", "nother", "Splain", "splain", "Tain" & SCQ & "t", "tain" & SCQ & "t", "Tisn" & SCQ & "t", "tisn" & SCQ & "t"
-                                    ChangeQ = True
-                            End Select
-                            GoTo SkipToHere
-                        End If
-                        
-                        '7 characters
-                        Selection.MoveRight unit:=wdCharacter, Count:=1
-                        If LookAhead() = True Then
-                            Select Case Selection.Text
-                                Case "Chother", "chother", "Druther", "druther", "Salmost", "salmost", "Snothin", "snothin", "Twasn" & SCQ & "t", "twasn" & SCQ & "t"
-                                    ChangeQ = True
-                            End Select
-                            GoTo SkipToHere
-                        End If
-                        
-                        '8 characters
-                        Selection.MoveRight unit:=wdCharacter, Count:=1
-                        If LookAhead() = True Then
-                            Select Case Selection.Text
-                                Case "Druthers", "druthers", "Tweren" & SCQ & "t", "tweren" & SCQ & "t"
-                                    ChangeQ = True
-                            End Select
-                            GoTo SkipToHere
-                        End If
-                        
-                        '9 characters
-                        Selection.MoveRight unit:=wdCharacter, Count:=1
-                        If LookAhead() = True Then
-                            Select Case Selection.Text
-                                Case "Specially", "specially", "Spossible", "spossible"
-                                    ChangeQ = True
-                            End Select
-                            GoTo SkipToHere
-                        End If
-                        
-                        '10 characters
-                        Selection.MoveRight unit:=wdCharacter, Count:=1
-                        'If LookAhead() = True Then
-                            'Select Case Selection.Text
-                                'Case
-                                    'ChangeQ = True
-                            'End Select
-                            'GoTo SkipToHere
-                        'End If
-                            
-                        '11 characters
-                        Selection.MoveRight unit:=wdCharacter, Count:=1
-                        If LookAhead() = True Then
-                            Select Case Selection.Text
-                                Case "Neverything", "neverything"
-                                    ChangeQ = True
-                            End Select
-                        End If
-                        
-SkipToHere:
- 
-                        Selection.ExtendMode = False
-                        ActiveDocument.Bookmarks("temp").Select
-                        Select Case ChangeQ
-                            Case True
-                                Selection.TypeText SCQ
-                            Case False
-                                Selection.TypeText SOQ
-                        End Select
-                    
-                Case Else
-                    If Not (OpenQuo = True) Then
-                        ActiveDocument.Bookmarks("temp").Select
-                        Selection.TypeText SCQ
-                    End If
-
-            End Select
+                End Select
+            End If
         
         ChangeQ = False
         OpenQuo = False
@@ -475,6 +481,20 @@ SkipToHere:
     
     Wend
 Next
+
+' Remove spaces between certain quote combinations.
+'   7/14/20 -- Commenting some of these space removals as per WDV-281
+'   Also, though they were previously set before DP conversion,
+'   SP & DP replacements captured relative OQ and CQ too;
+'   So moving them to the end of quote cleanup, where Primes have already become quotes
+FindReplaceSimple SOQ & aSPACE & DOQ, SOQ & DOQ
+FindReplaceSimple DOQ & aSPACE & SOQ, DOQ & SOQ
+FindReplaceSimple SCQ & aSPACE & DCQ, SCQ & DCQ
+FindReplaceSimple DOQ & aSPACE & SCQ, DOQ & SCQ
+FindReplaceSimple DCQ & aSPACE & SCQ, DCQ & SCQ
+'FindReplaceSimple SCQ & aSPACE & DOQ, SCQ & DOQ
+'FindReplaceSimple DCQ & aSPACE & SOQ, DCQ & SOQ
+'FindReplaceSimple SOQ & aSPACE & DCQ, SOQ & DCQ
 
 completeStatus = completeStatus + vbNewLine + "Fixing Single Quotes: 100%"
 Clean_helpers.updateStatus ("")
@@ -1064,9 +1084,9 @@ Sub CheckSpecialCharactersPC()
                             'do nothing
                         Case Else:
                             If R.Italic Then
-                                R.Style = "symbols (sym)"
-                            Else
                                 R.Style = "symbols-ital (symi)"
+                            Else
+                                R.Style = "symbols (sym)"
                             End If
                     End Select
                 End If
