@@ -209,7 +209,6 @@ Sub DoubleQuotes()
                             Selection.TypeText DOQ
                     End Select
                 Case " "
-                    Debug.Print Selection.Text + "space case"
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.MoveRight unit:=wdCharacter, Count:=1
                     Selection.Expand unit:=wdCharacter
@@ -231,7 +230,6 @@ Sub DoubleQuotes()
                             Selection.TypeText DOQ
                     End Select
                 Case vbCr, vbTab, "("
-                    Debug.Print Selection.Text + "tab"
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.TypeText DOQ
                     Selection.Expand unit:=wdCharacter
@@ -311,7 +309,7 @@ Sub SingleQuotes()
     
     ' WDV-281: 7-14-20
     '   "educating" already 'smart' single quotes results in some user-intended use-cases to be overridden
-    '   leaving the capability to search SOQ/SCQ via this array setup in csae we end up reversing/
+    '   leaving the capability to search SOQ/SCQ via this array setup in case we end up reversing course
     SearchString = Array(SP) ', SOQ, SCQ)
            
     ActiveDocument.StoryRanges(MyStoryNo).Select
@@ -324,7 +322,7 @@ Sub SingleQuotes()
         Selection.Find.Execute findText:=QuoStr
         
         While Selection.Find.Found
-            ' Find / Replace tool includes DOQ and DCQ as results in a search for DP
+            ' Find / Replace tool includes SOQ and SCQ as results in a search for SP
             '   for some reason (Windows/Office2013)
             '   we can filter them out here
             If Selection.Text = SP Then
