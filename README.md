@@ -148,6 +148,9 @@ Then
 ### Notes on the custom ribbon
 The custom ribbon is implemented via custom ribbon xml, stored as part of the document... it is not accessible via the MS VBA IDE (though there are other ui tools to build custom ribbons).  No straightforward way to auto-export/import this xml presents itself, but the xml itself is separately maintained in the "*custom_ui*" directory, as well as in the binary.
 
+## Setting Version for RS_Wordtemplate
+When making code upates to the RSuite_WordTemplate.dotm, remember to edit the 'version' Custom Document Property so your updates can be easily verified from word ('RSuite Tools Version').
+
 ---
 ###### * Notes for future development
 - Integration tests for macros, unittests.
