@@ -13,7 +13,7 @@ Sub CheckMacmillanGT()
     Dim strTemplatePath As String
     
     templateFile = "RSuite_Word-template.dotm"  'the template file you are checking
-    strTemplatePath = WT_Settings.StyleDir(FileType:="tools")
+    strTemplatePath = WT_Settings.StyleDir(FileType:="RS_wt")
 
     Call VersionCheck(strTemplatePath, templateFile)
 
