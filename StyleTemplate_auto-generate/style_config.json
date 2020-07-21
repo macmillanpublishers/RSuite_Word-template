@@ -235,11 +235,6 @@
       "type": "chapter",
       "class": "chapter2"
     },
-    ".Section-InterludeSIN": {
-      "type": "chapter",
-      "label": "Interlude",
-      "class": "interlude"
-    },
     ".Section-RecipeSREC": {
       "type": "chapter",
       "label": "Recipe",
@@ -301,7 +296,6 @@
     }
   },
   "legacy": [
-    ".Section-InterludeSIN"
   ],
   "footnotetextselector": [
     "div.footnote"

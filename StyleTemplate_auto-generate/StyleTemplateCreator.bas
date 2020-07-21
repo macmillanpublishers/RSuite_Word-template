@@ -223,7 +223,7 @@ Public Sub ReadStylestoJson()
     'how often we save and undo.clear on doc
     lngIncrement = 25
     ' JSON file path
-    strJsonPath = Word.ActiveDocument.Path & Application.PathSeparator & "macmillan.json"
+    strJsonPath = Word.ActiveDocument.Path & Application.PathSeparator & "RSuite.json"
     ' initialize dicts & counter
     Set dictStyle_dict = New Dictionary
     Set dictEmpty = New Dictionary
@@ -408,7 +408,7 @@ Public Sub ReadStylestoJson()
     
     strJson = JsonConverter.ConvertToJson(dictStyle_dict, Whitespace:=2)
     OverwriteTextFile strJsonPath, strJson
-    Debug.Print "Scanned " & a & " styles, wrote info for " & dictStyle_dict.Count & " Macmillan Styles to json"
+    Debug.Print "Scanned " & a & " styles, wrote info for " & dictStyle_dict.Count & " RSuite Styles to json"
 
 End Sub
 
@@ -451,11 +451,11 @@ Private Function WriteTemplatefromJsonCore(Optional p_boolNoColor As Boolean = F
     Dim objChecklistLT As ListTemplate
     
     ' file paths
-    strJsonPath = ThisDocument.Path & Application.PathSeparator & "macmillan.json"
+    strJsonPath = ThisDocument.Path & Application.PathSeparator & "RSuite.json"
     If p_boolNoColor = False Then
-        strNewFilePath = ThisDocument.Path & Application.PathSeparator & "macmillan.dotx"
+        strNewFilePath = ThisDocument.Path & Application.PathSeparator & "RSuite.dotx"
     ElseIf p_boolNoColor = True Then
-        strNewFilePath = ThisDocument.Path & Application.PathSeparator & "macmillan_NoColor.dotx"
+        strNewFilePath = ThisDocument.Path & Application.PathSeparator & "RSuite_NoColor.dotx"
     End If
 
     Application.ScreenUpdating = False
@@ -689,6 +689,12 @@ Private Function WriteTemplatefromJsonCore(Optional p_boolNoColor As Boolean = F
     '''Lower priority of built in styles to 9
     Call LowerPriorityBuiltInStyles(docTemplate)
     
+    docTemplate.UndoClear
+    docTemplate.Save
+    
+    ' Change the Font size/Name for Built-in Note styles
+    ChangeNoteFonts docTemplate
+
     docTemplate.Save
     Application.ScreenUpdating = True
 
@@ -828,4 +834,17 @@ Private Sub AddVersionNumber(docNewTemplate As Document)
   strVersionNumber = localReadTextFile(Path:=strVersionFileFullPath)
   docNewTemplate.CustomDocumentProperties.Add Name:="Version", LinkToContent:=False, _
     Type:=msoPropertyTypeString, Value:=strVersionNumber
+End Sub
+
+Sub ChangeNoteFonts(docNewTemplate As Document)
+    With docNewTemplate.Styles("Endnote Text")
+        .Font.Name = "Times New Roman"
+        .Font.Size = 12
+        .Priority = 1
+    End With
+    With docNewTemplate.Styles("Footnote Text")
+        .Font.Name = "Times New Roman"
+        .Font.Size = 12
+        .Priority = 1
+    End With
 End Sub
