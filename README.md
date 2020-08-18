@@ -22,6 +22,25 @@ Below that are notes for vba development with this repo.
     * File: containers.txt
 * Folder:  MacmillanStyleTemplate, + all contents   (from RSuite_Word-template/oldStyleTemplate/MacmillanStyleTemplate)
 
+## Gradle installation
+This installation option is provided for development and standalone installation purposes.
+It requires Gradle (which requires jdk 8 or higher).
+Resources for installing gradle [here](https://docs.gradle.org/current/userguide/installation.html), it's very straightforward on Mac via Homebrew.
+
+#### How to install via gradle.
+1. via commandline/Terminal, cd to directory: *_gradle-install*
+2. * on a Mac:
+    * type `./gradlew install`
+ * on a PC:
+    * type `.\gradle.bat install`
+3. If Word is running, the install task will fail and suggest that you quit Word. Otherwise 6 installation tasks should run successfully:
+  * verifies that Word is not running
+  * removes quarantine xattr attributes from all files (if on a Mac)
+  * for 3 install locations: removes install dirs to clear old files, recreates dir and installs files
+  * adds file attributes for .dotm files (if on Mac)
+  * summary/full task
+
+
 ## PC Installation
 
 #### PC Installation Targets:
@@ -154,4 +173,3 @@ When making code upates to the RSuite_WordTemplate.dotm, remember to edit the 'v
 ---
 ###### * Notes for future development
 - Integration tests for macros, unittests.
-- Build an installer for Mac & PC (gradle? VBA is overly-complicated for replacing in-use templates), consider possibilities for standalone / user-friendly version.

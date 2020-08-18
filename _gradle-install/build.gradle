@@ -1,0 +1,153 @@
+
+
+/******** ********  DEFINITIONS  ******** ********/
+def homePath = System.properties['user.home']
+def rsfolderName = 'RSuiteStyleTemplate'
+def oldstylesFolderName = 'MacmillanStyleTemplate'
+
+/* these definitions are for MacOS, re-setting below if Windows OS detected */
+def hostOS = 'macOS'
+def wordStartPath = homePath + '/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word'
+def templateFoldersPath = homePath + '/Library/Containers/com.microsoft.Word/Data/Documents'
+
+if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+	hostOS = 'windows'
+	wordStartPath = homePath + '/AppData/Roaming/Microsoft/Word/STARTUP'
+	templateFoldersPath = homePath + '/AppData/Roaming'
+}
+
+def dotm_xattr = "57 58 54 4D 4D 53 57 44 00 10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+def old_dotm_files = [
+	'macmillan_CoverCopy.dotm',
+	'macmillan_NoColor.dotm',
+	'macmillan.dotm',
+	'MacmillanGT.dotm'
+	]
+
+def checkWord = { ->
+	def wordStatus = new ByteArrayOutputStream()
+	if(hostOS == 'macOS') {
+		exec {
+		    commandLine 'sh', './checkWord.sh'
+		    standardOutput = wordStatus
+		}
+	} else {
+		exec {
+		    commandLine './checkWord.bat'
+		    standardOutput = wordStatus
+		}
+	}
+	return wordStatus.toString().trim()
+}
+
+
+project.logger.lifecycle("Host OS: '" + hostOS + "', user home: '" + homePath + "', word-status: '" + checkWord() + "'")
+
+
+/******** ********  TASKS  ******** ********/
+task wordcheck {
+	doFirst {
+		if (checkWord() == 'not running') {
+			println 'Word is not running, proceeding ... '
+		} else {
+			def errstring = 'MICROSOFT WORD IS RUNNING.\nPlease QUIT WORD and try again'
+			println errstring
+			throw new InvalidUserDataException(errstring)
+		}
+	}
+}
+
+task macfix_a {
+    description "runs xattr cmds to rm quarantines"
+    dependsOn 'wordcheck'
+    doFirst {
+	    if(hostOS == 'macOS') {
+	    	println "Rm'ing quarantine xattrs of files since we're on a Mac"
+        exec {
+		      commandLine 'sh', './rm_quarantine.sh'
+        }
+	    } else {
+	    	commandLine 'echo', '"We\'re on Windows, skipping Mac quarantine-fix"'
+	    }
+    }
+}
+
+task copyRSfiles {
+	doFirst {
+		println "Deleting existing rs_template dir"
+		delete templateFoldersPath + '/' + rsfolderName
+	}
+	description "move RS macros and templates to system destination"
+	dependsOn 'macfix_a'
+	doLast {
+		println "Copying rsuite files . . ."
+	    copy {
+	    	from "../RSuite_Word-template.dotm"
+	    	into templateFoldersPath + '/' + rsfolderName
+	    }
+	    copy {
+		    from "../StyleTemplate_auto-generate"
+		    into templateFoldersPath + '/' + rsfolderName + '/StyleTemplate_auto-generate'
+	    }
+	}
+}
+
+task copyOldfiles {
+	doFirst {
+		println "deleting old Macmillan templates dir .. "
+		delete templateFoldersPath + '/' + oldstylesFolderName
+	}
+	description "Copies old Macmillan macros and templates to system destination"
+	dependsOn 'macfix_a'
+	doLast {
+    copy {
+    	from "../oldStyleTemplate/MacmillanStyleTemplate"
+    	into templateFoldersPath + '/' + oldstylesFolderName
+    	println "re-installed old Macmillan templates dir .. "
+    }
+  }
+}
+
+task copyTS {
+	doFirst {
+		println "Deleting existing word startup dir"
+		delete wordStartPath
+	}
+	description "Copies templateSwitcher to word startup dir"
+	dependsOn 'macfix_a'
+	doLast {
+		copy {
+    	from "../template_switcher.dotm"
+    	into wordStartPath
+    	println "wrote new template_switcher.dotm to Startup"
+	  }
+  }
+}
+
+task macfix_b(dependsOn: ['copyRSfiles', 'copyOldfiles', 'copyTS']) {
+    description "runs xattr cmds to add creator code for mac dotm files"
+    doFirst {
+	    if(hostOS == 'macOS') {
+        println "Assigning creator-code xattrs for dotm files since we're on a Mac"
+	    	exec {
+          commandLine 'xattr', '-wx', 'com.apple.FinderInfo', dotm_xattr, wordStartPath + '/template_switcher.dotm'
+        }
+        exec {
+          commandLine 'xattr', '-wx', 'com.apple.FinderInfo', dotm_xattr, templateFoldersPath +'/'+ rsfolderName + '/RSuite_Word-template.dotm'
+        }
+        old_dotm_files.each { dotm ->
+		    	exec {
+            commandLine 'xattr', '-wx', 'com.apple.FinderInfo', dotm_xattr, templateFoldersPath +'/'+ oldstylesFolderName + '/' + dotm
+          }
+        }
+	    } else {
+	    	commandLine 'echo', '"We\'re on Windows, skipping Mac creator code dotm fixes"'
+	    }
+    }
+}
+
+task install(dependsOn: ['copyRSfiles', 'copyOldfiles', 'copyTS', 'macfix_b']) {
+	doFirst {
+		println "Running all installation tasks..."
+	}
+}
