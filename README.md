@@ -33,7 +33,7 @@ Resources for installing gradle [here](https://docs.gradle.org/current/userguide
     * type `./gradlew install`
  * on a PC:
     * type `.\gradle.bat install`
-3. If Word is running, the install task will fail and suggest that you quit Word. Otherwise 6 installation tasks should run successfully:
+3. If Word is running, the install task will fail and suggest that you quit Word. Otherwise 7 installation tasks should run successfully:
   * verifies that Word is not running
   * removes quarantine xattr attributes from all files (if on a Mac)
   * for 3 install locations: removes install dirs to clear old files, recreates dir and installs files
