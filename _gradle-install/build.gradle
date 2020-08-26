@@ -67,7 +67,7 @@ task macfix_a {
       }
     } else {
       exec {
-        commandLine 'echo', '"We\'re on Windows, skipping Mac quarantine-fix"'
+        commandLine 'cmd', '/c', 'echo We\'re on Windows, skipping Mac quarantine-fix'
       }
     }
   }
@@ -139,7 +139,7 @@ task macfix_b(dependsOn: ['copyRSfiles', 'copyOldfiles', 'copyTS']) {
       }
     } else {
       exec {
-        commandLine 'echo', '"We\'re on Windows, skipping Mac creator code dotm fixes"'
+        commandLine 'cmd', '/c', 'echo We\'re on Windows, skipping Mac creator code dotm fixes'
       }
     }
   }

@@ -24,8 +24,7 @@ Below that are notes for vba development with this repo.
 
 ## Gradle installation
 This installation option is provided for development and standalone installation purposes.
-It requires Gradle (which requires jdk 8 or higher).
-Resources for installing gradle [here](https://docs.gradle.org/current/userguide/installation.html), it's very straightforward on Mac via Homebrew.
+Gradle installer requires jdk 8 or higher, available [here](https://jdk.java.net/) ('Ready to Use' version should be fine).
 
 #### How to install via gradle.
 1. via commandline/Terminal, cd to directory: *_gradle-install*
