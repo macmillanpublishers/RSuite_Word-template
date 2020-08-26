@@ -24,7 +24,7 @@ Below that are notes for vba development with this repo.
 
 ## Gradle installation
 This installation option is provided for development and standalone installation purposes.
-Gradle installer requires jdk 8 or higher, available [here](https://jdk.java.net/) ('Ready to Use' version should be fine).
+Running the gradle installer requires installation of jdk 8 or higher, available [here](https://jdk.java.net/) (The first 'Ready to Use' version should be fine).
 
 #### How to install via gradle.
 1. via commandline/Terminal, cd to directory: *_gradle-install*
@@ -38,6 +38,7 @@ Gradle installer requires jdk 8 or higher, available [here](https://jdk.java.net
   * for 3 install locations: removes install dirs to clear old files, recreates dir and installs files
   * adds file attributes for .dotm files (if on Mac)
   * summary/full task
+4. For some reason, on Windows sometimes this installation fails the first time; if you get a Java.io error re: deleting, run installer again. 
 
 
 ## PC Installation
