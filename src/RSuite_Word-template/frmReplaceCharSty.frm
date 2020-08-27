@@ -2,9 +2,9 @@ VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmReplaceCharSty 
    Caption         =   "Invalid Character Style"
    ClientHeight    =   4710
-   ClientLeft      =   90
-   ClientTop       =   405
-   ClientWidth     =   6075
+   ClientLeft      =   91
+   ClientTop       =   406
+   ClientWidth     =   6076
    OleObjectBlob   =   "frmReplaceCharSty.frx":0000
    StartUpPosition =   3  'Windows Default
 End

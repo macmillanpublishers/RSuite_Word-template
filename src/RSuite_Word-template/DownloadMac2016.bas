@@ -30,13 +30,17 @@ Option Explicit
     Private Declare Function feof Lib "libc.dylib" (ByVal file As Long) As Long
   #End If
  #End If
-#Else
- #If VBA7 Then ' Word 2010 or later for Windows
-    Private Declare Function popen Lib "libc.dylib" (ByVal Command As String, ByVal mode As String) As Long
-    Private Declare Function pclose Lib "libc.dylib" (ByVal file As LongPtr) As Long
-    Private Declare Function fread Lib "libc.dylib" (ByVal outStr As String, ByVal size As LongPtr, ByVal items As LongPtr, ByVal stream As LongPtr) As Long
-    Private Declare Function feof Lib "libc.dylib" (ByVal file As LongPtr) As Long
- #End If
+#Else ' Word for Windows
+' #If VBA7 Then ' Word 2010 or later for Windows
+'    Private Declare Function popen Lib "libc.dylib" (ByVal Command As String, ByVal mode As String) As Long
+'    Private Declare Function pclose Lib "libc.dylib" (ByVal file As LongPtr) As Long
+'    Private Declare Function fread Lib "libc.dylib" (ByVal outStr As String, ByVal size As LongPtr, ByVal items As LongPtr, ByVal stream As LongPtr) As Long
+'    Private Declare Function feof Lib "libc.dylib" (ByVal file As LongPtr) As Long
+' #End If
+    Private Declare PtrSafe Function popen Lib "libc.dylib" (ByVal Command As String, ByVal mode As String) As LongPtr
+    Private Declare PtrSafe Function pclose Lib "libc.dylib" (ByVal file As LongPtr) As LongPtr
+    Private Declare PtrSafe Function fread Lib "libc.dylib" (ByVal outStr As String, ByVal size As LongPtr, ByVal items As LongPtr, ByVal stream As LongPtr) As LongPtr
+    Private Declare PtrSafe Function feof Lib "libc.dylib" (ByVal file As LongPtr) As LongPtr
 #End If
 
 Sub testdl()

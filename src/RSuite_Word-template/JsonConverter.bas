@@ -1,6 +1,6 @@
 Attribute VB_Name = "JsonConverter"
 ''
-' VBA-JSON v2.2.2
+' VBA-JSON v2.3.1
 ' (c) Tim Hall - https://github.com/VBA-tools/VBA-JSON
 '
 ' JSON Converter for VBA
@@ -45,46 +45,74 @@ Attribute VB_Name = "JsonConverter"
 ' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '
 Option Explicit
 
+' === VBA-UTC Headers
 #If Mac Then
- #If MAC_OFFICE_VERSION >= 15 Then
-  #If VBA7 Then ' 64-bit Word 2016 for Mac
-        Private Declare PtrSafe Function utc_popen Lib "libc.dylib" Alias "popen" (ByVal utc_Command As String, ByVal utc_Mode As String) As Long
-        Private Declare PtrSafe Function utc_pclose Lib "libc.dylib" Alias "pclose" (ByVal utc_File As Long) As Long
-        Private Declare PtrSafe Function utc_fread Lib "libc.dylib" Alias "fread" (ByVal utc_Buffer As String, ByVal utc_Size As Long, ByVal utc_Number As Long, ByVal utc_File As Long) As Long
-        Private Declare PtrSafe Function utc_feof Lib "libc.dylib" Alias "feof" (ByVal utc_File As Long) As Long
-  #Else ' 32-bit Word 2016 for Mac
-        Private Declare Function utc_popen Lib "libc.dylib" Alias "popen" (ByVal utc_Command As String, ByVal utc_Mode As String) As Long
-        Private Declare Function utc_pclose Lib "libc.dylib" Alias "pclose" (ByVal utc_File As Long) As Long
-        Private Declare Function utc_fread Lib "libc.dylib" Alias "fread" (ByVal utc_Buffer As String, ByVal utc_Size As Long, ByVal utc_Number As Long, ByVal utc_File As Long) As Long
-        Private Declare Function utc_feof Lib "libc.dylib" Alias "feof" (ByVal utc_File As Long) As Long
-  #End If
- #Else
-  #If VBA7 Then ' does not exist
 
-    #Else ' 32-bit Word 2011 for Mac
-        Private Declare Function utc_popen Lib "libc.dylib" Alias "popen" (ByVal utc_Command As String, ByVal utc_Mode As String) As Long
-        Private Declare Function utc_pclose Lib "libc.dylib" Alias "pclose" (ByVal utc_File As Long) As Long
-        Private Declare Function utc_fread Lib "libc.dylib" Alias "fread" (ByVal utc_Buffer As String, ByVal utc_Size As Long, ByVal utc_Number As Long, ByVal utc_File As Long) As Long
-        Private Declare Function utc_feof Lib "libc.dylib" Alias "feof" (ByVal utc_File As Long) As Long
-    #End If
- #End If
+#If VBA7 Then
+
+' 64-bit Mac (2016)
+Private Declare PtrSafe Function utc_popen Lib "/usr/lib/libc.dylib" Alias "popen" _
+    (ByVal utc_Command As String, ByVal utc_Mode As String) As LongPtr
+Private Declare PtrSafe Function utc_pclose Lib "/usr/lib/libc.dylib" Alias "pclose" _
+    (ByVal utc_File As LongPtr) As LongPtr
+Private Declare PtrSafe Function utc_fread Lib "/usr/lib/libc.dylib" Alias "fread" _
+    (ByVal utc_Buffer As String, ByVal utc_Size As LongPtr, ByVal utc_Number As LongPtr, ByVal utc_File As LongPtr) As LongPtr
+Private Declare PtrSafe Function utc_feof Lib "/usr/lib/libc.dylib" Alias "feof" _
+    (ByVal utc_File As LongPtr) As LongPtr
+
 #Else
- #If VBA7 Then ' Word 2010 or later for Windows
-    Private Declare Function utc_GetTimeZoneInformation Lib "kernel32" Alias "GetTimeZoneInformation" _
-        (utc_lpTimeZoneInformation As utc_TIME_ZONE_INFORMATION) As Long
-    Private Declare Function utc_SystemTimeToTzSpecificLocalTime Lib "kernel32" Alias "SystemTimeToTzSpecificLocalTime" _
-        (utc_lpTimeZoneInformation As utc_TIME_ZONE_INFORMATION, utc_lpUniversalTime As utc_SYSTEMTIME, utc_lpLocalTime As utc_SYSTEMTIME) As Long
-    Private Declare Function utc_TzSpecificLocalTimeToSystemTime Lib "kernel32" Alias "TzSpecificLocalTimeToSystemTime" _
-        (utc_lpTimeZoneInformation As utc_TIME_ZONE_INFORMATION, utc_lpLocalTime As utc_SYSTEMTIME, utc_lpUniversalTime As utc_SYSTEMTIME) As Long
- #End If
+
+' 32-bit Mac
+Private Declare Function utc_popen Lib "libc.dylib" Alias "popen" _
+    (ByVal utc_Command As String, ByVal utc_Mode As String) As Long
+Private Declare Function utc_pclose Lib "libc.dylib" Alias "pclose" _
+    (ByVal utc_File As Long) As Long
+Private Declare Function utc_fread Lib "libc.dylib" Alias "fread" _
+    (ByVal utc_Buffer As String, ByVal utc_Size As Long, ByVal utc_Number As Long, ByVal utc_File As Long) As Long
+Private Declare Function utc_feof Lib "libc.dylib" Alias "feof" _
+    (ByVal utc_File As Long) As Long
+
+#End If
+
+#ElseIf VBA7 Then
+
+' http://msdn.microsoft.com/en-us/library/windows/desktop/ms724421.aspx
+' http://msdn.microsoft.com/en-us/library/windows/desktop/ms724949.aspx
+' http://msdn.microsoft.com/en-us/library/windows/desktop/ms725485.aspx
+Private Declare PtrSafe Function utc_GetTimeZoneInformation Lib "kernel32" Alias "GetTimeZoneInformation" _
+    (utc_lpTimeZoneInformation As utc_TIME_ZONE_INFORMATION) As Long
+Private Declare PtrSafe Function utc_SystemTimeToTzSpecificLocalTime Lib "kernel32" Alias "SystemTimeToTzSpecificLocalTime" _
+    (utc_lpTimeZoneInformation As utc_TIME_ZONE_INFORMATION, utc_lpUniversalTime As utc_SYSTEMTIME, utc_lpLocalTime As utc_SYSTEMTIME) As Long
+Private Declare PtrSafe Function utc_TzSpecificLocalTimeToSystemTime Lib "kernel32" Alias "TzSpecificLocalTimeToSystemTime" _
+    (utc_lpTimeZoneInformation As utc_TIME_ZONE_INFORMATION, utc_lpLocalTime As utc_SYSTEMTIME, utc_lpUniversalTime As utc_SYSTEMTIME) As Long
+
+#Else
+
+Private Declare Function utc_GetTimeZoneInformation Lib "kernel32" Alias "GetTimeZoneInformation" _
+    (utc_lpTimeZoneInformation As utc_TIME_ZONE_INFORMATION) As Long
+Private Declare Function utc_SystemTimeToTzSpecificLocalTime Lib "kernel32" Alias "SystemTimeToTzSpecificLocalTime" _
+    (utc_lpTimeZoneInformation As utc_TIME_ZONE_INFORMATION, utc_lpUniversalTime As utc_SYSTEMTIME, utc_lpLocalTime As utc_SYSTEMTIME) As Long
+Private Declare Function utc_TzSpecificLocalTimeToSystemTime Lib "kernel32" Alias "TzSpecificLocalTimeToSystemTime" _
+    (utc_lpTimeZoneInformation As utc_TIME_ZONE_INFORMATION, utc_lpLocalTime As utc_SYSTEMTIME, utc_lpUniversalTime As utc_SYSTEMTIME) As Long
+
 #End If
 
 #If Mac Then
+
+#If VBA7 Then
+Private Type utc_ShellResult
+    utc_Output As String
+    utc_ExitCode As LongPtr
+End Type
+
+#Else
 
 Private Type utc_ShellResult
     utc_Output As String
     utc_ExitCode As Long
 End Type
+
+#End If
 
 #Else
 
@@ -111,28 +139,6 @@ End Type
 
 #End If
 ' === End VBA-UTC
-
-#If Mac Then
- #If MAC_OFFICE_VERSION >= 15 Then
-  #If VBA7 Then ' 64-bit Word 2016 for Mac
-    Private Declare PtrSafe Sub json_CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (json_MemoryDestination As Any, json_MemorySource As Any, ByVal json_ByteLength As Long)
-  #Else ' 32-bit Word 2016 for Mac
-        Private Declare Sub json_CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
-             (json_MemoryDestination As Any, json_MemorySource As Any, ByVal json_ByteLength As Long)
-  #End If
- #Else
-  #If VBA7 Then ' does not exist
-
-    #Else ' 32-bit Word 2011 for Mac
-        Private Declare Sub json_CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
-            (json_MemoryDestination As Any, json_MemorySource As Any, ByVal json_ByteLength As Long)
-    #End If
- #End If
-#Else
- #If VBA7 Then ' Word 2010 or later for Windows
-    Private Declare PtrSafe Sub json_CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (json_MemoryDestination As Any, json_MemorySource As Any, ByVal json_ByteLength As Long)
- #End If
-#End If
 
 Private Type json_Options
     ' VBA only stores 15 significant digits, so any numbers larger than that are truncated
@@ -191,7 +197,7 @@ End Function
 ' @return {String}
 ''
 Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitespace As Variant, Optional ByVal json_CurrentIndentation As Long = 0) As String
-    Dim json_buffer As String
+    Dim json_Buffer As String
     Dim json_BufferPosition As Long
     Dim json_BufferLength As Long
     Dim json_Index As Long
@@ -252,7 +258,7 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
         End If
 
         ' Array
-        json_BufferAppend json_buffer, "[", json_BufferPosition, json_BufferLength
+        json_BufferAppend json_Buffer, "[", json_BufferPosition, json_BufferLength
 
         On Error Resume Next
 
@@ -267,21 +273,21 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
                     json_IsFirstItem = False
                 Else
                     ' Append comma to previous line
-                    json_BufferAppend json_buffer, ",", json_BufferPosition, json_BufferLength
+                    json_BufferAppend json_Buffer, ",", json_BufferPosition, json_BufferLength
                 End If
 
                 If json_LBound2D >= 0 And json_UBound2D >= 0 Then
                     ' 2D Array
                     If json_PrettyPrint Then
-                        json_BufferAppend json_buffer, vbNewLine, json_BufferPosition, json_BufferLength
+                        json_BufferAppend json_Buffer, vbNewLine, json_BufferPosition, json_BufferLength
                     End If
-                    json_BufferAppend json_buffer, json_Indentation & "[", json_BufferPosition, json_BufferLength
+                    json_BufferAppend json_Buffer, json_Indentation & "[", json_BufferPosition, json_BufferLength
 
                     For json_Index2D = json_LBound2D To json_UBound2D
                         If json_IsFirstItem2D Then
                             json_IsFirstItem2D = False
                         Else
-                            json_BufferAppend json_buffer, ",", json_BufferPosition, json_BufferLength
+                            json_BufferAppend json_Buffer, ",", json_BufferPosition, json_BufferLength
                         End If
 
                         json_Converted = ConvertToJson(JsonValue(json_Index, json_Index2D), Whitespace, json_CurrentIndentation + 2)
@@ -298,14 +304,14 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
                             json_Converted = vbNewLine & json_InnerIndentation & json_Converted
                         End If
 
-                        json_BufferAppend json_buffer, json_Converted, json_BufferPosition, json_BufferLength
+                        json_BufferAppend json_Buffer, json_Converted, json_BufferPosition, json_BufferLength
                     Next json_Index2D
 
                     If json_PrettyPrint Then
-                        json_BufferAppend json_buffer, vbNewLine, json_BufferPosition, json_BufferLength
+                        json_BufferAppend json_Buffer, vbNewLine, json_BufferPosition, json_BufferLength
                     End If
 
-                    json_BufferAppend json_buffer, json_Indentation & "]", json_BufferPosition, json_BufferLength
+                    json_BufferAppend json_Buffer, json_Indentation & "]", json_BufferPosition, json_BufferLength
                     json_IsFirstItem2D = True
                 Else
                     ' 1D Array
@@ -323,7 +329,7 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
                         json_Converted = vbNewLine & json_Indentation & json_Converted
                     End If
 
-                    json_BufferAppend json_buffer, json_Converted, json_BufferPosition, json_BufferLength
+                    json_BufferAppend json_Buffer, json_Converted, json_BufferPosition, json_BufferLength
                 End If
             Next json_Index
         End If
@@ -331,7 +337,7 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
         On Error GoTo 0
 
         If json_PrettyPrint Then
-            json_BufferAppend json_buffer, vbNewLine, json_BufferPosition, json_BufferLength
+            json_BufferAppend json_Buffer, vbNewLine, json_BufferPosition, json_BufferLength
 
             If VBA.VarType(Whitespace) = VBA.vbString Then
                 json_Indentation = VBA.String$(json_CurrentIndentation, Whitespace)
@@ -340,9 +346,9 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
             End If
         End If
 
-        json_BufferAppend json_buffer, json_Indentation & "]", json_BufferPosition, json_BufferLength
+        json_BufferAppend json_Buffer, json_Indentation & "]", json_BufferPosition, json_BufferLength
 
-        ConvertToJson = json_BufferToString(json_buffer, json_BufferPosition, json_BufferLength)
+        ConvertToJson = json_BufferToString(json_Buffer, json_BufferPosition)
 
     ' Dictionary or Collection
     Case VBA.vbObject
@@ -356,7 +362,7 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
 
         ' Dictionary
         If VBA.TypeName(JsonValue) = "Dictionary" Then
-            json_BufferAppend json_buffer, "{", json_BufferPosition, json_BufferLength
+            json_BufferAppend json_Buffer, "{", json_BufferPosition, json_BufferLength
             For Each json_Key In JsonValue.Keys
                 ' For Objects, undefined (Empty/Nothing) is not added to object
                 json_Converted = ConvertToJson(JsonValue(json_Key), Whitespace, json_CurrentIndentation + 1)
@@ -370,7 +376,7 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
                     If json_IsFirstItem Then
                         json_IsFirstItem = False
                     Else
-                        json_BufferAppend json_buffer, ",", json_BufferPosition, json_BufferLength
+                        json_BufferAppend json_Buffer, ",", json_BufferPosition, json_BufferLength
                     End If
 
                     If json_PrettyPrint Then
@@ -379,12 +385,12 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
                         json_Converted = """" & json_Key & """:" & json_Converted
                     End If
 
-                    json_BufferAppend json_buffer, json_Converted, json_BufferPosition, json_BufferLength
+                    json_BufferAppend json_Buffer, json_Converted, json_BufferPosition, json_BufferLength
                 End If
             Next json_Key
 
             If json_PrettyPrint Then
-                json_BufferAppend json_buffer, vbNewLine, json_BufferPosition, json_BufferLength
+                json_BufferAppend json_Buffer, vbNewLine, json_BufferPosition, json_BufferLength
 
                 If VBA.VarType(Whitespace) = VBA.vbString Then
                     json_Indentation = VBA.String$(json_CurrentIndentation, Whitespace)
@@ -393,16 +399,16 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
                 End If
             End If
 
-            json_BufferAppend json_buffer, json_Indentation & "}", json_BufferPosition, json_BufferLength
+            json_BufferAppend json_Buffer, json_Indentation & "}", json_BufferPosition, json_BufferLength
 
         ' Collection
         ElseIf VBA.TypeName(JsonValue) = "Collection" Then
-            json_BufferAppend json_buffer, "[", json_BufferPosition, json_BufferLength
+            json_BufferAppend json_Buffer, "[", json_BufferPosition, json_BufferLength
             For Each json_Value In JsonValue
                 If json_IsFirstItem Then
                     json_IsFirstItem = False
                 Else
-                    json_BufferAppend json_buffer, ",", json_BufferPosition, json_BufferLength
+                    json_BufferAppend json_Buffer, ",", json_BufferPosition, json_BufferLength
                 End If
 
                 json_Converted = ConvertToJson(json_Value, Whitespace, json_CurrentIndentation + 1)
@@ -419,11 +425,11 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
                     json_Converted = vbNewLine & json_Indentation & json_Converted
                 End If
 
-                json_BufferAppend json_buffer, json_Converted, json_BufferPosition, json_BufferLength
+                json_BufferAppend json_Buffer, json_Converted, json_BufferPosition, json_BufferLength
             Next json_Value
 
             If json_PrettyPrint Then
-                json_BufferAppend json_buffer, vbNewLine, json_BufferPosition, json_BufferLength
+                json_BufferAppend json_Buffer, vbNewLine, json_BufferPosition, json_BufferLength
 
                 If VBA.VarType(Whitespace) = VBA.vbString Then
                     json_Indentation = VBA.String$(json_CurrentIndentation, Whitespace)
@@ -432,10 +438,10 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
                 End If
             End If
 
-            json_BufferAppend json_buffer, json_Indentation & "]", json_BufferPosition, json_BufferLength
+            json_BufferAppend json_Buffer, json_Indentation & "]", json_BufferPosition, json_BufferLength
         End If
 
-        ConvertToJson = json_BufferToString(json_buffer, json_BufferPosition, json_BufferLength)
+        ConvertToJson = json_BufferToString(json_Buffer, json_BufferPosition)
     Case VBA.vbInteger, VBA.vbLong, VBA.vbSingle, VBA.vbDouble, VBA.vbCurrency, VBA.vbDecimal
         ' Number (use decimals for numbers)
         ConvertToJson = VBA.Replace(JsonValue, ",", ".")
@@ -539,7 +545,7 @@ Private Function json_ParseString(json_String As String, ByRef json_Index As Lon
     Dim json_Quote As String
     Dim json_Char As String
     Dim json_Code As String
-    Dim json_buffer As String
+    Dim json_Buffer As String
     Dim json_BufferPosition As Long
     Dim json_BufferLength As Long
 
@@ -560,36 +566,36 @@ Private Function json_ParseString(json_String As String, ByRef json_Index As Lon
 
             Select Case json_Char
             Case """", "\", "/", "'"
-                json_BufferAppend json_buffer, json_Char, json_BufferPosition, json_BufferLength
+                json_BufferAppend json_Buffer, json_Char, json_BufferPosition, json_BufferLength
                 json_Index = json_Index + 1
             Case "b"
-                json_BufferAppend json_buffer, vbBack, json_BufferPosition, json_BufferLength
+                json_BufferAppend json_Buffer, vbBack, json_BufferPosition, json_BufferLength
                 json_Index = json_Index + 1
             Case "f"
-                json_BufferAppend json_buffer, vbFormFeed, json_BufferPosition, json_BufferLength
+                json_BufferAppend json_Buffer, vbFormFeed, json_BufferPosition, json_BufferLength
                 json_Index = json_Index + 1
             Case "n"
-                json_BufferAppend json_buffer, vbCrLf, json_BufferPosition, json_BufferLength
+                json_BufferAppend json_Buffer, vbCrLf, json_BufferPosition, json_BufferLength
                 json_Index = json_Index + 1
             Case "r"
-                json_BufferAppend json_buffer, vbCr, json_BufferPosition, json_BufferLength
+                json_BufferAppend json_Buffer, vbCr, json_BufferPosition, json_BufferLength
                 json_Index = json_Index + 1
             Case "t"
-                json_BufferAppend json_buffer, vbTab, json_BufferPosition, json_BufferLength
+                json_BufferAppend json_Buffer, vbTab, json_BufferPosition, json_BufferLength
                 json_Index = json_Index + 1
             Case "u"
                 ' Unicode character escape (e.g. \u00a9 = Copyright)
                 json_Index = json_Index + 1
                 json_Code = VBA.Mid$(json_String, json_Index, 4)
-                json_BufferAppend json_buffer, VBA.ChrW(VBA.Val("&h" + json_Code)), json_BufferPosition, json_BufferLength
+                json_BufferAppend json_Buffer, VBA.ChrW(VBA.Val("&h" + json_Code)), json_BufferPosition, json_BufferLength
                 json_Index = json_Index + 4
             End Select
         Case json_Quote
-            json_ParseString = json_BufferToString(json_buffer, json_BufferPosition, json_BufferLength)
+            json_ParseString = json_BufferToString(json_Buffer, json_BufferPosition)
             json_Index = json_Index + 1
             Exit Function
         Case Else
-            json_BufferAppend json_buffer, json_Char, json_BufferPosition, json_BufferLength
+            json_BufferAppend json_Buffer, json_Char, json_BufferPosition, json_BufferLength
             json_Index = json_Index + 1
         End Select
     Loop
@@ -675,7 +681,7 @@ Private Function json_Encode(ByVal json_Text As Variant) As String
     Dim json_Index As Long
     Dim json_Char As String
     Dim json_AscCode As Long
-    Dim json_buffer As String
+    Dim json_Buffer As String
     Dim json_BufferPosition As Long
     Dim json_BufferLength As Long
 
@@ -724,10 +730,10 @@ Private Function json_Encode(ByVal json_Text As Variant) As String
             json_Char = "\u" & VBA.Right$("0000" & VBA.Hex$(json_AscCode), 4)
         End Select
 
-        json_BufferAppend json_buffer, json_Char, json_BufferPosition, json_BufferLength
+        json_BufferAppend json_Buffer, json_Char, json_BufferPosition, json_BufferLength
     Next json_Index
 
-    json_Encode = json_BufferToString(json_buffer, json_BufferPosition, json_BufferLength)
+    json_Encode = json_BufferToString(json_Buffer, json_BufferPosition)
 End Function
 
 Private Function json_Peek(json_String As String, ByVal json_Index As Long, Optional json_NumberOfCharacters As Long = 1) As String
@@ -754,7 +760,6 @@ Private Function json_StringIsLargeNumber(json_String As Variant) As Boolean
     ' Length with be at least 16 characters and assume will be less than 100 characters
     If json_Length >= 16 And json_Length <= 100 Then
         Dim json_CharCode As String
-        Dim json_Index As Long
 
         json_StringIsLargeNumber = True
 
@@ -800,13 +805,10 @@ Private Function json_ParseErrorMessage(json_String As String, ByRef json_Index 
                              ErrorMessage
 End Function
 
-Private Sub json_BufferAppend(ByRef json_buffer As String, _
+Private Sub json_BufferAppend(ByRef json_Buffer As String, _
                               ByRef json_Append As Variant, _
                               ByRef json_BufferPosition As Long, _
                               ByRef json_BufferLength As Long)
-#If Mac Then
-    json_buffer = json_buffer & json_Append
-#Else
     ' VBA can be slow to append strings due to allocating a new string for each append
     ' Instead of using the traditional append, allocate a large empty string and then copy string at append position
     '
@@ -820,76 +822,45 @@ Private Sub json_BufferAppend(ByRef json_buffer As String, _
     ' Buffer: "abc       "
     ' Buffer Length: 10
     '
-    ' Copy memory for "def" into buffer at position 3 (0-based)
+    ' Put "def" into buffer at position 3 (0-based)
     ' Buffer: "abcdef    "
     '
     ' Approach based on cStringBuilder from vbAccelerator
     ' http://www.vbaccelerator.com/home/VB/Code/Techniques/RunTime_Debug_Tracing/VB6_Tracer_Utility_zip_cStringBuilder_cls.asp
+    '
+    ' and clsStringAppend from Philip Swannell
+    ' https://github.com/VBA-tools/VBA-JSON/pull/82
 
     Dim json_AppendLength As Long
     Dim json_LengthPlusPosition As Long
 
-    json_AppendLength = VBA.LenB(json_Append)
+    json_AppendLength = VBA.Len(json_Append)
     json_LengthPlusPosition = json_AppendLength + json_BufferPosition
 
     If json_LengthPlusPosition > json_BufferLength Then
-        ' Appending would overflow buffer, add chunks until buffer is long enough
-        Dim json_TemporaryLength As Long
+        ' Appending would overflow buffer, add chunk
+        ' (double buffer length or append length, whichever is bigger)
+        Dim json_AddedLength As Long
+        json_AddedLength = IIf(json_AppendLength > json_BufferLength, json_AppendLength, json_BufferLength)
 
-        json_TemporaryLength = json_BufferLength
-        Do While json_TemporaryLength < json_LengthPlusPosition
-            ' Initially, initialize string with 255 characters,
-            ' then add large chunks (8192) after that
-            '
-            ' Size: # Characters x 2 bytes / character
-            If json_TemporaryLength = 0 Then
-                json_TemporaryLength = json_TemporaryLength + 510
-            Else
-                json_TemporaryLength = json_TemporaryLength + 16384
-            End If
-        Loop
-
-        json_buffer = json_buffer & VBA.Space$((json_TemporaryLength - json_BufferLength) \ 2)
-        json_BufferLength = json_TemporaryLength
+        json_Buffer = json_Buffer & VBA.Space$(json_AddedLength)
+        json_BufferLength = json_BufferLength + json_AddedLength
     End If
 
-    ' Copy memory from append to buffer at buffer position
-    json_CopyMemory ByVal json_UnsignedAdd(StrPtr(json_buffer), _
-                    json_BufferPosition), _
-                    ByVal StrPtr(json_Append), _
-                    json_AppendLength
-
+    ' Note: Namespacing with VBA.Mid$ doesn't work properly here, throwing compile error:
+    ' Function call on left-hand side of assignment must return Variant or Object
+    Mid$(json_Buffer, json_BufferPosition + 1, json_AppendLength) = CStr(json_Append)
     json_BufferPosition = json_BufferPosition + json_AppendLength
-#End If
 End Sub
 
-Private Function json_BufferToString(ByRef json_buffer As String, ByVal json_BufferPosition As Long, ByVal json_BufferLength As Long) As String
-#If Mac Then
-    json_BufferToString = json_buffer
-#Else
+Private Function json_BufferToString(ByRef json_Buffer As String, ByVal json_BufferPosition As Long) As String
     If json_BufferPosition > 0 Then
-        json_BufferToString = VBA.Left$(json_buffer, json_BufferPosition \ 2)
-    End If
-#End If
-End Function
-
-#If VBA7 Then
-Private Function json_UnsignedAdd(json_Start As LongPtr, json_Increment As Long) As LongPtr
-#Else
-Private Function json_UnsignedAdd(json_Start As Long, json_Increment As Long) As Long
-#End If
-
-    If json_Start And &H80000000 Then
-        json_UnsignedAdd = json_Start + json_Increment
-    ElseIf (json_Start Or &H80000000) < -json_Increment Then
-        json_UnsignedAdd = json_Start + json_Increment
-    Else
-        json_UnsignedAdd = (json_Start + &H80000000) + (json_Increment + &H80000000)
+        json_BufferToString = VBA.Left$(json_Buffer, json_BufferPosition)
     End If
 End Function
 
 ''
-' VBA-UTC v1.0.2
+' VBA-UTC v1.0.6
 ' (c) Tim Hall - https://github.com/VBA-tools/VBA-UtcConverter
 '
 ' UTC/ISO 8601 Converter for VBA
@@ -1037,7 +1008,7 @@ Public Function ParseIso(utc_IsoString As String) As Date
         ParseIso = ParseUtc(ParseIso)
 
         If utc_HasOffset Then
-            ParseIso = ParseIso + utc_Offset
+            ParseIso = ParseIso - utc_Offset
         End If
     End If
 
@@ -1104,9 +1075,15 @@ Private Function utc_ConvertDate(utc_Value As Date, Optional utc_ConvertToUtc As
 End Function
 
 Private Function utc_ExecuteInShell(utc_ShellCommand As String) As utc_ShellResult
+#If VBA7 Then
+    Dim utc_File As LongPtr
+    Dim utc_Read As LongPtr
+#Else
     Dim utc_File As Long
-    Dim utc_Chunk As String
     Dim utc_Read As Long
+#End If
+
+    Dim utc_Chunk As String
 
     On Error GoTo utc_ErrorHandling
     utc_File = utc_popen(utc_ShellCommand, "r")
@@ -1115,15 +1092,15 @@ Private Function utc_ExecuteInShell(utc_ShellCommand As String) As utc_ShellResu
 
     Do While utc_feof(utc_File) = 0
         utc_Chunk = VBA.Space$(50)
-        utc_Read = utc_fread(utc_Chunk, 1, Len(utc_Chunk) - 1, utc_File)
+        utc_Read = CLng(utc_fread(utc_Chunk, 1, Len(utc_Chunk) - 1, utc_File))
         If utc_Read > 0 Then
-            utc_Chunk = VBA.Left$(utc_Chunk, utc_Read)
+            utc_Chunk = VBA.Left$(utc_Chunk, CLng(utc_Read))
             utc_ExecuteInShell.utc_Output = utc_ExecuteInShell.utc_Output & utc_Chunk
         End If
     Loop
 
 utc_ErrorHandling:
-    utc_ExecuteInShell.utc_ExitCode = utc_pclose(utc_File)
+    utc_ExecuteInShell.utc_ExitCode = CLng(utc_pclose(utc_File))
 End Function
 
 #Else
