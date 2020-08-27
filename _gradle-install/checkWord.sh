@@ -1,0 +1,1 @@
+if [ $(ps aux | grep Word.app | grep -c -v grep) -gt 0 ] ; then echo "running" ; else echo 'not running'; fi
