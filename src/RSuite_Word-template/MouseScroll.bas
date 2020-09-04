@@ -199,6 +199,7 @@ End Sub
                 Else
                     UnhookListBoxScroll
                 End If
+            End If
         #Else
             If WindowFromPoint(lParam.Pt.x, lParam.Pt.y) = mListBoxHwnd Then
                 If wParam = WM_MOUSEWHEEL Then

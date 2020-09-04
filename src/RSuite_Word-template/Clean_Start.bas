@@ -118,7 +118,7 @@ Sub StartCleanup(opts As tpOptions)
             If opts.Punctuation Then Call Clean.Punctuation
             If opts.Hyphens Then Call Clean.Dashes
             If opts.Quotes Then
-                Call Clean.DoubleQuotes
+                Call Clean.DoubleQuotes(MyStoryNo)
                 Call Clean.SingleQuotes
             End If
             

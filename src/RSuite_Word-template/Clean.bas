@@ -46,38 +46,38 @@ Sub Ellipses()
         While Selection.Find.Found
         
             ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
-            Selection.MoveLeft unit:=wdCharacter, Count:=2
+            Selection.MoveLeft Unit:=wdCharacter, Count:=2
             Select Case Selection.Text
                 Case RTN, vbCr
                     'do nothing
                 Case DP, DOQ, SOQ
                     ActiveDocument.Bookmarks("temp").Select
-                    Selection.MoveRight unit:=wdCharacter, Count:=1
+                    Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Selection.TypeText NBSPchar
                 Case EMDASH
-                    Selection.MoveRight unit:=wdCharacter, Count:=1
+                    Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Selection.TypeText aSPACE
                     ActiveDocument.Bookmarks("temp").Select
-                    Selection.MoveRight unit:=wdCharacter, Count:=1
+                    Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Selection.TypeText NBSPchar
                 Case Else
                     ActiveDocument.Bookmarks("temp").Select
-                    Selection.MoveRight unit:=wdCharacter, Count:=1
+                    Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Select Case Selection.Text
                         Case EMDASH
                             Selection.TypeText NBSPchar
                             ActiveDocument.Bookmarks("temp").Select
-                            Selection.MoveLeft unit:=wdCharacter, Count:=1
+                            Selection.MoveLeft Unit:=wdCharacter, Count:=1
                             Selection.TypeText NBSPchar
                         Case Else
                             ActiveDocument.Bookmarks("temp").Select
-                            Selection.MoveLeft unit:=wdCharacter, Count:=1
+                            Selection.MoveLeft Unit:=wdCharacter, Count:=1
                             Selection.TypeText NBSPchar
                         End Select
             End Select
 
             ActiveDocument.Bookmarks("temp").Select
-            Selection.MoveRight unit:=wdCharacter, Count:=1
+            Selection.MoveRight Unit:=wdCharacter, Count:=1
             Select Case Selection.Text
                 Case DP, DCQ, SCQ, RTN, NBSPchar, aSPACE, vbCr
                     'do nothing
@@ -161,7 +161,7 @@ Sub Punctuation()
     Clean_helpers.updateStatus ("")
 End Sub
 
-Sub DoubleQuotes()
+Sub DoubleQuotes(MyStoryNo)
             
     Application.ScreenUpdating = False
     ActiveDocument.StoryRanges(MyStoryNo).Select
@@ -176,8 +176,10 @@ Sub DoubleQuotes()
     Clean_helpers.updateStatus (thisStatus)
 
     ' Combine double single-primes into Double-prime, also double-backticks
-    FindReplaceSimple SP & SP, DP
+    'FindReplaceSimple "``", Chr(34)
+    'FindReplaceSimple "''", "^34"
     FindReplaceSimple "``", DP
+    FindReplaceSimple SP & SP, DP
     
     ActiveDocument.StoryRanges(MyStoryNo).Select
     Selection.Find.Execute findText:=DP
@@ -186,20 +188,20 @@ Sub DoubleQuotes()
         '   for some reason (Windows/Office2013)
         '   we can filter them out here
         If Selection.Text = DP Then
-            
+
             newPercentage = Selection.Range.Information(wdActiveEndPageNumber) / totalPages * 100
             If newPercentage > currPercentage Then
                 thisStatus = "Fixing double quotes: " & CStr(newPercentage) & "%"
                 Clean_helpers.updateStatus (thisStatus)
                 currPercentage = newPercentage
             End If
-             
+
             ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
-            Selection.MoveLeft unit:=wdCharacter, Count:=2
+            Selection.MoveLeft Unit:=wdCharacter, Count:=2
             Select Case Selection.Text
                 Case EMDASH
                     ActiveDocument.Bookmarks("temp").Select
-                    Selection.MoveRight unit:=wdCharacter, Count:=1
+                    Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Select Case Selection.Text
                         Case " ", vbCr
                             ActiveDocument.Bookmarks("temp").Select
@@ -210,15 +212,15 @@ Sub DoubleQuotes()
                     End Select
                 Case " "
                     ActiveDocument.Bookmarks("temp").Select
-                    Selection.MoveRight unit:=wdCharacter, Count:=1
-                    Selection.Expand unit:=wdCharacter
+                    Selection.MoveRight Unit:=wdCharacter, Count:=1
+                    Selection.Expand Unit:=wdCharacter
                     Select Case Selection.Text
                         Case " ", vbCr
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.TypeText DCQ
                         Case SP
                             Selection.TypeText SOQ
-                            Selection.Expand unit:=wdCharacter
+                            Selection.Expand Unit:=wdCharacter
                             Select Case Selection.Text
                                 Case DP
                                     Selection.TypeText DOQ
@@ -232,11 +234,11 @@ Sub DoubleQuotes()
                 Case vbCr, vbTab, "("
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.TypeText DOQ
-                    Selection.Expand unit:=wdCharacter
+                    Selection.Expand Unit:=wdCharacter
                     Select Case Selection.Text
                         Case SP
                             Selection.TypeText SOQ
-                            Selection.Expand unit:=wdCharacter
+                            Selection.Expand Unit:=wdCharacter
                             Select Case Selection.Text
                                 Case DP
                                     Selection.TypeText DOQ
@@ -250,12 +252,12 @@ Sub DoubleQuotes()
                         ActiveDocument.Bookmarks("temp").Select
                         Selection.TypeText DCQ
                     End If
-                    Selection.MoveLeft unit:=wdCharacter, Count:=2
+                    Selection.MoveLeft Unit:=wdCharacter, Count:=2
                     Select Case Selection.Text
                         Case SP
                             Selection.Delete
                             Selection.TypeText SCQ
-                            Selection.MoveLeft unit:=wdCharacter, Count:=2
+                            Selection.MoveLeft Unit:=wdCharacter, Count:=2
                             Select Case Selection.Text
                                 Case DP
                                     Selection.Delete
@@ -263,13 +265,13 @@ Sub DoubleQuotes()
                             End Select
                     End Select
                 End Select
-            Selection.MoveRight unit:=wdCharacter, Count:=3
+            Selection.MoveRight Unit:=wdCharacter, Count:=3
        End If
             If Clean_helpers.EndOfDocumentReached Then Exit Do
             Selection.Find.Execute
-        
+
     Loop
-    
+
     completeStatus = completeStatus + vbNewLine + "Fixing double quotes: 100%"
     Clean_helpers.updateStatus ("")
 
@@ -293,7 +295,7 @@ Sub SingleQuotes()
     Selection.Find.Execute findText:="`"
     While Selection.Find.Found
         ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
-        Selection.MoveLeft unit:=wdCharacter, Count:=2
+        Selection.MoveLeft Unit:=wdCharacter, Count:=2
         If Selection.Text = " " Or Selection.Text = vbCr Or Selection.Text = "(" Then
             ActiveDocument.Bookmarks("temp").Select
             Selection.TypeText SOQ
@@ -328,7 +330,7 @@ Sub SingleQuotes()
             If Selection.Text = SP Then
             
                 ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
-                Selection.MoveLeft unit:=wdCharacter, Count:=2
+                Selection.MoveLeft Unit:=wdCharacter, Count:=2
                 
                 Select Case Selection.Text
                         Case DP, DOQ, SOQ
@@ -337,11 +339,11 @@ Sub SingleQuotes()
                 
                 Select Case Selection.Text
                         Case " ", vbCr, vbTab, vbNewLine, "(", DP, DOQ, SOQ
-                            Selection.MoveRight unit:=wdCharacter, Count:=2
+                            Selection.MoveRight Unit:=wdCharacter, Count:=2
                             Selection.ExtendMode = True
                             
                             '1 character
-                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            Selection.MoveRight Unit:=wdCharacter, Count:=1
                             If LookAhead() = True Then
                                 Select Case Selection.Text
                                     Case DOQ, "K", "k"
@@ -351,7 +353,7 @@ Sub SingleQuotes()
                             End If
                             
                             '2 characters
-                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            Selection.MoveRight Unit:=wdCharacter, Count:=1
                             If IsYear(Selection.Text) = True Then
                                 ChangeQ = True
                                 GoTo SkipToHere
@@ -364,7 +366,7 @@ Sub SingleQuotes()
                             End If
                             
                             '3 characters
-                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            Selection.MoveRight Unit:=wdCharacter, Count:=1
                             If LookAhead() = True Then
                                 Select Case Selection.Text
                                     Case "Cuz", "cuz", "Net", "net", "Sup", "sup", "Tar", "tar", "Til", "til", "Tis", "tis"
@@ -374,7 +376,7 @@ Sub SingleQuotes()
                             End If
                             
                             '4 characters
-                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            Selection.MoveRight Unit:=wdCharacter, Count:=1
                             If LookAhead() = True Then
                                 Select Case Selection.Text
                                     Case "Bout", "bout", "Cept", "cept", "Fore", "fore", "Nuff", "nuff", "Post", "post", "Tall", "tall", "Twas", "twas"
@@ -384,7 +386,7 @@ Sub SingleQuotes()
                             End If
                             
                             '5 characters
-                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            Selection.MoveRight Unit:=wdCharacter, Count:=1
                             If LookAhead() = True Then
                                 Select Case Selection.Text
                                     Case "Cause", "cause", "Fraid", "fraid", "Night", "night", "Round", "round", "Scuse", "scuse", "Sides", "sides", "Spect", "spect", "Tever", "tever"
@@ -394,7 +396,7 @@ Sub SingleQuotes()
                             End If
         
                             '6 characters
-                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            Selection.MoveRight Unit:=wdCharacter, Count:=1
                             If LookAhead() = True Then
                                 Select Case Selection.Text
                                     Case "Course", "course", "Gainst", "gainst", "Nother", "nother", "Splain", "splain", "Tain" & SCQ & "t", "tain" & SCQ & "t", "Tisn" & SCQ & "t", "tisn" & SCQ & "t"
@@ -404,7 +406,7 @@ Sub SingleQuotes()
                             End If
                             
                             '7 characters
-                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            Selection.MoveRight Unit:=wdCharacter, Count:=1
                             If LookAhead() = True Then
                                 Select Case Selection.Text
                                     Case "Chother", "chother", "Druther", "druther", "Salmost", "salmost", "Snothin", "snothin", "Twasn" & SCQ & "t", "twasn" & SCQ & "t"
@@ -414,7 +416,7 @@ Sub SingleQuotes()
                             End If
                             
                             '8 characters
-                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            Selection.MoveRight Unit:=wdCharacter, Count:=1
                             If LookAhead() = True Then
                                 Select Case Selection.Text
                                     Case "Druthers", "druthers", "Tweren" & SCQ & "t", "tweren" & SCQ & "t"
@@ -424,7 +426,7 @@ Sub SingleQuotes()
                             End If
                             
                             '9 characters
-                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            Selection.MoveRight Unit:=wdCharacter, Count:=1
                             If LookAhead() = True Then
                                 Select Case Selection.Text
                                     Case "Specially", "specially", "Spossible", "spossible"
@@ -434,7 +436,7 @@ Sub SingleQuotes()
                             End If
                             
                             '10 characters
-                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            Selection.MoveRight Unit:=wdCharacter, Count:=1
                             'If LookAhead() = True Then
                                 'Select Case Selection.Text
                                     'Case
@@ -444,7 +446,7 @@ Sub SingleQuotes()
                             'End If
                                 
                             '11 characters
-                            Selection.MoveRight unit:=wdCharacter, Count:=1
+                            Selection.MoveRight Unit:=wdCharacter, Count:=1
                             If LookAhead() = True Then
                                 Select Case Selection.Text
                                     Case "Neverything", "neverything"
@@ -503,14 +505,14 @@ Function LookAhead() As Boolean
 
     ActiveDocument.Bookmarks.Add ("myTemp")
     Selection.ExtendMode = False
-    Selection.MoveRight unit:=wdCharacter, Count:=1
+    Selection.MoveRight Unit:=wdCharacter, Count:=1
     Select Case Selection.Text
         Case " ", ".", ",", "?", "!", EMDASH, ")"
             LookAhead = True
         Case Else
             LookAhead = False
     End Select
-    Selection.MoveLeft unit:=wdCharacter, Count:=1
+    Selection.MoveLeft Unit:=wdCharacter, Count:=1
     Selection.ExtendMode = True
     ActiveDocument.Bookmarks("myTemp").Select
     ActiveDocument.Bookmarks("myTemp").Delete
@@ -523,14 +525,14 @@ Function IsYear(theNumber) As Boolean
     
             ActiveDocument.Bookmarks.Add ("myTemp")
             Selection.ExtendMode = False
-            Selection.MoveRight unit:=wdCharacter, Count:=1
+            Selection.MoveRight Unit:=wdCharacter, Count:=1
             Select Case Selection.Text
                 Case " ", ".", ",", "?", "!", EMDASH, ")", "s"
                     IsYear = True
                 Case Else
                     IsYear = False
             End Select
-            Selection.MoveLeft unit:=wdCharacter, Count:=1
+            Selection.MoveLeft Unit:=wdCharacter, Count:=1
             Selection.ExtendMode = True
             ActiveDocument.Bookmarks("myTemp").Select
             ActiveDocument.Bookmarks("myTemp").Delete
@@ -647,7 +649,7 @@ End Sub
 
 Function HighlightNumber(myPattern)
     
-    Selection.HomeKey unit:=wdStory
+    Selection.HomeKey Unit:=wdStory
     Selection.Find.ClearFormatting
     With Selection.Find
         .Text = myPattern
@@ -670,7 +672,7 @@ Function removeHighlight()
 
     Options.DefaultHighlightColorIndex = wdPink
 
-    Selection.HomeKey unit:=wdStory
+    Selection.HomeKey Unit:=wdStory
     Selection.Find.ClearFormatting
     With Selection.Find
         .Text = ""
@@ -825,8 +827,8 @@ Function DeleteObjects()
     For Each s In ActiveDocument.Shapes
         If s.Type = msoTextBox Then
             s.Anchor.Select
-            Selection.MoveLeft unit:=wdCharacter
-            Selection.MoveDown unit:=wdParagraph
+            Selection.MoveLeft Unit:=wdCharacter
+            Selection.MoveDown Unit:=wdParagraph
             Selection.TypeText s.TextFrame.TextRange.Text
             s.Delete
         ElseIf s.Type = msoGroup Then
@@ -834,8 +836,8 @@ Function DeleteObjects()
                 If s.GroupItems(G).Type = 17 Then
                     Set TB = s.GroupItems(G).TextFrame
                     s.Anchor.Select
-                    Selection.MoveLeft unit:=wdCharacter
-                    Selection.MoveDown unit:=wdParagraph
+                    Selection.MoveLeft Unit:=wdCharacter
+                    Selection.MoveDown Unit:=wdParagraph
                     Selection.TypeText TB.TextRange.Text
                 End If
             Next G
@@ -1096,7 +1098,7 @@ Sub CheckSpecialCharactersPC()
         Clean_helpers.updateStatus ("")
     
         Application.ScreenUpdating = MyUpdate
-        Selection.HomeKey unit:=wdStory
+        Selection.HomeKey Unit:=wdStory
 End Sub
 
 
@@ -1108,14 +1110,14 @@ Sub NextElementRoutine()
 
     Application.ScreenUpdating = False
     
-    Selection.Move unit:=wdParagraph, Count:=1
+    Selection.Move Unit:=wdParagraph, Count:=1
     If Clean_helpers.EndOfDocumentReached = True Then
         MsgBox "End of document reached."
         Exit Sub
     End If
     
     While Selection.Style = "Body-Text (Tx)"
-        Selection.Move unit:=wdParagraph, Count:=1
+        Selection.Move Unit:=wdParagraph, Count:=1
             If Clean_helpers.EndOfDocumentReached = True Then
                 MsgBox "End of document reached."
                 Selection.GoTo What:=wdGoToBookmark, Name:="\Sel"

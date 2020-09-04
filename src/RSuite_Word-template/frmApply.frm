@@ -38,7 +38,7 @@ Private Sub cbOK_Click()
 End Sub
 
 Private Function ClearFormat()
-    Selection.Expand unit:=wdParagraph
+    Selection.Expand Unit:=wdParagraph
     Selection.ClearFormatting
     Selection.Collapse wdCollapseStart
 End Function
@@ -67,7 +67,7 @@ Function Container(sStyle As String, sText As String)
         ClearFormat
         Selection.Style = sStyle
         Selection.MoveDown
-        Selection.Expand unit:=wdParagraph
+        Selection.Expand Unit:=wdParagraph
         Selection.Collapse wdCollapseStart
         Selection.TypeText "END " & sText
         Selection.TypeParagraph
