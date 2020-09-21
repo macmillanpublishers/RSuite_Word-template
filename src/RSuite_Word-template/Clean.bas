@@ -176,8 +176,6 @@ Sub DoubleQuotes(MyStoryNo)
     Clean_helpers.updateStatus (thisStatus)
 
     ' Combine double single-primes into Double-prime, also double-backticks
-    'FindReplaceSimple "``", Chr(34)
-    'FindReplaceSimple "''", "^34"
     FindReplaceSimple "``", DP
     FindReplaceSimple SP & SP, DP
     
@@ -1057,7 +1055,7 @@ Sub CheckAppliedCharStyles()
 End Sub
 
 
-Sub CheckSpecialCharactersPC()
+Sub CheckSpecialCharactersPC(MyStoryNo)
 
     thisStatus = "Checking for Special Characters "
     Clean_helpers.updateStatus (thisStatus)

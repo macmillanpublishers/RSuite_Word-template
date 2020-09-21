@@ -55,7 +55,7 @@ Sub LaunchTagCharacterStyles()
             pBar.Status.Caption = completeStatus
         
             Call Clean.LocalFormatting
-            Call Clean.CheckSpecialCharactersPC
+            Call Clean.CheckSpecialCharactersPC(MyStoryNo)
             Call CheckAppliedCharStyles
             
             Unload pBar
