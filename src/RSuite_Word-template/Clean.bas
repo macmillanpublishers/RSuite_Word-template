@@ -275,7 +275,7 @@ Sub DoubleQuotes(MyStoryNo)
 
 End Sub
 
-Sub SingleQuotes()
+Sub SingleQuotes(MyStoryNo)
 
     Application.ScreenUpdating = False
     

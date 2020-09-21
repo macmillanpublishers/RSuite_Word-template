@@ -119,7 +119,7 @@ Sub StartCleanup(opts As tpOptions)
             If opts.Hyphens Then Call Clean.Dashes
             If opts.Quotes Then
                 Call Clean.DoubleQuotes(MyStoryNo)
-                Call Clean.SingleQuotes
+                Call Clean.SingleQuotes(MyStoryNo)
             End If
             
             If opts.TitleCase Then

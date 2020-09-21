@@ -7,7 +7,8 @@ Option Private Module
 
 Private Assert As Object
 Private Fakes As Object
-Private DQ_simplefinds_expected, DQ_emdash_expected, DQ_spaces_expected, DQ_special_expected, DQ_other_expected As String
+Private DQ_simplefinds_expected, DQ_emdash_expected, DQ_spaces_expected, DQ_special_expected, DQ_other_expected, _
+    SQ_backtick_expected, SQ_setasides_expected, SQ_openquo_expected, SQ_fandr_expected As String
 Private testDocx As Document
 Private MyStoryNo As Variant
 Private Function SetResultStrings()
@@ -29,6 +30,21 @@ DQ_other_expected = "Testing leading text" + DCQ + " DCQ" + vbCr _
             + "Testing leading and trailing text" + DCQ + "DCQ" + vbCr _
             + "Testing leading text and quote" + SCQ + DCQ + "ScqDcq" + vbCr _
             + "Testing leading text and quote2" + DCQ + SCQ + DCQ + "DcqScqDcq"
+SQ_backtick_expected = "Testing " + SOQ + "backtick" + SCQ + ":SoqScq" + vbCr _
+            + SOQ + "Backtick two. " + SOQ + " :SoqSoq and (" + SOQ + "backtick 3" + SCQ + ")" + SCQ + " :SoqScqScq"
+SQ_setasides_expected = "Test preceding space + good char: " + SCQ + "K :SCQ" + vbCr _
+            + "Test preceding space + bad char: " + SOQ + "L :SOQ" + vbCr _
+            + "Test preceding space + good word: " + SCQ + "spossible :SCQ" + vbCr _
+            + "Test preceding space + bad word: " + SOQ + "npossible :SOQ" + vbCr _
+            + "Test space + good year: " + SCQ + "30 :SCQ" + vbCr _
+            + "Test space + bad year: " + SOQ + "30( :SOQ"
+SQ_openquo_expected = "Openquo true 1 " + SOQ + SOQ + " and 2 " + DOQ + SOQ + " SoqSoq" + vbCr _
+            + "Openquo true 3 " + SOQ + SOQ + "SOQ and 4 " + DOQ + SOQ + "SOQ" + vbCr _
+            + "Openquo false 1 " + DCQ + SCQ + " and 2 X" + SCQ + ". ScqScq"
+SQ_fandr_expected = "Tighten " + SOQ + DOQ + "soq doq, tighten " + DOQ + SOQ + "doq soq" + vbCr _
+            + "Tighten scq dcq" + SCQ + DCQ + ", tighten dcq scq" + DCQ + SCQ
+
+
 
 End Function
 
@@ -39,6 +55,10 @@ DQ_emdash_expected = vbNullString
 DQ_spaces_expected = vbNullString
 DQ_special_expected = vbNullString
 DQ_other_expected = vbNullString
+SQ_backtick_expected = vbNullString
+SQ_setasides_expected = vbNullString
+SQ_openquo_expected = vbNullString
+SQ_fandr_expected = vbNullString
 
 End Function
 
@@ -202,6 +222,106 @@ Private Sub TestDoubleQuotes_other() 'TODO Rename test
     'Assert:
         Assert.Succeed
         Assert.AreEqual DQ_other_expected, results
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+'@TestMethod("CleanupMacro")
+Private Sub TestSingleQuotes_backtick() 'TODO Rename test
+    Dim results As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestSingleQuotes_backtick"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.SingleQuotes(MyStoryNo)
+        results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual SQ_backtick_expected, results
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CleanupMacro")
+Private Sub TestSingleQuotes_word_setasides() 'TODO Rename test
+    Dim results As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestSingleQuotes_word_setasides"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.SingleQuotes(MyStoryNo)
+        results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual SQ_setasides_expected, results
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CleanupMacro")
+Private Sub TestSingleQuotes_openquo() 'TODO Rename test
+    Dim results As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestSingleQuotes_openquo"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.SingleQuotes(MyStoryNo)
+        results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual SQ_openquo_expected, results
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CleanupMacro")
+Private Sub TestSingleQuotes_fandr() 'TODO Rename test
+    Dim results As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestSingleQuotes_fandr"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.SingleQuotes(MyStoryNo)
+        results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual SQ_fandr_expected, results
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CleanupMacro")
+Private Sub TestSingleQuotes_secondrun() 'TODO Rename test
+    Dim results_fandr, results_openquo, results_setasides, results_backtick As String
+    On Error GoTo TestFail
+    'Arrange:
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.SingleQuotes(MyStoryNo)
+        Call Clean.SingleQuotes(MyStoryNo)
+        results_fandr = TestHelpers.returnTestResultString("TestSingleQuotes_fandr", MyStoryNo)
+        results_openquo = TestHelpers.returnTestResultString("TestSingleQuotes_openquo", MyStoryNo)
+        results_setasides = TestHelpers.returnTestResultString("TestSingleQuotes_word_setasides", MyStoryNo)
+        results_backtick = TestHelpers.returnTestResultString("TestSingleQuotes_backtick", MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual SQ_fandr_expected, results_fandr
+        Assert.AreEqual SQ_openquo_expected, results_openquo
+        Assert.AreEqual SQ_setasides_expected, results_setasides
+        Assert.AreEqual SQ_backtick_expected, results_backtick
 TestExit:
     Exit Sub
 TestFail:
