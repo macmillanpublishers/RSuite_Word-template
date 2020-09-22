@@ -192,3 +192,29 @@ End Function
 '
 'End Sub
 
+Sub FindTestFiles()
+
+End Sub
+
+Function getRepoPath() As String
+Dim vbProj As VBIDE.VBProject
+Dim strDoc As Variant
+Dim i As Long
+i = 0
+Dim gitrepo_anchorfile As String
+Dim repo_pathStr As String
+
+gitrepo_anchorfile = "devSetup"
+
+For Each vbProj In Application.VBE.VBProjects   'Loop through each project
+    For Each strDoc In Documents              'Find the document name that matches
+        If strDoc.VBProject Is vbProj Then
+            If InStr(vbProj.FileName, gitrepo_anchorfile) Then
+                repo_pathStr = Left(vbProj.FileName, InStrRev(vbProj.FileName, "\"))
+            End If
+            i = i + 1
+        End If
+    Next strDoc
+Next vbProj
+getRepoPath = repo_pathStr  'includes trailing backslash
+End Function

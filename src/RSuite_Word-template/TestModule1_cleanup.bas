@@ -10,7 +10,9 @@ Private Fakes As Object
 Private DQ_simplefinds_expected, DQ_emdash_expected, DQ_spaces_expected, DQ_special_expected, DQ_other_expected, _
     SQ_backtick_expected, SQ_setasides_expected, SQ_openquo_expected, SQ_fandr_expected As String
 Private testDocx As Document
+Private testdotx_filepath As String
 Private MyStoryNo As Variant
+
 Private Function SetResultStrings()
 
 DQ_simplefinds_expected = DOQ + "Backtick pairs become doublequotes" + DCQ + ", " + DOQ + "Two single-primes also" + DCQ
@@ -68,6 +70,8 @@ Private Sub ModuleInitialize()
     'this method runs once per module.
     Set Assert = CreateObject("Rubberduck.AssertClass")
     Set Fakes = CreateObject("Rubberduck.FakesProvider")
+    ' Get testdot filepath.
+    testdotx_filepath = getRepoPath + "test_files\testfile1_cleanup.dotx"
     ' Load public vars:
     SetCharacters
     SetResultStrings
@@ -91,9 +95,6 @@ End Sub
 '@TestInitialize
 Private Sub TestInitialize()
     'This method runs before every test in the module..
-    ' Get DevSetup filepath.
-    Dim testdotx_filepath As String
-    testdotx_filepath = devTools.config.GetGitBasepath + "\test_files\testfile1_cleanup.dotx"
     ' Create new test docx from template
     Set testDocx = Application.Documents.Add(testdotx_filepath)
     MyStoryNo = 1 '1 = Main Body, 2 = Footnotes, 3 = Endnotes. Can override this value per test as needed

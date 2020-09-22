@@ -9,6 +9,7 @@ Private Assert As Object
 Private Fakes As Object
 Private Sym_symbol_expected, Sym_italsym_expected, Sym_validsym_expected As String
 Private testDocx As Document
+Private testdotx_filepath As String
 Private MyStoryNo As Variant
 Private Function SetResultStrings()
 
@@ -31,6 +32,8 @@ Private Sub ModuleInitialize()
     'this method runs once per module.
     Set Assert = CreateObject("Rubberduck.AssertClass")
     Set Fakes = CreateObject("Rubberduck.FakesProvider")
+    ' Get testdot filepath.
+    testdotx_filepath = getRepoPath + "test_files\testfile2_charstyles.dotx"
     ' Load public vars:
     SetCharacters
     SetResultStrings
@@ -54,10 +57,7 @@ End Sub
 '@TestInitialize
 Private Sub TestInitialize()
     'This method runs before every test in the module..
-    ' Get DevSetup filepath.
-    Dim testdotx_filepath As String
-    testdotx_filepath = devTools.config.GetGitBasepath + "\test_files\testfile2_charstyles.dotx"
-    ' Create new test docx from template
+   ' Create new test docx from template
     Set testDocx = Application.Documents.Add(testdotx_filepath)
     MyStoryNo = 1 '1 = Main Body, 2 = Footnotes, 3 = Endnotes. Can override this value per test as needed
     
