@@ -38,7 +38,7 @@ Running the gradle installer requires installation of jdk 8 or higher, available
   * for 3 install locations: removes install dirs to clear old files, recreates dir and installs files
   * adds file attributes for .dotm files (if on Mac)
   * summary/full task
-4. For some reason, on Windows sometimes this installation fails the first time; if you get a Java.io error re: deleting, run installer again. 
+4. For some reason, on Windows sometimes this installation fails the first time; if you get a Java.io error re: deleting, run installer again.
 
 
 ## PC Installation
@@ -170,6 +170,30 @@ The custom ribbon is implemented via custom ribbon xml, stored as part of the do
 ## Setting Version for RS_Wordtemplate
 When making code upates to the RSuite_WordTemplate.dotm, remember to edit the 'version' Custom Document Property so your updates can be easily verified from word ('RSuite Tools Version').
 
+## Unit testing
+Unit tests are done using the integrated Rubberduck tool. The testing modules are housed the *RSuite_WordTemplate.dotm* file.
+Currently unit tests are stored in separate modules per macro/tool:
+  * `TestModule1_Cleanup.bas`
+  * `TestModule2_Charstyles.bas`
+A separate `TestHelpers.bas` module is used for shared 'utility' functions and subs.
+
+Each module has a corresponding .dotx test file in ./test_files
+
+### Running the tests
+1. goto the 'Rubberduck' menu in the vba IDE,
+2. select 'Unit Tests > Test Explorer'
+3. In the Test Explorer click the 'refresh' icon (top left) to detect tests in all open projects.
+4. Run tests!
+
+### Creating tests
+Each testfile.dotx is a Word template, so to edit the file itself (instead of spawning a new file based on template) you must open via 'File >Open' in Word.
+In each testfile, initial content for each test is denoted by a heading matching the test's name, plus preceding and trailing double-underscores.  This format is important, b/c this is how the test finds result-strings for assertions.
+
+(Example: If the test sub name is: *TestPCSpecialCharacters_symbol*, then heading for content for that test in Word will be: *__TestPCSpecialCharacters_symbol__*)
+
+To create new tests, just follow the format of existing tests in detail. Result strings are defined at the top of the module, for reuse with 'multiple runs' test-scenarios.
+
+
 ---
 ###### * Notes for future development
-- Integration tests for macros, unittests.
+- Integration tests
