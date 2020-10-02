@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmReplaceCharSty 
    Caption         =   "Invalid Character Style"
-   ClientHeight    =   4710
+   ClientHeight    =   4711
    ClientLeft      =   91
    ClientTop       =   406
    ClientWidth     =   6076

@@ -230,7 +230,7 @@ Public Function ConvertLocalFormatting(Optional ByVal ItalTF As Boolean = False,
                 End If
                 
                 If InStr(CurrSel, vbCr) Or InStr(currse1, vbLf) Or InStr(CurrSel, vbCrLf) Or InStr(CurrSel, vbNewLine) Then
-                    Selection.MoveEnd unit:=wdCharacter, Count:=-1
+                    Selection.MoveEnd Unit:=wdCharacter, Count:=-1
                 End If
                 
                 Select Case NewStyle
@@ -305,7 +305,7 @@ Public Function ConvertLocalFormatting(Optional ByVal ItalTF As Boolean = False,
                 End Select
 NextOne:
                 PrevSel = Selection.Text
-                Selection.MoveRight unit:=wdCharacter, Count:=1
+                Selection.MoveRight Unit:=wdCharacter, Count:=1
                 If Clean_helpers.EndOfDocumentReached Then Exit Do
                 Selection.Find.Execute
             Loop

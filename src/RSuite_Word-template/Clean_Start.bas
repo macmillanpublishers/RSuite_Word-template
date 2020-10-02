@@ -55,7 +55,7 @@ Sub LaunchTagCharacterStyles()
             pBar.Status.Caption = completeStatus
         
             Call Clean.LocalFormatting
-            Call Clean.CheckSpecialCharactersPC
+            Call Clean.CheckSpecialCharactersPC(MyStoryNo)
             Call CheckAppliedCharStyles
             
             Unload pBar
@@ -118,8 +118,8 @@ Sub StartCleanup(opts As tpOptions)
             If opts.Punctuation Then Call Clean.Punctuation
             If opts.Hyphens Then Call Clean.Dashes
             If opts.Quotes Then
-                Call Clean.DoubleQuotes
-                Call Clean.SingleQuotes
+                Call Clean.DoubleQuotes(MyStoryNo)
+                Call Clean.SingleQuotes(MyStoryNo)
             End If
             
             If opts.TitleCase Then

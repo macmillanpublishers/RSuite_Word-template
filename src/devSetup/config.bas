@@ -40,6 +40,11 @@ Dim fso As Object
     dotms.Add dev
     
 End Sub
+Public Function GetGitBasepath() As String
+GetGitBasepath = ThisDocument.Path
+
+End Function
+
 
 Private Sub testcopy()
 Copy_Installed_Binary_Back_to_Repo ("template_switcher.dotm")
