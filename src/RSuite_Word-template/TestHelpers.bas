@@ -9,7 +9,7 @@ Dim FindStartRange As Range, FindEndRange As Range
 
 Set FindStartRange = ActiveDocument.StoryRanges(MyStoryNo)
 Set FindEndRange = ActiveDocument.StoryRanges(MyStoryNo)
-Set resultRng = ActiveDocument.Range
+Set resultRng = ActiveDocument.StoryRanges(MyStoryNo)
 
 With FindStartRange.Find
     .Text = testProcNameStart
@@ -73,7 +73,7 @@ Dim FindStartRange As Range, FindEndRange As Range
 
 Set FindStartRange = ActiveDocument.StoryRanges(MyStoryNo)
 Set FindEndRange = ActiveDocument.StoryRanges(MyStoryNo)
-Set resultRng = ActiveDocument.Range
+Set resultRng = ActiveDocument.StoryRanges(MyStoryNo)
 
 With FindStartRange.Find
     .Text = testProcNameStart
@@ -118,13 +118,14 @@ With FindEndRange.Find
         resultRng.End = ActiveDocument.StoryRanges(MyStoryNo).End
         ' ... minus the trailing vbcr
         resultRng.MoveEnd Unit:=wdWord, Count:=-1
-        'Debug.Print resultRng ' < for debug
     End If
+    'Debug.Print resultRng ' < for debug
 End With
 
 returnTestResultString = resultRng
 
 End Function
+
 
 
 
@@ -207,14 +208,53 @@ Dim repo_pathStr As String
 gitrepo_anchorfile = "devSetup"
 
 For Each vbProj In Application.VBE.VBProjects   'Loop through each project
-    For Each strDoc In Documents              'Find the document name that matches
-        If strDoc.VBProject Is vbProj Then
-            If InStr(vbProj.FileName, gitrepo_anchorfile) Then
-                repo_pathStr = Left(vbProj.FileName, InStrRev(vbProj.FileName, "\"))
-            End If
-            i = i + 1
+    If Not vbProj.Description = "" Then
+        If InStr(vbProj.FileName, gitrepo_anchorfile) Then
+            repo_pathStr = Left(vbProj.FileName, InStrRev(vbProj.FileName, "\"))
         End If
-    Next strDoc
+    End If
+    i = i + 1
 Next vbProj
+
 getRepoPath = repo_pathStr  'includes trailing backslash
 End Function
+
+Sub copyBodyContentsToEndNotes()
+Dim mainContentsRng As Range
+Set mainContentsRng = ActiveDocument.StoryRanges(1)
+
+' add trailing 'end' tag to main doc
+Set mainContentsRng = ActiveDocument.StoryRanges(1)
+mainContentsRng.InsertAfter (vbCr + "__END_TESTS__")
+
+' add an empty note referencing last char of main doc
+Set mainRngEnd = ActiveDocument.StoryRanges(1)
+mainRngEnd.Collapse Direction:=wdCollapseEnd
+ActiveDocument.Endnotes.Add Range:=mainRngEnd
+
+' paste contents of main doc into the note (minus trailing note ref and vbcr)
+mainContentsRng.MoveEnd Unit:=wdCharacter, Count:=-2
+mainContentsRng.Copy
+ActiveDocument.Endnotes(1).Range.Paste
+End Sub
+
+Sub copyBodyContentsToFootNotes()
+Dim mainContentsRng As Range
+Dim mainRngEnd As Range
+
+' add trailing 'end' tag to main doc
+Set mainContentsRng = ActiveDocument.StoryRanges(1)
+mainContentsRng.InsertAfter (vbCr + "__END_TESTS__")
+
+' add an empty note referencing last char of main doc
+Set mainRngEnd = ActiveDocument.StoryRanges(1)
+mainRngEnd.Collapse Direction:=wdCollapseEnd
+ActiveDocument.Footnotes.Add Range:=mainRngEnd
+
+' paste contents of main doc into the note (minus trailing note ref and vbcr)
+mainContentsRng.MoveEnd Unit:=wdCharacter, Count:=-2
+mainContentsRng.Copy
+ActiveDocument.Footnotes(1).Range.Paste
+
+End Sub
+

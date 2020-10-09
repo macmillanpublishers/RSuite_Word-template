@@ -113,21 +113,21 @@ Sub StartCleanup(opts As tpOptions)
             Clean_helpers.updateStatus ("")
                     
             'run routines
-            If opts.Ellipses Then Call Clean.Ellipses
-            If opts.Spaces Then Call Clean.Spaces
-            If opts.Punctuation Then Call Clean.Punctuation
-            If opts.Hyphens Then Call Clean.Dashes
+            If opts.Ellipses Then Call Clean.Ellipses(MyStoryNo)
+            If opts.Spaces Then Call Clean.Spaces(MyStoryNo)
+            If opts.Punctuation Then Call Clean.Punctuation(MyStoryNo)
+            If opts.Hyphens Then Call Clean.Dashes(MyStoryNo)
             If opts.Quotes Then
                 Call Clean.DoubleQuotes(MyStoryNo)
                 Call Clean.SingleQuotes(MyStoryNo)
             End If
             
             If opts.TitleCase Then
-             Call Clean.MakeTitleCase
+             Call Clean.MakeTitleCase(MyStoryNo)
             End If
             
             If opts.CleanBreaks Then
-                Call Clean.CleanBreaks
+                Call Clean.CleanBreaks(MyStoryNo)
             End If
             
             If opts.DeleteMarkup Then
@@ -137,7 +137,7 @@ Sub StartCleanup(opts As tpOptions)
             
             If opts.DeleteObjects Then
                 Call Clean.DeleteBookmarks
-                Call Clean.DeleteObjects
+                Call Clean.DeleteObjects(MyStoryNo)
             End If
             
             If opts.RemoveHyperlinks Then

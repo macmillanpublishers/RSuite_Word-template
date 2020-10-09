@@ -12,10 +12,9 @@ Public Function CheckTemplate()
 End Function
 
 
-Public Function FindReplaceSimple(ByVal sFind As String, ByVal sReplace As String)
-    If currentStoryNumber = Empty Then currentStoryNumber = 1
-    ActiveDocument.StoryRanges(currentStoryNumber).Select
-    Selection.Collapse direction:=wdCollapseStart
+Public Function FindReplaceSimple(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
+    ActiveDocument.StoryRanges(storyNumber).Select
+    Selection.Collapse Direction:=wdCollapseStart
     Call ClearSearch
     
     With Selection.Find
@@ -33,13 +32,13 @@ Public Function FindReplaceComplex(ByVal sFind As String, _
                                     Optional bMatchCase As Boolean = False, _
                                     Optional bUseWildcards As Boolean = False, _
                                     Optional bSmallCaps As Boolean = False, _
-                                    Optional bIncludeFormat As Boolean = False)
+                                    Optional bIncludeFormat As Boolean = False, _
+                                    Optional storyNumber As Variant = 1)
 
-    If currentStoryNumber = Empty Then currentStoryNumber = 1
     Call ClearSearch
 
-    ActiveDocument.StoryRanges(currentStoryNumber).Select
-    Selection.Collapse direction:=wdCollapseStart
+    ActiveDocument.StoryRanges(storyNumber).Select
+    Selection.Collapse Direction:=wdCollapseStart
     
     With Selection.Find
         .Forward = True
@@ -89,6 +88,17 @@ Public Function EndOfDocumentReached() As Boolean
            EndOfDocumentReached = True
         Case Else
            EndOfDocumentReached = False
+    End Select
+End Function
+
+
+
+Public Function EndOfStoryReached(storyNumber As Variant) As Boolean
+    Select Case ActiveDocument.StoryRanges(storyNumber).End
+        Case Selection.End, Selection.End + 1
+           EndOfStoryReached = True
+        Case Else
+           EndOfStoryReached = False
     End Select
 End Function
 
@@ -198,7 +208,7 @@ Public Function ConvertLocalFormatting(Optional ByVal ItalTF As Boolean = False,
         Clean_helpers.ClearSearch
         
         ActiveDocument.StoryRanges(MyStoryNo).Select
-        Selection.Collapse direction:=wdCollapseStart
+        Selection.Collapse Direction:=wdCollapseStart
         
             With Selection.Find
                 .Text = ""

@@ -150,3 +150,51 @@ TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
 
+'@TestMethod("CharStylesMacro")
+Private Sub TestPCSpecialCharacters_footnotes() 'TODO Rename test
+    Dim results_symbol, results_italsymbol, results_validsymbol As String
+    On Error GoTo TestFail
+    'Arrange:
+        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToFootNotes
+    'Act:
+        Call Clean.CheckSpecialCharactersPC(MyStoryNo)
+        results_symbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_symbol", MyStoryNo)
+        results_italsymbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_italsymbol", MyStoryNo)
+        results_validsymbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_validsymbol", MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual Sym_symbol_expected, results_symbol
+        Assert.AreEqual Sym_italsym_expected, results_italsymbol
+        Assert.AreEqual Sym_validsym_expected, results_validsymbol
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestPCSpecialCharacters_endnotes() 'TODO Rename test
+    Dim results_symbol, results_italsymbol, results_validsymbol As String
+    On Error GoTo TestFail
+    'Arrange:
+        MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToEndNotes
+    'Act:
+        Call Clean.CheckSpecialCharactersPC(MyStoryNo)
+        results_symbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_symbol", MyStoryNo)
+        results_italsymbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_italsymbol", MyStoryNo)
+        results_validsymbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_validsymbol", MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual Sym_symbol_expected, results_symbol
+        Assert.AreEqual Sym_italsym_expected, results_italsymbol
+        Assert.AreEqual Sym_validsym_expected, results_validsymbol
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+
+

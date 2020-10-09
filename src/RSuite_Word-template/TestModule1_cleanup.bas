@@ -11,6 +11,7 @@ Private DQ_simplefinds_expected, DQ_emdash_expected, DQ_spaces_expected, DQ_spec
     SQ_backtick_expected, SQ_setasides_expected, SQ_openquo_expected, SQ_fandr_expected As String
 Private testDocx As Document
 Private testdotx_filepath As String
+Private testdotx As String
 Private MyStoryNo As Variant
 
 Private Function SetResultStrings()
@@ -211,6 +212,58 @@ TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
 '@TestMethod("CleanupMacro")
+Private Sub TestDoubleQuotes_footnotes() 'TODO Rename test
+    Dim results_emdash, results_other, results_simplefinds, results_spaces, results_special As String
+    On Error GoTo TestFail
+    'Arrange:
+        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToFootNotes
+    'Act:
+        Call Clean.DoubleQuotes(MyStoryNo)
+        results_emdash = TestHelpers.returnTestResultString("TestDoubleQuotes_emdash", MyStoryNo)
+        results_other = TestHelpers.returnTestResultString("TestDoubleQuotes_other", MyStoryNo)
+        results_simplefinds = TestHelpers.returnTestResultString("TestDoubleQuotes_simplefinds", MyStoryNo)
+        results_spaces = TestHelpers.returnTestResultString("TestDoubleQuotes_spaces", MyStoryNo)
+        results_special = TestHelpers.returnTestResultString("TestDoubleQuotes_special", MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual DQ_emdash_expected, results_emdash
+        Assert.AreEqual DQ_other_expected, results_other
+        Assert.AreEqual DQ_simplefinds_expected, results_simplefinds
+        Assert.AreEqual DQ_spaces_expected, results_spaces
+        Assert.AreEqual DQ_special_expected, results_special
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+'@TestMethod("CleanupMacro")
+Private Sub TestDoubleQuotes_endnotes() 'TODO Rename test
+    Dim results_emdash, results_other, results_simplefinds, results_spaces, results_special As String
+    On Error GoTo TestFail
+    'Arrange:
+        MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToEndNotes
+    'Act:
+        Call Clean.DoubleQuotes(MyStoryNo)
+        results_emdash = TestHelpers.returnTestResultString("TestDoubleQuotes_emdash", MyStoryNo)
+        results_other = TestHelpers.returnTestResultString("TestDoubleQuotes_other", MyStoryNo)
+        results_simplefinds = TestHelpers.returnTestResultString("TestDoubleQuotes_simplefinds", MyStoryNo)
+        results_spaces = TestHelpers.returnTestResultString("TestDoubleQuotes_spaces", MyStoryNo)
+        results_special = TestHelpers.returnTestResultString("TestDoubleQuotes_special", MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual DQ_emdash_expected, results_emdash
+        Assert.AreEqual DQ_other_expected, results_other
+        Assert.AreEqual DQ_simplefinds_expected, results_simplefinds
+        Assert.AreEqual DQ_spaces_expected, results_spaces
+        Assert.AreEqual DQ_special_expected, results_special
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+'@TestMethod("CleanupMacro")
 Private Sub TestDoubleQuotes_other() 'TODO Rename test
     Dim results As String
     On Error GoTo TestFail
@@ -312,6 +365,56 @@ Private Sub TestSingleQuotes_secondrun() 'TODO Rename test
         'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
     'Act:
         Call Clean.SingleQuotes(MyStoryNo)
+        Call Clean.SingleQuotes(MyStoryNo)
+        results_fandr = TestHelpers.returnTestResultString("TestSingleQuotes_fandr", MyStoryNo)
+        results_openquo = TestHelpers.returnTestResultString("TestSingleQuotes_openquo", MyStoryNo)
+        results_setasides = TestHelpers.returnTestResultString("TestSingleQuotes_word_setasides", MyStoryNo)
+        results_backtick = TestHelpers.returnTestResultString("TestSingleQuotes_backtick", MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual SQ_fandr_expected, results_fandr
+        Assert.AreEqual SQ_openquo_expected, results_openquo
+        Assert.AreEqual SQ_setasides_expected, results_setasides
+        Assert.AreEqual SQ_backtick_expected, results_backtick
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CleanupMacro")
+Private Sub TestSingleQuotes_endnotes() 'TODO Rename test
+    Dim results_fandr, results_openquo, results_setasides, results_backtick As String
+    On Error GoTo TestFail
+    'Arrange:
+        MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToEndNotes
+    'Act:
+        Call Clean.SingleQuotes(MyStoryNo)
+        results_fandr = TestHelpers.returnTestResultString("TestSingleQuotes_fandr", MyStoryNo)
+        results_openquo = TestHelpers.returnTestResultString("TestSingleQuotes_openquo", MyStoryNo)
+        results_setasides = TestHelpers.returnTestResultString("TestSingleQuotes_word_setasides", MyStoryNo)
+        results_backtick = TestHelpers.returnTestResultString("TestSingleQuotes_backtick", MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual SQ_fandr_expected, results_fandr
+        Assert.AreEqual SQ_openquo_expected, results_openquo
+        Assert.AreEqual SQ_setasides_expected, results_setasides
+        Assert.AreEqual SQ_backtick_expected, results_backtick
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CleanupMacro")
+Private Sub TestSingleQuotes_footnotes() 'TODO Rename test
+    Dim results_fandr, results_openquo, results_setasides, results_backtick As String
+    On Error GoTo TestFail
+    'Arrange:
+        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToFootNotes
+    'Act:
         Call Clean.SingleQuotes(MyStoryNo)
         results_fandr = TestHelpers.returnTestResultString("TestSingleQuotes_fandr", MyStoryNo)
         results_openquo = TestHelpers.returnTestResultString("TestSingleQuotes_openquo", MyStoryNo)

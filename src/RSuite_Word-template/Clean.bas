@@ -1,6 +1,6 @@
 Attribute VB_Name = "Clean"
 
-Sub Ellipses()
+Sub Ellipses(MyStoryNo)
 
         Application.ScreenUpdating = False
                 
@@ -8,34 +8,34 @@ Sub Ellipses()
         Clean_helpers.updateStatus (thisStatus)
 
         'replace anythign that's already fixed, in case it's run again
-        Clean_helpers.FindReplaceSimple ELLIPSIS, "<doneellipsis>"
+        Clean_helpers.FindReplaceSimple ELLIPSIS, "<doneellipsis>", MyStoryNo
         'this makes sure all ellipses are consistent
         'ellipsis.dot = ellipsis
-        Clean_helpers.FindReplaceSimple "." & ELLIPSIS_SYM, "." & TEMP_ELL
+        Clean_helpers.FindReplaceSimple "." & ELLIPSIS_SYM, "." & TEMP_ELL, MyStoryNo
         
         'ellipsis = ellipsis
-        Clean_helpers.FindReplaceSimple ELLIPSIS_SYM, TEMP_ELL
+        Clean_helpers.FindReplaceSimple ELLIPSIS_SYM, TEMP_ELL, MyStoryNo
         'dot.dot.dot.dot=dot.ellipsis
-        Clean_helpers.FindReplaceSimple "....", "." & TEMP_ELL
+        Clean_helpers.FindReplaceSimple "....", "." & TEMP_ELL, MyStoryNo
         
         'dot.space.dot.space.dot.space.dot=dot.ellipsis
-        Clean_helpers.FindReplaceSimple ". . . .", "." & TEMP_ELL
+        Clean_helpers.FindReplaceSimple ". . . .", "." & TEMP_ELL, MyStoryNo
         'dot.dot.dot=ellipsis
-        Clean_helpers.FindReplaceSimple "...", TEMP_ELL
+        Clean_helpers.FindReplaceSimple "...", TEMP_ELL, MyStoryNo
         
         'dot.space.dot.space.dot=ellipsis
-        Clean_helpers.FindReplaceSimple ". . .", TEMP_ELL
+        Clean_helpers.FindReplaceSimple ". . .", TEMP_ELL, MyStoryNo
         'dot.space.dot.space.dot=ellipsis
-        Clean_helpers.FindReplaceSimple TEMP_ELL & "." & aSPACE, "." & TEMP_ELL
+        Clean_helpers.FindReplaceSimple TEMP_ELL & "." & aSPACE, "." & TEMP_ELL, MyStoryNo
         
         'space.dot.tempell=tempell
-        Clean_helpers.FindReplaceSimple aSPACE & "." & TEMP_ELL, "." & TEMP_ELL
+        Clean_helpers.FindReplaceSimple aSPACE & "." & TEMP_ELL, "." & TEMP_ELL, MyStoryNo
          'dot.space.dot.space.dot=ellipsis
-        Clean_helpers.FindReplaceSimple TEMP_ELL & aSPACE, TEMP_ELL
+        Clean_helpers.FindReplaceSimple TEMP_ELL & aSPACE, TEMP_ELL, MyStoryNo
         
         'fix all double spaces before and after ellipses
-        Clean_helpers.FindReplaceComplex aSPACE & "{1,}" & TEMP_ELL, TEMP_ELL, False, True
-        Clean_helpers.FindReplaceComplex TEMP_ELL & aSPACE & "{2,}", TEMP_ELL & aSPACE, False, True
+        Clean_helpers.FindReplaceComplex aSPACE & "{1,}" & TEMP_ELL, TEMP_ELL, False, True, , , MyStoryNo
+        Clean_helpers.FindReplaceComplex TEMP_ELL & aSPACE & "{2,}", TEMP_ELL & aSPACE, False, True, , , MyStoryNo
     
         ActiveDocument.StoryRanges(MyStoryNo).Select
         With Selection.Find
@@ -91,50 +91,50 @@ Sub Ellipses()
         Wend
         
     'dot.space.dot.space.dot=space.ellipsis.space
-    Clean_helpers.FindReplaceSimple TEMP_ELL, ELLIPSIS
+    Clean_helpers.FindReplaceSimple TEMP_ELL, ELLIPSIS, MyStoryNo
     
     'replace anything that's already fixed, in case it's run again
-    Clean_helpers.FindReplaceComplex "<doneellipsis>", ELLIPSIS, True, False
+    Clean_helpers.FindReplaceComplex "<doneellipsis>", ELLIPSIS, True, False, , , MyStoryNo
     
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
         
 End Sub
 
-Sub Spaces()
+Sub Spaces(MyStoryNo)
 
     thisStatus = "Fixing spaces "
     Clean_helpers.updateStatus (thisStatus)
 
     'temporarily chanage finished ellipses and delete nonbreaking spaces
-    Clean_helpers.FindReplaceSimple PERIOD_ELLIPSIS, "<doneperiodellipsis>"
+    Clean_helpers.FindReplaceSimple PERIOD_ELLIPSIS, "<doneperiodellipsis>", MyStoryNo
     'temporarily chanage finished ellipses and delete nonbreaking spaces
-    Clean_helpers.FindReplaceSimple NBS_ELLIPSIS, "<doneellipsis>"
+    Clean_helpers.FindReplaceSimple NBS_ELLIPSIS, "<doneellipsis>", MyStoryNo
     'nonbreaking space to regular space
-    Clean_helpers.FindReplaceComplex ChrW(202), " ", False, True
-    Clean_helpers.FindReplaceComplex ChrW(160), " ", False, True
-    Clean_helpers.FindReplaceSimple "<doneellipsis>", NBS_ELLIPSIS
-    Clean_helpers.FindReplaceSimple "<doneperiodellipsis>", PERIOD_ELLIPSIS
+    Clean_helpers.FindReplaceComplex ChrW(202), " ", False, True, , , MyStoryNo
+    Clean_helpers.FindReplaceComplex ChrW(160), " ", False, True, , , MyStoryNo
+    Clean_helpers.FindReplaceSimple "<doneellipsis>", NBS_ELLIPSIS, MyStoryNo
+    Clean_helpers.FindReplaceSimple "<doneperiodellipsis>", PERIOD_ELLIPSIS, MyStoryNo
     'multiple tabs to regular space
-    Clean_helpers.FindReplaceComplex "^9{1,}", " ", False, True
+    Clean_helpers.FindReplaceComplex "^9{1,}", " ", False, True, , , MyStoryNo
     'multiple spaces to one space
-    Clean_helpers.FindReplaceComplex " {2,}", " ", False, True
+    Clean_helpers.FindReplaceComplex " {2,}", " ", False, True, , , MyStoryNo
     'soft returns to hard returns
-    Clean_helpers.FindReplaceSimple "^l", "^p"
+    Clean_helpers.FindReplaceSimple "^l", "^p", MyStoryNo
     'spaces before/after line breaks
-    Clean_helpers.FindReplaceSimple ChrW(13) + " ", "^p"
-    Clean_helpers.FindReplaceSimple " " + ChrW(13), "^p"
-    Clean_helpers.FindReplaceSimple "^p ", "^p"
-    Clean_helpers.FindReplaceSimple " ^p", "^p"
+    Clean_helpers.FindReplaceSimple ChrW(13) + " ", "^p", MyStoryNo
+    Clean_helpers.FindReplaceSimple " " + ChrW(13), "^p", MyStoryNo
+    Clean_helpers.FindReplaceSimple "^p ", "^p", MyStoryNo
+    Clean_helpers.FindReplaceSimple " ^p", "^p", MyStoryNo
     'space before/after brackets to no space
-    Clean_helpers.FindReplaceSimple "( ", "("
-    Clean_helpers.FindReplaceSimple "[ ", "["
-    Clean_helpers.FindReplaceSimple "{ ", "{"
-    Clean_helpers.FindReplaceSimple " )", ")"
-    Clean_helpers.FindReplaceSimple " ]", "]"
-    Clean_helpers.FindReplaceSimple " }", "}"
+    Clean_helpers.FindReplaceSimple "( ", "(", MyStoryNo
+    Clean_helpers.FindReplaceSimple "[ ", "[", MyStoryNo
+    Clean_helpers.FindReplaceSimple "{ ", "{", MyStoryNo
+    Clean_helpers.FindReplaceSimple " )", ")", MyStoryNo
+    Clean_helpers.FindReplaceSimple " ]", "]", MyStoryNo
+    Clean_helpers.FindReplaceSimple " }", "}", MyStoryNo
     'space after dollar sign to no space
-    Clean_helpers.FindReplaceSimple "$ ", "$"
+    Clean_helpers.FindReplaceSimple "$ ", "$", MyStoryNo
     
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
@@ -142,20 +142,20 @@ Sub Spaces()
     
 End Sub
 
-Sub Punctuation()
+Sub Punctuation(MyStoryNo)
 
     thisStatus = "Fixing punctuation "
     Clean_helpers.updateStatus (thisStatus)
 
     'multiple periods to single period
-    Clean_helpers.FindReplaceComplex ".{2,}", ".", False, True
+    Clean_helpers.FindReplaceComplex ".{2,}", ".", False, True, , , MyStoryNo
     'multiple commas to single comma
-    Clean_helpers.FindReplaceComplex ",{2,}", ",", False, True
+    Clean_helpers.FindReplaceComplex ",{2,}", ",", False, True, , , MyStoryNo
     'optional hyphen to nothing
-    Clean_helpers.FindReplaceSimple OPTHYPH, ""
-    Clean_helpers.FindReplaceSimple OPTHYPH2, ""
+    Clean_helpers.FindReplaceSimple OPTHYPH, "", MyStoryNo
+    Clean_helpers.FindReplaceSimple OPTHYPH2, "", MyStoryNo
     'non-breaking hyphen to regular hyphen
-    Clean_helpers.FindReplaceSimple NBHYPH, "-"
+    Clean_helpers.FindReplaceSimple NBHYPH, "-", MyStoryNo
     
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
@@ -176,8 +176,8 @@ Sub DoubleQuotes(MyStoryNo)
     Clean_helpers.updateStatus (thisStatus)
 
     ' Combine double single-primes into Double-prime, also double-backticks
-    FindReplaceSimple "``", DP
-    FindReplaceSimple SP & SP, DP
+    FindReplaceSimple "``", DP, MyStoryNo
+    FindReplaceSimple SP & SP, DP, MyStoryNo
     
     ActiveDocument.StoryRanges(MyStoryNo).Select
     Selection.Find.Execute findText:=DP
@@ -485,11 +485,11 @@ Next
 '   Also, though they were previously set before DP conversion,
 '   SP & DP replacements captured relative OQ and CQ too;
 '   So moving them to the end of quote cleanup, where Primes have already become quotes
-FindReplaceSimple SOQ & aSPACE & DOQ, SOQ & DOQ
-FindReplaceSimple DOQ & aSPACE & SOQ, DOQ & SOQ
-FindReplaceSimple SCQ & aSPACE & DCQ, SCQ & DCQ
-FindReplaceSimple DOQ & aSPACE & SCQ, DOQ & SCQ
-FindReplaceSimple DCQ & aSPACE & SCQ, DCQ & SCQ
+FindReplaceSimple SOQ & aSPACE & DOQ, SOQ & DOQ, MyStoryNo
+FindReplaceSimple DOQ & aSPACE & SOQ, DOQ & SOQ, MyStoryNo
+FindReplaceSimple SCQ & aSPACE & DCQ, SCQ & DCQ, MyStoryNo
+FindReplaceSimple DOQ & aSPACE & SCQ, DOQ & SCQ, MyStoryNo
+FindReplaceSimple DCQ & aSPACE & SCQ, DCQ & SCQ, MyStoryNo
 'FindReplaceSimple SCQ & aSPACE & DOQ, SCQ & DOQ
 'FindReplaceSimple DCQ & aSPACE & SOQ, DCQ & SOQ
 'FindReplaceSimple SOQ & aSPACE & DCQ, SOQ & DCQ
@@ -539,7 +539,7 @@ Function IsYear(theNumber) As Boolean
 
 End Function
 
-Sub Dashes()
+Sub Dashes(MyStoryNo)
 
     thisStatus = "Fixing dashes "
     Clean_helpers.updateStatus (thisStatus)
@@ -560,7 +560,7 @@ Sub Dashes()
     For i = 0 To 9
         For J = 0 To 9
             ActiveDocument.StoryRanges(MyStoryNo).Select
-            Selection.Collapse direction:=wdCollapseStart
+            Selection.Collapse Direction:=wdCollapseStart
             
             With Selection.Find
                  .ClearFormatting
@@ -586,51 +586,51 @@ Sub Dashes()
     Clean_helpers.updateStatus (thisStatus)
 
     'weird-character = emdash
-    FindReplaceSimple ChrW(-3906), EMDASH
+    FindReplaceSimple ChrW(-3906), EMDASH, MyStoryNo
     'bar character = emdash
-    FindReplaceSimple ChrW(8213), EMDASH
+    FindReplaceSimple ChrW(8213), EMDASH, MyStoryNo
     
     thisStatus = "Fixing dashes: 30%"
     Clean_helpers.updateStatus (thisStatus)
     
     'figure dash=endash
-    FindReplaceSimple ChrW(8210), ENDASH
+    FindReplaceSimple ChrW(8210), ENDASH, MyStoryNo
     'hyphen.hyphen.hyphen=endash
-    FindReplaceSimple "---", EMDASH
+    FindReplaceSimple "---", EMDASH, MyStoryNo
     'space.hyphen.space=emdash
-    FindReplaceSimple " - ", "-"
+    FindReplaceSimple " - ", "-", MyStoryNo
     
     thisStatus = "Fixing dashes: 40%"
     Clean_helpers.updateStatus (thisStatus)
     
     'space.hyphen.hyphen.space=emdash
-    FindReplaceSimple " -- ", EMDASH
+    FindReplaceSimple " -- ", EMDASH, MyStoryNo
     'hyphen.hyphen=emdash
-    FindReplaceSimple "--", EMDASH
+    FindReplaceSimple "--", EMDASH, MyStoryNo
     
     thisStatus = "Fixing dashes: 50%"
     Clean_helpers.updateStatus (thisStatus)
     
    'dash.space=dash
-    FindReplaceSimple "-" & aSPACE, "-"
+    FindReplaceSimple "-" & aSPACE, "-", MyStoryNo
     'space.dash=dash
-    FindReplaceSimple aSPACE & "-", "-"
+    FindReplaceSimple aSPACE & "-", "-", MyStoryNo
     
     thisStatus = "Fixing dashes: 60%"
     Clean_helpers.updateStatus (thisStatus)
     
     'space.endash=emdash
-    FindReplaceSimple aSPACE & ENDASH, EMDASH
+    FindReplaceSimple aSPACE & ENDASH, EMDASH, MyStoryNo
     'endash.space=emdash
-    FindReplaceSimple ENDASH & aSPACE, ENDASH
+    FindReplaceSimple ENDASH & aSPACE, ENDASH, MyStoryNo
     
     thisStatus = "Fixing dashes: 70%"
     Clean_helpers.updateStatus (thisStatus)
     
     'emdash.space=emdash
-    FindReplaceSimple EMDASH & aSPACE, EMDASH
+    FindReplaceSimple EMDASH & aSPACE, EMDASH, MyStoryNo
     'space.emdash=emdash
-    FindReplaceSimple aSPACE & EMDASH, EMDASH
+    FindReplaceSimple aSPACE & EMDASH, EMDASH, MyStoryNo
     
     thisStatus = "Fixing dashes: 80%"
     Clean_helpers.updateStatus (thisStatus)
@@ -686,7 +686,7 @@ Function removeHighlight()
 
 End Function
 
-Function MakeTitleCase()
+Function MakeTitleCase(MyStoryNo)
 
     thisStatus = "Converting headings to title case "
     Clean_helpers.updateStatus (thisStatus)
@@ -700,7 +700,7 @@ Function MakeTitleCase()
         Clean_helpers.ClearSearch
         
         ActiveDocument.StoryRanges(MyStoryNo).Select
-        Selection.Collapse direction:=wdCollapseStart
+        Selection.Collapse Direction:=wdCollapseStart
     
         With Selection.Find
             .Wrap = wdFindStop
@@ -720,15 +720,21 @@ Function MakeTitleCase()
     Clean_helpers.updateStatus ("")
 
 End Function
+Sub test()
+Debug.Print "Test"
+End Sub
 
-Function CleanBreaks()
+Function CleanBreaks(MyStoryNo)
 
     thisStatus = "Cleaning breaks "
     Clean_helpers.updateStatus (thisStatus)
 
-    FindReplaceSimple "^l", "^p"
-    FindReplaceSimple "^m", "^p"
-    FindReplaceSimple "^b", "^p"
+    FindReplaceSimple "^l", "^p", MyStoryNo
+    FindReplaceSimple "^m", "^p", MyStoryNo
+    FindReplaceSimple "^b", "^p", MyStoryNo
+    
+    ActiveDocument.StoryRanges(MyStoryNo).Select
+    Selection.Collapse Direction:=wdCollapseStart
     
     With Selection.Find
         .ClearFormatting
@@ -740,8 +746,8 @@ Function CleanBreaks()
     End With
     
     Do While Selection.Find.Found
-        If EndOfDocumentReached = False Then
-            FindReplaceSimple "^p^p", "^p"
+        If EndOfStoryReached(MyStoryNo) = False Then
+            FindReplaceSimple "^p^p", "^p", MyStoryNo
             With Selection.Find
                 .ClearFormatting
                 .Replacement.ClearFormatting
@@ -810,7 +816,7 @@ Function DeleteBookmarks()
     
 End Function
 
-Function DeleteObjects()
+Function DeleteObjects(MyStoryNo)
 
     thisStatus = "Deleting Objects "
     Clean_helpers.updateStatus (thisStatus)
@@ -845,11 +851,11 @@ Function DeleteObjects()
         End If
     Next
     
-    For Each i In ActiveDocument.InlineShapes
+    For Each i In ActiveDocument.StoryRanges(MyStoryNo).InlineShapes
         i.Delete
     Next
     
-    For Each F In ActiveDocument.Frames
+    For Each F In ActiveDocument.StoryRanges(MyStoryNo).Frames
         F.Delete
     Next
     
@@ -950,7 +956,7 @@ Sub CheckAppliedCharStyles()
         
         For Each MyStyle In styleList
             ActiveDocument.StoryRanges(MyStoryNo).Select
-            Selection.Collapse direction:=wdCollapseStart
+            Selection.Collapse Direction:=wdCollapseStart
         
             With Selection.Find
                 .Style = ActiveDocument.Styles(MyStyle)
@@ -1172,7 +1178,7 @@ Sub ValidateCharStyles()
                   Dim myRange As Range
                   Set myRange = ActiveDocument.StoryRanges(rng)
                   myRange.Select
-                  Selection.Collapse direction:=wdCollapseStart
+                  Selection.Collapse Direction:=wdCollapseStart
                   With Selection.Find
                       .ClearFormatting
                       .Text = ""
