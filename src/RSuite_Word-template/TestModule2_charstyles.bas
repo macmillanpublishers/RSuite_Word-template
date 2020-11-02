@@ -33,7 +33,7 @@ Private Sub ModuleInitialize()
     Set Assert = CreateObject("Rubberduck.AssertClass")
     Set Fakes = CreateObject("Rubberduck.FakesProvider")
     ' Get testdot filepath.
-    testdotx_filepath = getRepoPath + "test_files\testfile2_charstyles.dotx"
+    testdotx_filepath = getRepoPath + "test_files\testfile_charstyles.dotx"
     ' Load public vars:
     SetCharacters
     SetResultStrings

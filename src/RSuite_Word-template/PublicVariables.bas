@@ -1,5 +1,6 @@
 Attribute VB_Name = "PublicVariables"
-Public OPTHYPH, OPTHYPH2, NBHYPH, SOQ, SCQ, DOQ, DCQ, DP, SP, aSPACE, RTN, RTN2, EMDASH, ENDASH, ELLIPSIS_SYM, TEMP_ELL, NBS_ELLIPSIS, PERIOD_ELLIPSIS, ELLIPSIS, NBSP, NBSPchar, aTAB As String
+Public OPTHYPH, OPTHYPH2, NBHYPH, NBHYPH2, SOQ, SCQ, DOQ, DCQ, DP, SP, aSPACE, RTN, RTN2, EMDASH, ENDASH, ELLIPSIS_SYM, TEMP_ELL, _
+NBS_ELLIPSIS, PERIOD_ELLIPSIS, ELLIPSIS, QUOTE_ELLIPSIS, EMDASH_ELLIPSIS, NBSP, NBSPchar, aTAB As String
 Public pBar As Progress_Bar
 Public partialStatus, completeStatus As String
 Public MyStoryNo As Integer
@@ -8,7 +9,10 @@ Public endCharCheck As Boolean
 Public removeStyles(), replaceStyles(), skipStyles() As Variant
 
 Function SetCharacters()
-
+    ' to find/translate chr codes, lookup # here: https://www.codetable.net
+    ' chr code is equiv. to 'decimal' num
+    ' to view/type actual character in Word: 'Insert'>'Symbol'> specify Hex num from above url as 'unicode Hex'
+    
     MyStoryNo = 0
 
     'tab
@@ -46,12 +50,16 @@ Function SetCharacters()
         NBSP = "^s"
         'non-breaking space for typing
         NBSPchar = Chr(202)
-        'ellipsis
+        'ellipsis > all must be added to preserve them when cleaning up spaces
         ELLIPSIS = "." & NBSPchar & "." & NBSPchar & "."
         NBS_ELLIPSIS = NBSPchar & ELLIPSIS
+        QUOTE_ELLIPSIS = ELLIPSIS & NBSPchar
+        EMDASH_ELLIPSIS = NBS_ELLIPSIS & NBSPchar
         PERIOD_ELLIPSIS = "." & NBSPchar & ELLIPSIS
-        'non-breaking hyphen
+        'nonbreaking hyphen
         NBHYPH = ChrW(30)
+        'nonbreaking hyphen
+        NBHYPH2 = ChrW(8209)
         'optional hyphen
         OPTHYPH2 = ChrW(173)
         'optional hyphen
@@ -71,12 +79,16 @@ Function SetCharacters()
         NBSP = Chr(160)
         'non-breaking space for typing
         NBSPchar = Chr(160)
-        'ellipsis character
+        'ellipsis > all must be added to preserve them when cleaning up spaces
         ELLIPSIS = "." & NBSP & "." & NBSP & "."
         NBS_ELLIPSIS = NBSP & ELLIPSIS
+        QUOTE_ELLIPSIS = ELLIPSIS & NBSP
+        EMDASH_ELLIPSIS = NBS_ELLIPSIS & NBSP
         PERIOD_ELLIPSIS = "." & NBSP & ELLIPSIS
         'nonbreaking hyphen
-        NBHYPH = ChrW(8209)
+        NBHYPH = ChrW(30)
+        'nonbreaking hyphen
+        NBHYPH2 = ChrW(8209)
         'optional hyphen
         OPTHYPH = ChrW(173)
         'optional hyphen

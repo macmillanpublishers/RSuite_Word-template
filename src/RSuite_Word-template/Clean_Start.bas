@@ -83,6 +83,11 @@ Sub StartCleanup(opts As tpOptions)
     Call PublicVariables.SetCharacters
     
     Dim StoryNo, StoryName As Variant
+    ' we only want to run trackchanges / comments once,
+    '   b/c these functions cycles through the whole doc at once,
+    '   in order to only prompt the user once
+    Dim TCrun_bool As Boolean
+    TCrun_bool = False
 
     Set pBar = New Progress_Bar
     pBar.Caption = "RSuite Cleanup Macros"
@@ -123,16 +128,17 @@ Sub StartCleanup(opts As tpOptions)
             End If
             
             If opts.TitleCase Then
-             Call Clean.MakeTitleCase(MyStoryNo)
+                Call Clean.MakeTitleCase(MyStoryNo)
             End If
             
             If opts.CleanBreaks Then
                 Call Clean.CleanBreaks(MyStoryNo)
             End If
             
-            If opts.DeleteMarkup Then
+            If opts.DeleteMarkup And TCrun_bool = False Then
                 Call Clean.RemoveTrackChanges
                 Call Clean.RemoveComments
+                TCrun_bool = True
             End If
             
             If opts.DeleteObjects Then
@@ -141,7 +147,7 @@ Sub StartCleanup(opts As tpOptions)
             End If
             
             If opts.RemoveHyperlinks Then
-                Call Clean.RemoveHyperlinks
+                Call Clean.RemoveHyperlinks(MyStoryNo)
             End If
                 
         End If

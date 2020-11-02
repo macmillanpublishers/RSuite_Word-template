@@ -102,6 +102,7 @@ Public Function EndOfStoryReached(storyNumber As Variant) As Boolean
     End Select
 End Function
 
+
 Public Function AtStartOfDocument() As Boolean
     Select Case ActiveDocument.Content.Start
         Case Selection.Start
@@ -112,7 +113,7 @@ Public Function AtStartOfDocument() As Boolean
 End Function
 
 Sub TitleCase()
-    
+            
     Application.ScreenUpdating = False
     
     Dim HeadingSoFar As String, Q As String, NumWords As Integer

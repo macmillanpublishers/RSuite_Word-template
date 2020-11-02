@@ -44,19 +44,23 @@ Sub Ellipses(MyStoryNo)
             .Execute findText:=TEMP_ELL
         End With
         While Selection.Find.Found
-        
+            
+            ' moveLeft 2 looks at the character preceding found selection, resolve by case
             ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
             Selection.MoveLeft Unit:=wdCharacter, Count:=2
             Select Case Selection.Text
                 Case RTN, vbCr
                     'do nothing
                 Case DP, DOQ, SOQ
+                    ' add an nbsp trailing the ellipse
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Selection.TypeText NBSPchar
                 Case EMDASH
+                    ' add a space following emdash, preceding ellipse
                     Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Selection.TypeText aSPACE
+                    ' and add an nbsp trailing the ellipse
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Selection.TypeText NBSPchar
@@ -64,12 +68,16 @@ Sub Ellipses(MyStoryNo)
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Select Case Selection.Text
+                        ' if emdash _trails_ ellipses
                         Case EMDASH
+                            ' add preceding _and_ trailing nbsps to ellipse
                             Selection.TypeText NBSPchar
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.MoveLeft Unit:=wdCharacter, Count:=1
                             Selection.TypeText NBSPchar
+                        ' for all other leading chars,
                         Case Else
+                            ' add nbsp preceding ellipse
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.MoveLeft Unit:=wdCharacter, Count:=1
                             Selection.TypeText NBSPchar
@@ -106,15 +114,21 @@ Sub Spaces(MyStoryNo)
     thisStatus = "Fixing spaces "
     Clean_helpers.updateStatus (thisStatus)
 
-    'temporarily chanage finished ellipses and delete nonbreaking spaces
+    'temporarily change finished ellipses and delete nonbreaking spaces
+    Clean_helpers.FindReplaceSimple EMDASH_ELLIPSIS, "<doneemdashellipsis>", MyStoryNo
     Clean_helpers.FindReplaceSimple PERIOD_ELLIPSIS, "<doneperiodellipsis>", MyStoryNo
-    'temporarily chanage finished ellipses and delete nonbreaking spaces
-    Clean_helpers.FindReplaceSimple NBS_ELLIPSIS, "<doneellipsis>", MyStoryNo
+    Clean_helpers.FindReplaceSimple NBS_ELLIPSIS, "<donenbsellipsis>", MyStoryNo
+    Clean_helpers.FindReplaceSimple QUOTE_ELLIPSIS, "<donequoteellipsis>", MyStoryNo
+    Clean_helpers.FindReplaceSimple ELLIPSIS, "<doneellipsis>", MyStoryNo
     'nonbreaking space to regular space
     Clean_helpers.FindReplaceComplex ChrW(202), " ", False, True, , , MyStoryNo
     Clean_helpers.FindReplaceComplex ChrW(160), " ", False, True, , , MyStoryNo
-    Clean_helpers.FindReplaceSimple "<doneellipsis>", NBS_ELLIPSIS, MyStoryNo
+    'change ellipses back
+    Clean_helpers.FindReplaceSimple "<doneellipsis>", ELLIPSIS, MyStoryNo
+    Clean_helpers.FindReplaceSimple "<donequoteellipsis>", QUOTE_ELLIPSIS, MyStoryNo
+    Clean_helpers.FindReplaceSimple "<donenbsellipsis>", NBS_ELLIPSIS, MyStoryNo
     Clean_helpers.FindReplaceSimple "<doneperiodellipsis>", PERIOD_ELLIPSIS, MyStoryNo
+    Clean_helpers.FindReplaceSimple "<doneemdashellipsis>", EMDASH_ELLIPSIS, MyStoryNo
     'multiple tabs to regular space
     Clean_helpers.FindReplaceComplex "^9{1,}", " ", False, True, , , MyStoryNo
     'multiple spaces to one space
@@ -156,6 +170,7 @@ Sub Punctuation(MyStoryNo)
     Clean_helpers.FindReplaceSimple OPTHYPH2, "", MyStoryNo
     'non-breaking hyphen to regular hyphen
     Clean_helpers.FindReplaceSimple NBHYPH, "-", MyStoryNo
+    Clean_helpers.FindReplaceSimple NBHYPH2, "-", MyStoryNo
     
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
@@ -184,7 +199,7 @@ Sub DoubleQuotes(MyStoryNo)
     Do While Selection.Find.Found
         ' Find / Replace tool includes DOQ and DCQ as results in a search for DP
         '   for some reason (Windows/Office2013)
-        '   we can filter them out here
+        '   we can filter them out here with the next line:
         If Selection.Text = DP Then
 
             newPercentage = Selection.Range.Information(wdActiveEndPageNumber) / totalPages * 100
@@ -193,7 +208,8 @@ Sub DoubleQuotes(MyStoryNo)
                 Clean_helpers.updateStatus (thisStatus)
                 currPercentage = newPercentage
             End If
-
+            
+            ' test preceding char for following case statement
             ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
             Selection.MoveLeft Unit:=wdCharacter, Count:=2
             Select Case Selection.Text
@@ -201,9 +217,11 @@ Sub DoubleQuotes(MyStoryNo)
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Select Case Selection.Text
+                        ' preceding emdash and trailing whitespace = DCQ
                         Case " ", vbCr
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.TypeText DCQ
+                        ' otherwise preceding emdash = DOQ
                         Case Else
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.TypeText DOQ
@@ -213,9 +231,11 @@ Sub DoubleQuotes(MyStoryNo)
                     Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Selection.Expand Unit:=wdCharacter
                     Select Case Selection.Text
+                        ' preceding space and trailing whitespace = DCQ
                         Case " ", vbCr
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.TypeText DCQ
+                        ' preceding space and trailing SP = DOQ-SOQ (replacing SP)
                         Case SP
                             Selection.TypeText SOQ
                             Selection.Expand Unit:=wdCharacter
@@ -225,47 +245,56 @@ Sub DoubleQuotes(MyStoryNo)
                             End Select
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.TypeText DOQ
+                        ' preceding space other = DOQ
                         Case Else
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.TypeText DOQ
                     End Select
                 Case vbCr, vbTab, "("
+                    ' if preceding return, tab or open paren type DOQ
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.TypeText DOQ
                     Selection.Expand Unit:=wdCharacter
                     Select Case Selection.Text
+                        ' if trailing char is SP replace it with SOQ
                         Case SP
                             Selection.TypeText SOQ
                             Selection.Expand Unit:=wdCharacter
+                            ' if trailing that SP is DP, replace it with another DOQ
                             Select Case Selection.Text
                                 Case DP
                                     Selection.TypeText DOQ
                             End Select
                     End Select
                 Case Else
+                    ' if we are the first char or doc, make DP a DOQ
                     If Clean_helpers.AtStartOfDocument Then
                         ActiveDocument.Bookmarks("temp").Select
                         Selection.TypeText DOQ
+                    ' otherwise make DP a DCQ
                     Else
                         ActiveDocument.Bookmarks("temp").Select
                         Selection.TypeText DCQ
                     End If
                     Selection.MoveLeft Unit:=wdCharacter, Count:=2
                     Select Case Selection.Text
+                        'if preceding char is SP, change to SCQ
                         Case SP
                             Selection.Delete
                             Selection.TypeText SCQ
                             Selection.MoveLeft Unit:=wdCharacter, Count:=2
                             Select Case Selection.Text
+                                ' if char preceding SP is DP, make it a DCQ
                                 Case DP
                                     Selection.Delete
                                     Selection.TypeText DCQ
                             End Select
                     End Select
                 End Select
+            ' get out of that selection region for next find!
             Selection.MoveRight Unit:=wdCharacter, Count:=3
        End If
-            If Clean_helpers.EndOfDocumentReached Then Exit Do
+            If Clean_helpers.EndOfStoryReached(MyStoryNo) Then Exit Do
             Selection.Find.Execute
 
     Loop
@@ -287,16 +316,20 @@ Sub SingleQuotes(MyStoryNo)
 
     Dim ChangeQ As Boolean
     ChangeQ = False
-     
+    
+    ' check backtick chars
     ActiveDocument.StoryRanges(MyStoryNo).Select
     Selection.Find.ClearFormatting
     Selection.Find.Execute findText:="`"
     While Selection.Find.Found
+        ' get preceding character
         ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
         Selection.MoveLeft Unit:=wdCharacter, Count:=2
+        ' if preceding char is space, return, or open paren, replace selection with SOQ
         If Selection.Text = " " Or Selection.Text = vbCr Or Selection.Text = "(" Then
             ActiveDocument.Bookmarks("temp").Select
             Selection.TypeText SOQ
+        ' else replace with SXQ
         Else:
             ActiveDocument.Bookmarks("temp").Select
             Selection.TypeText SCQ
@@ -330,11 +363,14 @@ Sub SingleQuotes(MyStoryNo)
                 ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
                 Selection.MoveLeft Unit:=wdCharacter, Count:=2
                 
+                ' if preceding char is open quote or double-prime, default is SOQ
+                '   else default is SCQ
                 Select Case Selection.Text
                         Case DP, DOQ, SOQ
                             OpenQuo = True
                 End Select
                 
+                ' if default is SOQ, for any of the following lookaheads we would flip to SCQ
                 Select Case Selection.Text
                         Case " ", vbCr, vbTab, vbNewLine, "(", DP, DOQ, SOQ
                             Selection.MoveRight Unit:=wdCharacter, Count:=2
@@ -547,12 +583,12 @@ Sub Dashes(MyStoryNo)
     Application.ScreenUpdating = False
     
      'phone number pattern
-     Call HighlightNumber("[0-9]{3}-[0-9]{3}-[0-9]{4}")
-     Call HighlightNumber("\([0-9]{3}\) [0-9]{3}-[0-9]{4}")
+     Call HighlightNumber("[0-9]{3}-[0-9]{3}-[0-9]{4}", MyStoryNo)
+     Call HighlightNumber("\([0-9]{3}\) [0-9]{3}-[0-9]{4}", MyStoryNo)
     
 '    FOLLOWING CAN BE USED TO FIND ISBN PATTERN AND FLAG FOR NO CHANGE
-     Call HighlightNumber("97[89]-[0-9]{10,14}")
-     Call HighlightNumber("97[89]-[0-9]-[0-9]{3}-[0-9]{5}-[0-9]")
+     Call HighlightNumber("97[89]-[0-9]{10,14}", MyStoryNo)
+     Call HighlightNumber("97[89]-[0-9]-[0-9]{3}-[0-9]{5}-[0-9]", MyStoryNo)
      
     thisStatus = "Fixing dashes: 10%"
     Clean_helpers.updateStatus (thisStatus)
@@ -635,7 +671,7 @@ Sub Dashes(MyStoryNo)
     thisStatus = "Fixing dashes: 80%"
     Clean_helpers.updateStatus (thisStatus)
     
-    Call removeHighlight
+    Call removeHighlight(MyStoryNo)
     
     thisStatus = "Fixing dashes: 90%"
     Clean_helpers.updateStatus (thisStatus)
@@ -645,9 +681,11 @@ Sub Dashes(MyStoryNo)
     
 End Sub
 
-Function HighlightNumber(myPattern)
+Function HighlightNumber(myPattern, Optional storyNumber As Variant = 1)
     
-    Selection.HomeKey Unit:=wdStory
+    ActiveDocument.StoryRanges(storyNumber).Select
+    Selection.Collapse Direction:=wdCollapseStart
+    
     Selection.Find.ClearFormatting
     With Selection.Find
         .Text = myPattern
@@ -660,17 +698,19 @@ Function HighlightNumber(myPattern)
     Do While Selection.Find.Found
         Selection.Range.HighlightColorIndex = wdPink
         Selection.MoveRight
-        If Clean_helpers.EndOfDocumentReached Then Exit Do
+        If Clean_helpers.EndOfStoryReached(storyNumber) Then Exit Do
         Selection.Find.Execute
     Loop
 
 End Function
 
-Function removeHighlight()
 
+Function removeHighlight(Optional storyNumber As Variant = 1)
+    ActiveDocument.StoryRanges(storyNumber).Select
+    Selection.Collapse Direction:=wdCollapseStart
+    
     Options.DefaultHighlightColorIndex = wdPink
 
-    Selection.HomeKey Unit:=wdStory
     Selection.Find.ClearFormatting
     With Selection.Find
         .Text = ""
@@ -711,7 +751,7 @@ Function MakeTitleCase(MyStoryNo)
         Do While Selection.Find.Found
             Clean_helpers.TitleCase
             Selection.MoveRight
-            If Clean_helpers.EndOfDocumentReached Then Exit Do
+            If Clean_helpers.EndOfStoryReached(MyStoryNo) Then Exit Do
             Selection.Find.Execute
         Loop
     Next
@@ -720,9 +760,7 @@ Function MakeTitleCase(MyStoryNo)
     Clean_helpers.updateStatus ("")
 
 End Function
-Sub test()
-Debug.Print "Test"
-End Sub
+
 
 Function CleanBreaks(MyStoryNo)
 
@@ -745,17 +783,24 @@ Function CleanBreaks(MyStoryNo)
         .Execute
     End With
     
+    ' adding a counter to make sure we don't get caught in a loop trying to rm
+    '   unremoveable consectuive breaks (happened with consecutive breaks with
+    '   shape object in between in testing.
+    Dim counter As Integer
+    counter = 0
+    
     Do While Selection.Find.Found
-        If EndOfStoryReached(MyStoryNo) = False Then
+        If EndOfStoryReached(MyStoryNo) = False And counter < 3 Then
             FindReplaceSimple "^p^p", "^p", MyStoryNo
             With Selection.Find
                 .ClearFormatting
                 .Replacement.ClearFormatting
                 .Text = "^p^p"
                 .Forward = True
-                .Wrap = wdFindContinue
+                .Wrap = wdFindStop
                 .Execute
             End With
+            counter = counter + 1
         Else
             Exit Do
         End If
@@ -769,17 +814,48 @@ End Function
 Function RemoveTrackChanges()
 
     thisStatus = "Removing Track Changes "
-    Clean_helpers.updateStatus (thisStatus)
+   ' Clean_helpers.updateStatus (thisStatus)
     
-    If ActiveDocument.Revisions.Count > 0 Then
+    Dim StoryNo As Variant
+    Dim tc_sum As Long
+    Dim tc_subtotal As Integer
+    Dim rm_revisions As Boolean
+    tc_sum = 0
+    accept_revisions = False
+    
+    'get a count of track changes for the whole document
+    'determine stories in document
+    For Each StoryNo In ActiveDocument.StoryRanges
+        'run on main (1) endnotes (2), and footnotes (3)
+        If StoryNo.StoryType < 4 Then
+            tc_sum = tc_sum + ActiveDocument.StoryRanges(StoryNo.StoryType).Revisions.Count
+        End If
+    Next
+    
+    'see if the user wants to accept changes
+    If tc_sum > 0 Then
         If Clean_helpers.MessageBox("ACCEPT TRACK CHANGES", "Your document contains unacccepted Track Changes, which must be removed before the file is transformed in RSuite." & vbNewLine & vbNewLine & _
           "Select YES to accept all changes in the document." & vbNewLine & vbNewLine & _
           "Select NO to retain Track Changes.") = vbYes Then
-                ActiveDocument.Revisions.AcceptAll
+                accept_revisions = True
         End If
     End If
     
+    ' if YES, delete revisions per story, where present
+    If accept_revisions = True Then
+        'determine stories in document
+        For Each StoryNo In ActiveDocument.StoryRanges
+            'run on main (1) endnotes (2), and footnotes (3)
+            If StoryNo.StoryType < 4 Then
+                If ActiveDocument.StoryRanges(StoryNo.StoryType).Revisions.Count > 0 Then
+                    ActiveDocument.StoryRanges(StoryNo.StoryType).Revisions.AcceptAll
+                End If
+            End If
+        Next
+    End If
+    
 End Function
+
 
 Function RemoveComments()
 
@@ -864,16 +940,26 @@ Function DeleteObjects(MyStoryNo)
     
 End Function
 
-Function RemoveHyperlinks()
+Function RemoveHyperlinks(Optional MyStoryNo As Variant = 1)
 
     thisStatus = "Removing hyperlinks "
     Clean_helpers.updateStatus (thisStatus)
     
+    Dim link_count As Integer
     Dim H As hyperlink
-    For Each H In ActiveDocument.Hyperlinks
-        H.Range.Style = "Hyperlink"
-        H.Delete
-    Next
+    link_count = 0
+
+    ' since in testing, one pass of the for loop did not catch all hyperlinks:
+    '   while hyperlink count is greater than 0 we run through again. If link_count ever
+    '   matches hyperlink count, we know we're passing through and not able to delete remaining links
+    '   for whatever reason, so exit to avoid a crash.
+    Do While ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks.Count > 0 And link_count <> ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks.Count
+        link_count = ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks.Count
+        For Each H In ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks
+            H.Range.Style = "Hyperlink"
+            H.Delete
+        Next
+    Loop
     
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
@@ -1135,6 +1221,8 @@ Sub NextElementRoutine()
     Application.ScreenRefresh
     
 End Sub
+
+
 
 Sub ValidateCharStyles()
 
