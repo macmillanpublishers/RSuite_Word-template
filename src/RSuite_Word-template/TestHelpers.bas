@@ -1,4 +1,57 @@
 Attribute VB_Name = "TestHelpers"
+Function compareRanges(actualRange As Range, expectedRange As Range) As String
+Dim returnString As String
+Dim i As Integer
+returnString = "Same"
+
+If actualRange.Characters.Count <> expectedRange.Characters.Count Then
+    returnString = "Compared ranges are different lengths, expected: " + Str(expectedRange.Characters.Count) + _
+        ", actual: " + Str(actualRange.Characters.Count)
+    GoTo TheEnd
+ElseIf actualRange.Text <> expectedRange.Text Then
+    returnString = "Range text mismatch, expected: '" + actualRange.Text + "', actual: '" + expectedRange.Text + "'"
+    GoTo TheEnd
+Else
+    For i = 1 To actualRange.Characters.Count
+        ' namelocal reports char style where present, otherwise give para style
+        If actualRange.Characters(i).Style.NameLocal <> expectedRange.Characters(i).Style.NameLocal Then
+            returnString = "Different styles detected for char #" + Str(i) + " ('" + actualRange.Characters(i) + _
+                "'), expected: '" + expectedRange.Characters(i).Style.NameLocal + "', actual: '" + _
+                actualRange.Characters(i).Style.NameLocal + "'"
+            GoTo TheEnd
+        ' checking local formatting types one by one
+        ElseIf actualRange.Characters(i).Font.Bold <> expectedRange.Characters(i).Font.Bold Then
+            returnString = "Diff in 'bold' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            GoTo TheEnd
+        ElseIf actualRange.Characters(i).Font.Italic <> expectedRange.Characters(i).Font.Italic Then
+            returnString = "Diff in 'italic' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            GoTo TheEnd
+        ElseIf actualRange.Characters(i).Font.SmallCaps <> expectedRange.Characters(i).Font.SmallCaps Then
+            returnString = "Diff in 'smallcaps' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            GoTo TheEnd
+        ElseIf actualRange.Characters(i).Font.Subscript <> expectedRange.Characters(i).Font.Subscript Then
+            returnString = "Diff in 'Subscript' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            GoTo TheEnd
+        ElseIf actualRange.Characters(i).Font.Superscript <> expectedRange.Characters(i).Font.Superscript Then
+            returnString = "Diff in 'Superscript' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            GoTo TheEnd
+        ElseIf actualRange.Characters(i).Font.StrikeThrough <> expectedRange.Characters(i).Font.StrikeThrough Then
+            returnString = "Diff in 'strikethrough' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            GoTo TheEnd
+        ElseIf actualRange.Characters(i).Font.Underline <> expectedRange.Characters(i).Font.Underline Then
+            returnString = "Diff in 'underline' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            GoTo TheEnd
+        End If
+    Next i
+End If
+
+compareRanges = returnString
+
+TheEnd:
+    compareRanges = returnString
+
+End Function
+
 Function returnTestResultStyle(testProcName, MyStoryNo)
 Dim testProcNameStart As String
 testProcNameStart = "__" + testProcName + "__^p"
@@ -126,6 +179,72 @@ returnTestResultString = resultRng
 
 End Function
 
+Function returnTestResultRange(testProcName, MyStoryNo, testDocument)
+
+Dim testProcNameStart As String
+testProcNameStart = "__" + testProcName + "__^p"
+Const testProcNameNext = "^p__"
+
+Dim resultRng As Range, DelStartRange As Range, DelEndRange As Range
+Dim FindStartRange As Range, FindEndRange As Range
+
+Set FindStartRange = testDocument.StoryRanges(MyStoryNo)
+Set FindEndRange = testDocument.StoryRanges(MyStoryNo)
+Set resultRng = testDocument.StoryRanges(MyStoryNo)
+
+With FindStartRange.Find
+    .Text = testProcNameStart
+    .Replacement.Text = ""
+    .Forward = True
+    .Wrap = wdFindAsk
+    .Format = False
+    .MatchCase = True
+    .MatchWholeWord = True
+    .MatchWildcards = False
+    .MatchSoundsLike = False
+    .MatchAllWordForms = False
+    .Execute
+    If .Found = True Then
+        resultRng.Start = FindStartRange.End
+        '' \/ helpful for debug
+        'Set resultStartRange = FindStartRange
+        'resultStartRange.Select
+        resultRng.Start = FindStartRange.End
+        ' start the next search at this point \/
+        FindEndRange.Start = FindStartRange.End
+   End If
+End With
+
+With FindEndRange.Find
+    .Text = testProcNameNext
+    .Replacement.Text = ""
+    .Forward = True
+    .Wrap = wdFindStop
+    .Format = False
+    .MatchCase = False
+    .MatchWholeWord = False
+    .MatchWildcards = False
+    .MatchSoundsLike = False
+    .MatchAllWordForms = False
+    .Execute
+    If .Found = True Then
+        'FindEndRange.Select ' < helpful for debug
+        resultRng.End = FindEndRange.Start
+    Else
+        'if we are at end of story, that is the end of range ...
+        resultRng.End = testDocument.StoryRanges(MyStoryNo).End
+        ' ... minus the trailing vbcr
+        resultRng.MoveEnd Unit:=wdWord, Count:=-1
+    End If
+    'Debug.Print resultRng ' < for debug
+End With
+
+Set returnTestResultRange = resultRng
+
+End Function
+
+
+
 
 
 
@@ -192,10 +311,6 @@ End Function
 'Post_DelRange.Delete
 '
 'End Sub
-
-Sub FindTestFiles()
-
-End Sub
 
 Function getRepoPath() As String
 Dim vbProj As VBIDE.VBProject

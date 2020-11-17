@@ -966,7 +966,7 @@ Function RemoveHyperlinks(Optional MyStoryNo As Variant = 1)
 
 End Function
 
-Sub LocalFormatting()
+Sub LocalFormatting(MyStoryNo)
 
     thisStatus = "Replacing Local Formatting with Character Styles "
     Clean_helpers.updateStatus (thisStatus)
@@ -974,43 +974,43 @@ Sub LocalFormatting()
     Application.ScreenUpdating = False
     
     'small caps bold italic
-    Call ConvertLocalFormatting(SmallCapsTF:=True, ItalTF:=True, BoldTF:=True, NewStyle:="smallcaps-bold-ital (scbi)")
+    Call ConvertLocalFormatting(MyStoryNo, SmallCapsTF:=True, ItalTF:=True, BoldTF:=True, NewStyle:="smallcaps-bold-ital (scbi)")
     
     'bold ital
-    Call ConvertLocalFormatting(ItalTF:=True, BoldTF:=True, NewStyle:="bold-ital (bi)")
+    Call ConvertLocalFormatting(MyStoryNo, ItalTF:=True, BoldTF:=True, NewStyle:="bold-ital (bi)")
     
     'small caps bold
-    Call ConvertLocalFormatting(SmallCapsTF:=True, BoldTF:=True, NewStyle:="smallcaps-bold (scb)")
+    Call ConvertLocalFormatting(MyStoryNo, SmallCapsTF:=True, BoldTF:=True, NewStyle:="smallcaps-bold (scb)")
     
     'small caps ital
-    Call ConvertLocalFormatting(SmallCapsTF:=True, ItalTF:=True, NewStyle:="smallcaps-ital (sci)")
+    Call ConvertLocalFormatting(MyStoryNo, SmallCapsTF:=True, ItalTF:=True, NewStyle:="smallcaps-ital (sci)")
     
     'strikethrough
-    Call ConvertLocalFormatting(StrikeTF:=True, NewStyle:="strike (str)")
+    Call ConvertLocalFormatting(MyStoryNo, StrikeTF:=True, NewStyle:="strike (str)")
     
     'superscript italic
-    Call ConvertLocalFormatting(superTF:=True, ItalTF:=True, NewStyle:="super-ital (supi)")
+    Call ConvertLocalFormatting(MyStoryNo, superTF:=True, ItalTF:=True, NewStyle:="super-ital (supi)")
     
     'superscript
-    Call ConvertLocalFormatting(superTF:=True, NewStyle:="super (sup)")
+    Call ConvertLocalFormatting(MyStoryNo, superTF:=True, NewStyle:="super (sup)")
     
     'subscript
-    Call ConvertLocalFormatting(subTF:=True, NewStyle:="sub (sub)")
+    Call ConvertLocalFormatting(MyStoryNo, subTF:=True, NewStyle:="sub (sub)")
     
     'ital
-    Call ConvertLocalFormatting(ItalTF:=True, NewStyle:="ital (i)")
+    Call ConvertLocalFormatting(MyStoryNo, ItalTF:=True, NewStyle:="ital (i)")
     
     'bold
-    Call ConvertLocalFormatting(BoldTF:=True, NewStyle:="bold (b)")
+    Call ConvertLocalFormatting(MyStoryNo, BoldTF:=True, NewStyle:="bold (b)")
 
     'small caps
-    Call ConvertLocalFormatting(SmallCapsTF:=True, NewStyle:="smallcaps (sc)")
+    Call ConvertLocalFormatting(MyStoryNo, SmallCapsTF:=True, NewStyle:="smallcaps (sc)")
         
     'underline
-    Call ConvertLocalFormatting(UnderlineTF:=True, NewStyle:="underline (u)")
+    Call ConvertLocalFormatting(MyStoryNo, UnderlineTF:=True, NewStyle:="underline (u)")
     
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
-    Clean_helpers.updateStatus ("")
+'    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+'    Clean_helpers.updateStatus ("")
     
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
@@ -1019,131 +1019,139 @@ Sub LocalFormatting()
 
 End Sub
 
-Sub CheckAppliedCharStyles()
+Sub CheckAppliedCharStyles(MyStoryNo)
 
     thisStatus = "Checking Applied Character Styles "
     Clean_helpers.updateStatus (thisStatus)
 
         Application.ScreenUpdating = False
-        
+
         Dim styleList() As Variant
         Dim defaultStyle As Variant
         Dim b, i, sc, subs, sup, strk, u As Boolean
-        
+        Dim numChars As Integer
+        Dim selectedChar As Range
+
         defaultStyle = WdBuiltinStyle.wdStyleDefaultParagraphFont
-        
+
         If MyStoryNo < 1 Then MyStoryNo = 1
-        
+
         styleList = Array("bold (b)", "ital (i)", "smallcaps (sc)", "underline (u)", "super (sup)", "sub (sub)", _
                           "bold-ital (bi)", "smallcaps-ital (sci)", "smallcaps-bold (scb)", _
                           "smallcaps-bold-ital (scbi)", "super-ital (supi)", "strike (str)")
-        
+
         Clean_helpers.ClearSearch
-        
+
         For Each MyStyle In styleList
             ActiveDocument.StoryRanges(MyStoryNo).Select
             Selection.Collapse Direction:=wdCollapseStart
-        
+
             With Selection.Find
                 .Style = ActiveDocument.Styles(MyStyle)
                 .Execute
             End With
-            
+
             Do While Selection.Find.Found
-                
-                b = Selection.Font.Bold
-                i = Selection.Font.Italic
-                sc = Selection.Font.SmallCaps
-                subs = Selection.Font.Subscript
-                sup = Selection.Font.Superscript
-                strk = Selection.Font.StrikeThrough
-                u = Selection.Font.Underline
-                
-                Select Case MyStyle
-                
-                    Case "bold (b)"
-                        If Not b Then Selection.Style = defaultStyle
-                        
-                    Case "ital (i)"
-                        If Not i Then Selection.Style = defaultStyle
-                        
-                    Case "smallcaps (sc)"
-                        If Not sc Then Selection.Style = defaultStyle
-                        
-                    Case "underline (u)"
-                        If Not u Then Selection.Style = defaultStyle
-                        
-                    Case "super (sup)"
-                        If Not sup Then Selection.Style = defaultStyle
-                        
-                    Case "sub (sub)"
-                        If Not subs Then Selection.Style = defaultStyle
-                    
-                    Case "bold-ital (bi)"
-                        If Not b And Not i Then
-                            Selection.Style = defaultStyle
-                        ElseIf Not b Then
-                            Selection.Range.Style = "ital (i)"
-                        ElseIf Not i Then
-                            Selection.Range.Style = "bold (b)"
-                        End If
-                        
-                    Case "smallcaps-ital (sci)"
-                        If Not sc And Not i Then
-                            Selection.Style = defaultStyle
-                        ElseIf Not sc Then
-                            Selection.Range.Style = "ital (i)"
-                        ElseIf Not i Then
-                            Selection.Range.Style = "smallcaps (sc)"
-                        End If
-                    
-                    Case "smallcaps-bold (scb)"
-                        If Not sc And Not b Then
-                            Selection.Style = defaultStyle
-                        ElseIf Not sc Then
-                            Selection.Range.Style = "bold (b)"
-                        ElseIf Not b Then
-                            Selection.Range.Style = "smallcaps (sc)"
-                        End If
-                    
-                    Case "smallcaps-bold-ital (scbi)"
-                        If Not sc And Not b And Not i Then
-                            Selection.Style = defaultStyle
-                        ElseIf Not sc And Not i Then
-                            Selection.Range.Style = "bold (b)"
-                        ElseIf Not sc And Not b Then
-                            Selection.Range.Style = "ital (i)"
-                        ElseIf Not sc Then
-                            Selection.Range.Style = "bold-ital (bi)"
-                        ElseIf Not b Then
-                            Selection.Range.Style = "smallcaps-ital (sci)"
-                        ElseIf Not i Then
-                            Selection.Range.Style = "smallcaps-bold (scb)"
-                        End If
-                    
-                    Case "super-ital (supi)"
-                        If Not sup And Not i Then
-                            Selection.Style = defaultStyle
-                        ElseIf Not sup Then
-                            Selection.Range.Style = "ital (i)"
-                        ElseIf Not i Then
-                            Selection.Range.Style = "super (sup)"
-                        End If
-                    
-                    Case "strike (str)"
-                        If Not strk Then Selection.Style = defaultStyle
-                        
-                End Select
-                'Selection.ClearCharacterDirectFormatting
-                Selection.MoveRight
-                If Clean_helpers.EndOfDocumentReached Then Exit Do
+                numChars = Selection.Characters.Count
+
+                ' cycle through characters of selected range
+                For k = 1 To numChars
+                    Set selectedChar = Selection.Characters(k)
+
+                    b = selectedChar.Font.Bold
+                    i = selectedChar.Font.Italic
+                    sc = selectedChar.Font.SmallCaps
+                    subs = selectedChar.Font.Subscript
+                    sup = selectedChar.Font.Superscript
+                    strk = selectedChar.Font.StrikeThrough
+                    u = selectedChar.Font.Underline
+
+                    Select Case MyStyle
+
+                        Case "bold (b)"
+                            If Not b Then selectedChar.Style = defaultStyle
+
+                        Case "ital (i)"
+                           If Not i Then selectedChar.Style = defaultStyle
+
+                        Case "smallcaps (sc)"
+                            If Not sc Then selectedChar.Style = defaultStyle
+
+                        Case "underline (u)"
+                            If Not u Then selectedChar.Style = defaultStyle
+
+                        Case "super (sup)"
+                            If Not sup Then selectedChar.Style = defaultStyle
+
+                        Case "sub (sub)"
+                            If Not subs Then selectedChar.Style = defaultStyle
+
+                        Case "bold-ital (bi)"
+                            If Not b And Not i Then
+                                selectedChar.Style = defaultStyle
+                            ElseIf Not b Then
+                                selectedChar.Style = "ital (i)"
+                            ElseIf Not i Then
+                                selectedChar.Style = "bold (b)"
+                            End If
+
+                        Case "smallcaps-ital (sci)"
+                            If Not sc And Not i Then
+                                selectedChar.Style = defaultStyle
+                            ElseIf Not sc Then
+                                selectedChar.Style = "ital (i)"
+                            ElseIf Not i Then
+                                selectedChar.Style = "smallcaps (sc)"
+                            End If
+
+                        Case "smallcaps-bold (scb)"
+                            If Not sc And Not b Then
+                                selectedChar.Style = defaultStyle
+                            ElseIf Not sc Then
+                                selectedChar.Style = "bold (b)"
+                            ElseIf Not b Then
+                                selectedChar.Style = "smallcaps (sc)"
+                            End If
+
+                        Case "smallcaps-bold-ital (scbi)"
+                            If Not sc And Not b And Not i Then
+                                selectedChar.Style = defaultStyle
+                            ElseIf Not sc And Not i Then
+                                selectedChar.Style = "bold (b)"
+                            ElseIf Not sc And Not b Then
+                                selectedChar.Style = "ital (i)"
+                            ElseIf Not b And Not i Then
+                                selectedChar.Style = "smallcaps (sc)"
+                            ElseIf Not sc Then
+                                selectedChar.Style = "bold-ital (bi)"
+                            ElseIf Not b Then
+                                selectedChar.Style = "smallcaps-ital (sci)"
+                            ElseIf Not i Then
+                                selectedChar.Style = "smallcaps-bold (scb)"
+                            End If
+
+                        Case "super-ital (supi)"
+                            If Not sup And Not i Then
+                                selectedChar.Style = defaultStyle
+                            ElseIf Not sup Then
+                                selectedChar.Style = "ital (i)"
+                            ElseIf Not i Then
+                                selectedChar.Style = "super (sup)"
+                            End If
+
+                        Case "strike (str)"
+                            If Not strk Then selectedChar.Style = defaultStyle
+
+                    End Select
+                 Next k
+                If Clean_helpers.EndOfStoryReached(MyStoryNo) Then Exit Do
                 Selection.Find.Execute
             Loop
         Next
-        
+
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
-        
+
 End Sub
 
 

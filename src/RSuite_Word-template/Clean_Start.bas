@@ -54,9 +54,9 @@ Sub LaunchTagCharacterStyles()
             completeStatus = "Starting Character Style Replacement"
             pBar.Status.Caption = completeStatus
         
-            Call Clean.LocalFormatting
+            Call Clean.LocalFormatting(MyStoryNo)
             Call Clean.CheckSpecialCharactersPC(MyStoryNo)
-            Call CheckAppliedCharStyles
+            Call CheckAppliedCharStyles(MyStoryNo)
             
             Unload pBar
             
@@ -72,7 +72,7 @@ ErrorHandler:
     If Err.Number = 5834 Then
         Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="NO TEMPLATE ATTACHED", Msg:="Macmillan RSuite styles not found." & vbNewLine & vbNewLine & "Please ensure you have a style template attached to this document."
     Else
-        Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="UNEXPECTED ERRROR", Msg:="Sorry, an error occurred: " & Err.Number & " - " & Err.Description
+        Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="UNEXPECTED ERROR", Msg:="Sorry, an error occurred: " & Err.Number & " - " & Err.Description
     End If
     
 End Sub
@@ -162,6 +162,6 @@ Sub StartCleanup(opts As tpOptions)
     Exit Sub
     
 ErrorHandler:
-    Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="UNEXPECTED ERRROR", Msg:="Sorry, an error occurred: " & Err.Number & " - " & Err.Description
+    Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="UNEXPECTED ERROR", Msg:="Sorry, an error occurred: " & Err.Number & " - " & Err.Description
 
 End Sub

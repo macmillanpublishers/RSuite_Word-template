@@ -186,7 +186,7 @@ Function MessageBox(Title As String, Msg As String, Optional ByVal buttonType As
     MessageBox = MsgBox(Msg, buttonType, Title)
 End Function
 
-Public Function ConvertLocalFormatting(Optional ByVal ItalTF As Boolean = False, _
+Public Function ConvertLocalFormatting(MyStoryNo, Optional ByVal ItalTF As Boolean = False, _
                                         Optional ByVal BoldTF As Boolean = False, _
                                         Optional ByVal CapsTF As Boolean = False, _
                                         Optional ByVal SmallCapsTF As Boolean = False, _
@@ -272,11 +272,15 @@ Public Function ConvertLocalFormatting(Optional ByVal ItalTF As Boolean = False,
                     Case "smallcaps-bold-ital (scbi)"
                         If Not oStyle.Font.Bold And Not oStyle.Font.SmallCaps And Not oStyle.Font.Italic Then
                             Selection.Style = NewStyle
-                        ElseIf oStyle.Font.Bold And Not oStyle.Font.Italic And Not oStyle.Font.SmallCaps Then
+                        ElseIf oStyle.Font.Bold And Not oStyle.Font.SmallCaps And Not oStyle.Font.Italic Then
                             Selection.Style = "smallcaps-ital (sci)"
                         ElseIf Not oStyle.Font.Bold And Not oStyle.Font.SmallCaps And oStyle.Font.Italic Then
                             Selection.Style = "smallcaps-bold (scb)"
-                        Else
+                        ElseIf Not oStyle.Font.Bold And oStyle.Font.SmallCaps And oStyle.Font.Italic Then
+                            Selection.Style = "bold (b)"
+                        ElseIf oStyle.Font.Bold And oStyle.Font.SmallCaps And Not oStyle.Font.Italic Then
+                            Selection.Style = "ital (i)"
+                        ElseIf oStyle.Font.Bold And Not oStyle.Font.SmallCaps And oStyle.Font.Italic Then
                             Selection.Style = "smallcaps (sc)"
                         End If
                     Case "super-ital (supi)"
@@ -284,7 +288,7 @@ Public Function ConvertLocalFormatting(Optional ByVal ItalTF As Boolean = False,
                             Selection.Style = NewStyle
                         ElseIf Not oStyle.Font.Superscript And oStyle.Font.Italic Then
                             Selection.Style = "super (sup)"
-                        Else
+                        ElseIf oStyle.Font.Superscript And Not oStyle.Font.Italic Then
                             Selection.Style = "ital (i)"
                         End If
                     Case "ital (i)"
