@@ -54,9 +54,9 @@ Sub LaunchTagCharacterStyles()
             completeStatus = "Starting Character Style Replacement"
             pBar.Status.Caption = completeStatus
         
-            Call Clean.LocalFormatting
+            Call Clean.LocalFormatting(MyStoryNo)
             Call Clean.CheckSpecialCharactersPC(MyStoryNo)
-            Call CheckAppliedCharStyles
+            Call CheckAppliedCharStyles(MyStoryNo)
             
             Unload pBar
             
@@ -72,7 +72,7 @@ ErrorHandler:
     If Err.Number = 5834 Then
         Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="NO TEMPLATE ATTACHED", Msg:="Macmillan RSuite styles not found." & vbNewLine & vbNewLine & "Please ensure you have a style template attached to this document."
     Else
-        Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="UNEXPECTED ERRROR", Msg:="Sorry, an error occurred: " & Err.Number & " - " & Err.Description
+        Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="UNEXPECTED ERROR", Msg:="Sorry, an error occurred: " & Err.Number & " - " & Err.Description
     End If
     
 End Sub
@@ -83,6 +83,11 @@ Sub StartCleanup(opts As tpOptions)
     Call PublicVariables.SetCharacters
     
     Dim StoryNo, StoryName As Variant
+    ' we only want to run trackchanges / comments once,
+    '   b/c these functions cycles through the whole doc at once,
+    '   in order to only prompt the user once
+    Dim TCrun_bool As Boolean
+    TCrun_bool = False
 
     Set pBar = New Progress_Bar
     pBar.Caption = "RSuite Cleanup Macros"
@@ -113,35 +118,36 @@ Sub StartCleanup(opts As tpOptions)
             Clean_helpers.updateStatus ("")
                     
             'run routines
-            If opts.Ellipses Then Call Clean.Ellipses
-            If opts.Spaces Then Call Clean.Spaces
-            If opts.Punctuation Then Call Clean.Punctuation
-            If opts.Hyphens Then Call Clean.Dashes
+            If opts.Ellipses Then Call Clean.Ellipses(MyStoryNo)
+            If opts.Spaces Then Call Clean.Spaces(MyStoryNo)
+            If opts.Punctuation Then Call Clean.Punctuation(MyStoryNo)
+            If opts.Hyphens Then Call Clean.Dashes(MyStoryNo)
             If opts.Quotes Then
                 Call Clean.DoubleQuotes(MyStoryNo)
                 Call Clean.SingleQuotes(MyStoryNo)
             End If
             
             If opts.TitleCase Then
-             Call Clean.MakeTitleCase
+                Call Clean.MakeTitleCase(MyStoryNo)
             End If
             
             If opts.CleanBreaks Then
-                Call Clean.CleanBreaks
+                Call Clean.CleanBreaks(MyStoryNo)
             End If
             
-            If opts.DeleteMarkup Then
+            If opts.DeleteMarkup And TCrun_bool = False Then
                 Call Clean.RemoveTrackChanges
                 Call Clean.RemoveComments
+                TCrun_bool = True
             End If
             
             If opts.DeleteObjects Then
                 Call Clean.DeleteBookmarks
-                Call Clean.DeleteObjects
+                Call Clean.DeleteObjects(MyStoryNo)
             End If
             
             If opts.RemoveHyperlinks Then
-                Call Clean.RemoveHyperlinks
+                Call Clean.RemoveHyperlinks(MyStoryNo)
             End If
                 
         End If
@@ -156,6 +162,6 @@ Sub StartCleanup(opts As tpOptions)
     Exit Sub
     
 ErrorHandler:
-    Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="UNEXPECTED ERRROR", Msg:="Sorry, an error occurred: " & Err.Number & " - " & Err.Description
+    Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="UNEXPECTED ERROR", Msg:="Sorry, an error occurred: " & Err.Number & " - " & Err.Description
 
 End Sub

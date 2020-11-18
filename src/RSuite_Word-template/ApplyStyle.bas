@@ -30,9 +30,9 @@ End Sub
 Function ApplyParaSty(MyStyle As String)
     On Error GoTo ErrorHandler
 
-    Selection.Expand unit:=wdParagraph
+    Selection.Expand Unit:=wdParagraph
     Selection.Style = MyStyle
-    Selection.Collapse direction:=wdCollapseEnd
+    Selection.Collapse Direction:=wdCollapseEnd
     ActiveWindow.SmallScroll Up:=3, down:=2
     Selection.GoTo What:=wdGoToBookmark, Name:="\Sel"
     Application.ScreenRefresh
@@ -50,7 +50,7 @@ ErrorHandler:
      Else
         Clean_helpers.MessageBox _
                 buttonType:=vbOKOnly, _
-                Title:="UNEXPECTED ERRROR", _
+                Title:="UNEXPECTED ERROR", _
                 Msg:="Error number " & Err.Number & " occurred." & vbCr & "Description: " & Err.Description
      End If
 
@@ -80,7 +80,7 @@ ErrorHandler:
      Else
         Clean_helpers.MessageBox _
                 buttonType:=vbOKOnly, _
-                Title:="UNEXPECTED ERRROR", _
+                Title:="UNEXPECTED ERROR", _
                 Msg:="Error number " & Err.Number & " occurred." & vbCr & "Description: " & Err.Description
      End If
      
@@ -93,16 +93,16 @@ On Error GoTo ErrorHandler
     Dim StartAt1 As Boolean
     Application.DisplayAlerts = wdAlertsNone
     
-    Selection.Expand unit:=wdParagraph
+    Selection.Expand Unit:=wdParagraph
     ActiveDocument.Bookmarks.Add ("templine")
-    Selection.Collapse direction:=wdCollapseStart
-    Selection.Move unit:=wdParagraph, Count:=-1
+    Selection.Collapse Direction:=wdCollapseStart
+    Selection.Move Unit:=wdParagraph, Count:=-1
     If Selection.Style <> MyStyle Then StartAt1 = True
     ActiveDocument.Bookmarks("templine").Select
     Selection.Style = MyStyle
     If StartAt1 = True Then Selection.Range.ListFormat.ApplyListTemplate ListTemplate:=ListGalleries(wdNumberGallery).ListTemplates(1), _
                 ContinuePreviousList:=False, ApplyTo:=wdListApplyToWholeList
-    Selection.Collapse direction:=wdCollapseEnd
+    Selection.Collapse Direction:=wdCollapseEnd
     Application.ScreenRefresh
     
         With ListGalleries(wdNumberGallery).ListTemplates(1).ListLevels(1)
@@ -133,7 +133,7 @@ ErrorHandler:
      Else
         Clean_helpers.MessageBox _
                 buttonType:=vbOKOnly, _
-                Title:="UNEXPECTED ERRROR", _
+                Title:="UNEXPECTED ERROR", _
                 Msg:="Error number " & Err.Number & " occurred." & vbCr & "Description: " & Err.Description
      End If
 
@@ -166,14 +166,14 @@ Private Function getList(listName As String)
         
         While Not EOF(FileNum)
             Line Input #FileNum, DataLine
-            Dim Result() As String
-            Result() = Split(DataLine, ",")
-            If Right(Result(0), 1) = vbLf Or Right(Result(0), 1) = vbCr Then Result(0) = Left(Result(0), Len(Result(0)) - 1)
-            If Right(Result(1), 1) = vbLf Or Right(Result(1), 1) = vbCr Then Result(1) = Left(Result(1), Len(Result(1)) - 1)
-            Result(0) = CleanString(RTrim(Trim(Result(0))))
-            Result(1) = CleanString(RTrim(Trim(Result(1))))
+            Dim result() As String
+            result() = Split(DataLine, ",")
+            If Right(result(0), 1) = vbLf Or Right(result(0), 1) = vbCr Then result(0) = Left(result(0), Len(result(0)) - 1)
+            If Right(result(1), 1) = vbLf Or Right(result(1), 1) = vbCr Then result(1) = Left(result(1), Len(result(1)) - 1)
+            result(0) = CleanString(RTrim(Trim(result(0))))
+            result(1) = CleanString(RTrim(Trim(result(1))))
             ReDim Preserve all(i)
-            all(i) = Result
+            all(i) = result
             i = i + 1
         Wend
         
@@ -253,7 +253,7 @@ ErrorHandler:
 
     Clean_helpers.MessageBox _
                 buttonType:=vbOKOnly, _
-                Title:="UNEXPECTED ERRROR", _
+                Title:="UNEXPECTED ERROR", _
                 Msg:="Error number " & Err.Number & " occurred." & vbCr & "Description: " & Err.Description
 End Sub
 
@@ -286,7 +286,7 @@ ErrorHandler:
 
     Clean_helpers.MessageBox _
                 buttonType:=vbOKOnly, _
-                Title:="UNEXPECTED ERRROR", _
+                Title:="UNEXPECTED ERROR", _
                 Msg:="Error number " & Err.Number & " occurred." & vbCr & "Description: " & Err.Description
     
 End Sub

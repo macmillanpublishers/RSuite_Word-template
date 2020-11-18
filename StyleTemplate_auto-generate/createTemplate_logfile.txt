@@ -662,3 +662,15 @@
 2020-07-21 01:44:56      : run_macro -- Macro "WriteTemplatefromJson" completed, exiting .ps1
 2020-07-21 01:44:58      : run_macro -- macro: "WriteNoColorTemplatefromJson." Received file "C:\Users\test\Documents\git_repos\RSuite_Word-template\StyleTemplate_auto-generate\StyleTemplateCreator.docm", checking filetype.
 2020-07-21 01:45:19      : run_macro -- Macro "WriteNoColorTemplatefromJson" completed, exiting .ps1
+2020-11-11 10:29:15      : run_macro -- macro: "autorun_StylesToJSON." Received file "C:\Users\matthew.retzer\Documents\git_repos\RSuite_Word-template\StyleTemplate_auto-generate\WordTemplateStyles.xlsm", checking filetype.
+2020-11-11 10:29:20      : run_macro -- Macro "autorun_StylesToJSON" completed, exiting .ps1
+2020-11-11 10:29:22      : run_macro -- macro: "autorun_HTMLmappingsToJSON." Received file "C:\Users\matthew.retzer\Documents\git_repos\RSuite_Word-template\StyleTemplate_auto-generate\WordTemplateStyles.xlsm", checking filetype.
+2020-11-11 10:29:26      : run_macro -- Macro "autorun_HTMLmappingsToJSON" completed, exiting .ps1
+2020-11-11 10:29:28      : run_macro -- macro: "autorun_VBAmappingsToJSON." Received file "C:\Users\matthew.retzer\Documents\git_repos\RSuite_Word-template\StyleTemplate_auto-generate\WordTemplateStyles.xlsm", checking filetype.
+2020-11-11 10:29:31      : run_macro -- Macro "autorun_VBAmappingsToJSON" completed, exiting .ps1
+2020-11-11 10:29:34      : run_macro -- macro: "autorun_VbaTxtFiles." Received file "C:\Users\matthew.retzer\Documents\git_repos\RSuite_Word-template\StyleTemplate_auto-generate\WordTemplateStyles.xlsm", checking filetype.
+2020-11-11 10:29:38      : run_macro -- Macro "autorun_VbaTxtFiles" completed, exiting .ps1
+2020-11-11 10:29:40      : run_macro -- macro: "WriteTemplatefromJson." Received file "C:\Users\matthew.retzer\Documents\git_repos\RSuite_Word-template\StyleTemplate_auto-generate\StyleTemplateCreator.docm", checking filetype.
+2020-11-11 10:30:00      : run_macro -- Macro "WriteTemplatefromJson" completed, exiting .ps1
+2020-11-11 10:30:03      : run_macro -- macro: "WriteNoColorTemplatefromJson." Received file "C:\Users\matthew.retzer\Documents\git_repos\RSuite_Word-template\StyleTemplate_auto-generate\StyleTemplateCreator.docm", checking filetype.
+2020-11-11 10:30:27      : run_macro -- Macro "WriteNoColorTemplatefromJson" completed, exiting .ps1

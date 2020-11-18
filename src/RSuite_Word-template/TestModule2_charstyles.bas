@@ -7,9 +7,10 @@ Option Private Module
 
 Private Assert As Object
 Private Fakes As Object
-Private Sym_symbol_expected, Sym_italsym_expected, Sym_validsym_expected As String
+Private Sym_symbol_expected, Sym_italsym_expected As String, Sym_validsym_expected As String
 Private testDocx As Document
 Private testdotx_filepath As String
+Private testresults_dotx_filepath As String
 Private MyStoryNo As Variant
 Private Function SetResultStrings()
 
@@ -33,7 +34,9 @@ Private Sub ModuleInitialize()
     Set Assert = CreateObject("Rubberduck.AssertClass")
     Set Fakes = CreateObject("Rubberduck.FakesProvider")
     ' Get testdot filepath.
-    testdotx_filepath = getRepoPath + "test_files\testfile2_charstyles.dotx"
+    testdotx_filepath = getRepoPath + "test_files\testfile_charstyles.dotx"
+    ' Get results docx filepath
+    testresults_dotx_filepath = getRepoPath + "test_files\testfile_charstyle_results.dotx"
     ' Load public vars:
     SetCharacters
     SetResultStrings
@@ -150,3 +153,457 @@ TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
 
+'@TestMethod("CharStylesMacro")
+Private Sub TestPCSpecialCharacters_footnotes() 'TODO Rename test
+    Dim results_symbol, results_italsymbol, results_validsymbol As String
+    On Error GoTo TestFail
+    'Arrange:
+        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToFootNotes
+    'Act:
+        Call Clean.CheckSpecialCharactersPC(MyStoryNo)
+        results_symbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_symbol", MyStoryNo)
+        results_italsymbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_italsymbol", MyStoryNo)
+        results_validsymbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_validsymbol", MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual Sym_symbol_expected, results_symbol
+        Assert.AreEqual Sym_italsym_expected, results_italsymbol
+        Assert.AreEqual Sym_validsym_expected, results_validsymbol
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestPCSpecialCharacters_endnotes() 'TODO Rename test
+    Dim results_symbol, results_italsymbol, results_validsymbol As String
+    On Error GoTo TestFail
+    'Arrange:
+        MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToEndNotes
+    'Act:
+        Call Clean.CheckSpecialCharactersPC(MyStoryNo)
+        results_symbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_symbol", MyStoryNo)
+        results_italsymbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_italsymbol", MyStoryNo)
+        results_validsymbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_validsymbol", MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual Sym_symbol_expected, results_symbol
+        Assert.AreEqual Sym_italsym_expected, results_italsymbol
+        Assert.AreEqual Sym_validsym_expected, results_validsymbol
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestCheckAppliedStyles_basic() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestCheckAppliedStyles_basic"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.CheckAppliedCharStyles(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestCheckAppliedStyles_multistyle() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestCheckAppliedStyles_multistyle"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.CheckAppliedCharStyles(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestCheckAppliedStyles_allstyles() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestCheckAppliedStyles_allstyles"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.CheckAppliedCharStyles(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+
+'@TestMethod("CharStylesMacro")
+' testing LocalFormatting in conjunction with Check Applied Styles to verify we are not mis-removing styles again
+Private Sub TestWdv321_basic() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        ' for the other 2 wdv-321 tests we are using the CheckAppliedStyles content; bu tthis one has a brk that is handled
+        '   differently by the LocalFormatting macro, resulting in slightly different expected output.
+        Const C_PROC_NAME = "TestWdv321_basic"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.LocalFormatting(MyStoryNo)
+        Call Clean.CheckAppliedCharStyles(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+' testing LocalFormatting in conjunction with Check Applied Styles to verify we are not mis-removing styles again
+Private Sub TestWdv321_multistyle() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestCheckAppliedStyles_multistyle"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.LocalFormatting(MyStoryNo)
+        Call Clean.CheckAppliedCharStyles(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+' testing LocalFormatting in conjunction with Check Applied Styles to verify we are not mis-removing styles again
+Private Sub TestWdv321_allstyles() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestCheckAppliedStyles_allstyles"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.LocalFormatting(MyStoryNo)
+        Call Clean.CheckAppliedCharStyles(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestCheckAppliedStyles_footnotes() 'TODO Rename test
+    Dim results_basic As Range, basic_expected As Range
+    Dim results_multistyle As Range, multi_expected As Range
+    Dim results_allstyle As Range, allstyle_expected As Range
+    Dim testResultsDocx As Document
+    Dim compareStr_basic As String, compareStr_multi As String, compareStr_all As String
+    On Error GoTo TestFail
+    'Arrange:
+        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToFootNotes
+    'Act:
+        Call Clean.CheckAppliedCharStyles(MyStoryNo)
+        Set results_basic = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_basic", MyStoryNo, testDocx)
+        Set results_multistyle = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_multistyle", MyStoryNo, testDocx)
+        Set results_allstyle = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_allstyles", MyStoryNo, testDocx)
+        ''' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        ' Get known good results
+        Set basic_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_basic", 1, testResultsDocx)
+        Set multi_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_multistyle", 1, testResultsDocx)
+        Set allstyle_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_allstyles", 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        compareStr_basic = TestHelpers.compareRanges(results_basic, basic_expected)
+        compareStr_multi = TestHelpers.compareRanges(results_multistyle, multi_expected)
+        compareStr_all = TestHelpers.compareRanges(results_allstyle, allstyle_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", compareStr_basic
+        Assert.AreEqual "Same", compareStr_multi
+        Assert.AreEqual "Same", compareStr_all
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestCheckAppliedStyles_endnotes() 'TODO Rename test
+    Dim results_basic As Range, basic_expected As Range
+    Dim results_multistyle As Range, multi_expected As Range
+    Dim results_allstyle As Range, allstyle_expected As Range
+    Dim testResultsDocx As Document
+    Dim compareStr_basic As String, compareStr_multi As String, compareStr_all As String
+    On Error GoTo TestFail
+    'Arrange:
+        MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToEndNotes
+    'Act:
+        Call Clean.CheckAppliedCharStyles(MyStoryNo)
+        Set results_basic = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_basic", MyStoryNo, testDocx)
+        Set results_multistyle = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_multistyle", MyStoryNo, testDocx)
+        Set results_allstyle = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_allstyles", MyStoryNo, testDocx)
+        ''' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        ' Get known good results
+        Set basic_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_basic", 1, testResultsDocx)
+        Set multi_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_multistyle", 1, testResultsDocx)
+        Set allstyle_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_allstyles", 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        compareStr_basic = TestHelpers.compareRanges(results_basic, basic_expected)
+        compareStr_multi = TestHelpers.compareRanges(results_multistyle, multi_expected)
+        compareStr_all = TestHelpers.compareRanges(results_allstyle, allstyle_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", compareStr_basic
+        Assert.AreEqual "Same", compareStr_multi
+        Assert.AreEqual "Same", compareStr_all
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestCheckAppliedStyles_secondrun() 'TODO Rename test
+    Dim results_basic As Range, basic_expected As Range
+    Dim results_multistyle As Range, multi_expected As Range
+    Dim results_allstyle As Range, allstyle_expected As Range
+    Dim testResultsDocx As Document
+    Dim compareStr_basic As String, compareStr_multi As String, compareStr_all As String
+    On Error GoTo TestFail
+    'Arrange:
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.CheckAppliedCharStyles(MyStoryNo)
+        Call Clean.CheckAppliedCharStyles(MyStoryNo)
+        Set results_basic = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_basic", MyStoryNo, testDocx)
+        Set results_multistyle = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_multistyle", MyStoryNo, testDocx)
+        Set results_allstyle = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_allstyles", MyStoryNo, testDocx)
+        ''' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        ' Get known good results
+        Set basic_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_basic", 1, testResultsDocx)
+        Set multi_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_multistyle", 1, testResultsDocx)
+        Set allstyle_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_allstyles", 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        compareStr_basic = TestHelpers.compareRanges(results_basic, basic_expected)
+        compareStr_multi = TestHelpers.compareRanges(results_multistyle, multi_expected)
+        compareStr_all = TestHelpers.compareRanges(results_allstyle, allstyle_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", compareStr_basic
+        Assert.AreEqual "Same", compareStr_multi
+        Assert.AreEqual "Same", compareStr_all
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestLocalFormatting() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestLocalFormatting"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.LocalFormatting(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestLocalFormatting_footnotes() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestLocalFormatting"  '<-- name of this test procedure
+        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToFootNotes
+    'Act:
+        Call Clean.LocalFormatting(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestLocalFormatting_endnotes() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestLocalFormatting"  '<-- name of this test procedure
+        MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToEndNotes
+    'Act:
+        Call Clean.LocalFormatting(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestLocalFormatting_secondrun() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestLocalFormatting"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.LocalFormatting(MyStoryNo)
+        Call Clean.LocalFormatting(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub

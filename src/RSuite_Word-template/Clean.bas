@@ -1,6 +1,6 @@
 Attribute VB_Name = "Clean"
 
-Sub Ellipses()
+Sub Ellipses(MyStoryNo)
 
         Application.ScreenUpdating = False
                 
@@ -8,34 +8,34 @@ Sub Ellipses()
         Clean_helpers.updateStatus (thisStatus)
 
         'replace anythign that's already fixed, in case it's run again
-        Clean_helpers.FindReplaceSimple ELLIPSIS, "<doneellipsis>"
+        Clean_helpers.FindReplaceSimple ELLIPSIS, "<doneellipsis>", MyStoryNo
         'this makes sure all ellipses are consistent
         'ellipsis.dot = ellipsis
-        Clean_helpers.FindReplaceSimple "." & ELLIPSIS_SYM, "." & TEMP_ELL
+        Clean_helpers.FindReplaceSimple "." & ELLIPSIS_SYM, "." & TEMP_ELL, MyStoryNo
         
         'ellipsis = ellipsis
-        Clean_helpers.FindReplaceSimple ELLIPSIS_SYM, TEMP_ELL
+        Clean_helpers.FindReplaceSimple ELLIPSIS_SYM, TEMP_ELL, MyStoryNo
         'dot.dot.dot.dot=dot.ellipsis
-        Clean_helpers.FindReplaceSimple "....", "." & TEMP_ELL
+        Clean_helpers.FindReplaceSimple "....", "." & TEMP_ELL, MyStoryNo
         
         'dot.space.dot.space.dot.space.dot=dot.ellipsis
-        Clean_helpers.FindReplaceSimple ". . . .", "." & TEMP_ELL
+        Clean_helpers.FindReplaceSimple ". . . .", "." & TEMP_ELL, MyStoryNo
         'dot.dot.dot=ellipsis
-        Clean_helpers.FindReplaceSimple "...", TEMP_ELL
+        Clean_helpers.FindReplaceSimple "...", TEMP_ELL, MyStoryNo
         
         'dot.space.dot.space.dot=ellipsis
-        Clean_helpers.FindReplaceSimple ". . .", TEMP_ELL
+        Clean_helpers.FindReplaceSimple ". . .", TEMP_ELL, MyStoryNo
         'dot.space.dot.space.dot=ellipsis
-        Clean_helpers.FindReplaceSimple TEMP_ELL & "." & aSPACE, "." & TEMP_ELL
+        Clean_helpers.FindReplaceSimple TEMP_ELL & "." & aSPACE, "." & TEMP_ELL, MyStoryNo
         
         'space.dot.tempell=tempell
-        Clean_helpers.FindReplaceSimple aSPACE & "." & TEMP_ELL, "." & TEMP_ELL
+        Clean_helpers.FindReplaceSimple aSPACE & "." & TEMP_ELL, "." & TEMP_ELL, MyStoryNo
          'dot.space.dot.space.dot=ellipsis
-        Clean_helpers.FindReplaceSimple TEMP_ELL & aSPACE, TEMP_ELL
+        Clean_helpers.FindReplaceSimple TEMP_ELL & aSPACE, TEMP_ELL, MyStoryNo
         
         'fix all double spaces before and after ellipses
-        Clean_helpers.FindReplaceComplex aSPACE & "{1,}" & TEMP_ELL, TEMP_ELL, False, True
-        Clean_helpers.FindReplaceComplex TEMP_ELL & aSPACE & "{2,}", TEMP_ELL & aSPACE, False, True
+        Clean_helpers.FindReplaceComplex aSPACE & "{1,}" & TEMP_ELL, TEMP_ELL, False, True, , , MyStoryNo
+        Clean_helpers.FindReplaceComplex TEMP_ELL & aSPACE & "{2,}", TEMP_ELL & aSPACE, False, True, , , MyStoryNo
     
         ActiveDocument.StoryRanges(MyStoryNo).Select
         With Selection.Find
@@ -44,19 +44,23 @@ Sub Ellipses()
             .Execute findText:=TEMP_ELL
         End With
         While Selection.Find.Found
-        
+            
+            ' moveLeft 2 looks at the character preceding found selection, resolve by case
             ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
             Selection.MoveLeft Unit:=wdCharacter, Count:=2
             Select Case Selection.Text
                 Case RTN, vbCr
                     'do nothing
                 Case DP, DOQ, SOQ
+                    ' add an nbsp trailing the ellipse
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Selection.TypeText NBSPchar
                 Case EMDASH
+                    ' add a space following emdash, preceding ellipse
                     Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Selection.TypeText aSPACE
+                    ' and add an nbsp trailing the ellipse
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Selection.TypeText NBSPchar
@@ -64,12 +68,16 @@ Sub Ellipses()
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Select Case Selection.Text
+                        ' if emdash _trails_ ellipses
                         Case EMDASH
+                            ' add preceding _and_ trailing nbsps to ellipse
                             Selection.TypeText NBSPchar
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.MoveLeft Unit:=wdCharacter, Count:=1
                             Selection.TypeText NBSPchar
+                        ' for all other leading chars,
                         Case Else
+                            ' add nbsp preceding ellipse
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.MoveLeft Unit:=wdCharacter, Count:=1
                             Selection.TypeText NBSPchar
@@ -91,50 +99,56 @@ Sub Ellipses()
         Wend
         
     'dot.space.dot.space.dot=space.ellipsis.space
-    Clean_helpers.FindReplaceSimple TEMP_ELL, ELLIPSIS
+    Clean_helpers.FindReplaceSimple TEMP_ELL, ELLIPSIS, MyStoryNo
     
     'replace anything that's already fixed, in case it's run again
-    Clean_helpers.FindReplaceComplex "<doneellipsis>", ELLIPSIS, True, False
+    Clean_helpers.FindReplaceComplex "<doneellipsis>", ELLIPSIS, True, False, , , MyStoryNo
     
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
         
 End Sub
 
-Sub Spaces()
+Sub Spaces(MyStoryNo)
 
     thisStatus = "Fixing spaces "
     Clean_helpers.updateStatus (thisStatus)
 
-    'temporarily chanage finished ellipses and delete nonbreaking spaces
-    Clean_helpers.FindReplaceSimple PERIOD_ELLIPSIS, "<doneperiodellipsis>"
-    'temporarily chanage finished ellipses and delete nonbreaking spaces
-    Clean_helpers.FindReplaceSimple NBS_ELLIPSIS, "<doneellipsis>"
+    'temporarily change finished ellipses and delete nonbreaking spaces
+    Clean_helpers.FindReplaceSimple EMDASH_ELLIPSIS, "<doneemdashellipsis>", MyStoryNo
+    Clean_helpers.FindReplaceSimple PERIOD_ELLIPSIS, "<doneperiodellipsis>", MyStoryNo
+    Clean_helpers.FindReplaceSimple NBS_ELLIPSIS, "<donenbsellipsis>", MyStoryNo
+    Clean_helpers.FindReplaceSimple QUOTE_ELLIPSIS, "<donequoteellipsis>", MyStoryNo
+    Clean_helpers.FindReplaceSimple ELLIPSIS, "<doneellipsis>", MyStoryNo
     'nonbreaking space to regular space
-    Clean_helpers.FindReplaceComplex ChrW(202), " ", False, True
-    Clean_helpers.FindReplaceComplex ChrW(160), " ", False, True
-    Clean_helpers.FindReplaceSimple "<doneellipsis>", NBS_ELLIPSIS
-    Clean_helpers.FindReplaceSimple "<doneperiodellipsis>", PERIOD_ELLIPSIS
+    Clean_helpers.FindReplaceComplex ChrW(202), " ", False, True, , , MyStoryNo
+    Clean_helpers.FindReplaceComplex ChrW(160), " ", False, True, , , MyStoryNo
+    'change ellipses back
+    Clean_helpers.FindReplaceSimple "<doneellipsis>", ELLIPSIS, MyStoryNo
+    Clean_helpers.FindReplaceSimple "<donequoteellipsis>", QUOTE_ELLIPSIS, MyStoryNo
+    Clean_helpers.FindReplaceSimple "<donenbsellipsis>", NBS_ELLIPSIS, MyStoryNo
+    Clean_helpers.FindReplaceSimple "<doneperiodellipsis>", PERIOD_ELLIPSIS, MyStoryNo
+    Clean_helpers.FindReplaceSimple "<doneemdashellipsis>", EMDASH_ELLIPSIS, MyStoryNo
     'multiple tabs to regular space
-    Clean_helpers.FindReplaceComplex "^9{1,}", " ", False, True
+    Clean_helpers.FindReplaceComplex "^9{1,}", " ", False, True, , , MyStoryNo
     'multiple spaces to one space
-    Clean_helpers.FindReplaceComplex " {2,}", " ", False, True
+    Clean_helpers.FindReplaceComplex " {2,}", " ", False, True, , , MyStoryNo
     'soft returns to hard returns
-    Clean_helpers.FindReplaceSimple "^l", "^p"
+    Clean_helpers.FindReplaceSimple "^l", "^p", MyStoryNo
     'spaces before/after line breaks
-    Clean_helpers.FindReplaceSimple ChrW(13) + " ", "^p"
-    Clean_helpers.FindReplaceSimple " " + ChrW(13), "^p"
-    Clean_helpers.FindReplaceSimple "^p ", "^p"
-    Clean_helpers.FindReplaceSimple " ^p", "^p"
+    Clean_helpers.FindReplaceSimple ChrW(13) + " ", "^p", MyStoryNo
+    Clean_helpers.FindReplaceSimple " " + ChrW(13), "^p", MyStoryNo
+    Clean_helpers.FindReplaceSimple "^p ", "^p", MyStoryNo
+    Clean_helpers.FindReplaceSimple " ^p", "^p", MyStoryNo
     'space before/after brackets to no space
-    Clean_helpers.FindReplaceSimple "( ", "("
-    Clean_helpers.FindReplaceSimple "[ ", "["
-    Clean_helpers.FindReplaceSimple "{ ", "{"
-    Clean_helpers.FindReplaceSimple " )", ")"
-    Clean_helpers.FindReplaceSimple " ]", "]"
-    Clean_helpers.FindReplaceSimple " }", "}"
+    Clean_helpers.FindReplaceSimple "( ", "(", MyStoryNo
+    Clean_helpers.FindReplaceSimple "[ ", "[", MyStoryNo
+    Clean_helpers.FindReplaceSimple "{ ", "{", MyStoryNo
+    Clean_helpers.FindReplaceSimple " )", ")", MyStoryNo
+    Clean_helpers.FindReplaceSimple " ]", "]", MyStoryNo
+    Clean_helpers.FindReplaceSimple " }", "}", MyStoryNo
     'space after dollar sign to no space
-    Clean_helpers.FindReplaceSimple "$ ", "$"
+    Clean_helpers.FindReplaceSimple "$ ", "$", MyStoryNo
     
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
@@ -142,20 +156,21 @@ Sub Spaces()
     
 End Sub
 
-Sub Punctuation()
+Sub Punctuation(MyStoryNo)
 
     thisStatus = "Fixing punctuation "
     Clean_helpers.updateStatus (thisStatus)
 
     'multiple periods to single period
-    Clean_helpers.FindReplaceComplex ".{2,}", ".", False, True
+    Clean_helpers.FindReplaceComplex ".{2,}", ".", False, True, , , MyStoryNo
     'multiple commas to single comma
-    Clean_helpers.FindReplaceComplex ",{2,}", ",", False, True
+    Clean_helpers.FindReplaceComplex ",{2,}", ",", False, True, , , MyStoryNo
     'optional hyphen to nothing
-    Clean_helpers.FindReplaceSimple OPTHYPH, ""
-    Clean_helpers.FindReplaceSimple OPTHYPH2, ""
+    Clean_helpers.FindReplaceSimple OPTHYPH, "", MyStoryNo
+    Clean_helpers.FindReplaceSimple OPTHYPH2, "", MyStoryNo
     'non-breaking hyphen to regular hyphen
-    Clean_helpers.FindReplaceSimple NBHYPH, "-"
+    Clean_helpers.FindReplaceSimple NBHYPH, "-", MyStoryNo
+    Clean_helpers.FindReplaceSimple NBHYPH2, "-", MyStoryNo
     
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
@@ -176,15 +191,15 @@ Sub DoubleQuotes(MyStoryNo)
     Clean_helpers.updateStatus (thisStatus)
 
     ' Combine double single-primes into Double-prime, also double-backticks
-    FindReplaceSimple "``", DP
-    FindReplaceSimple SP & SP, DP
+    FindReplaceSimple "``", DP, MyStoryNo
+    FindReplaceSimple SP & SP, DP, MyStoryNo
     
     ActiveDocument.StoryRanges(MyStoryNo).Select
     Selection.Find.Execute findText:=DP
     Do While Selection.Find.Found
         ' Find / Replace tool includes DOQ and DCQ as results in a search for DP
         '   for some reason (Windows/Office2013)
-        '   we can filter them out here
+        '   we can filter them out here with the next line:
         If Selection.Text = DP Then
 
             newPercentage = Selection.Range.Information(wdActiveEndPageNumber) / totalPages * 100
@@ -193,7 +208,8 @@ Sub DoubleQuotes(MyStoryNo)
                 Clean_helpers.updateStatus (thisStatus)
                 currPercentage = newPercentage
             End If
-
+            
+            ' test preceding char for following case statement
             ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
             Selection.MoveLeft Unit:=wdCharacter, Count:=2
             Select Case Selection.Text
@@ -201,9 +217,11 @@ Sub DoubleQuotes(MyStoryNo)
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Select Case Selection.Text
+                        ' preceding emdash and trailing whitespace = DCQ
                         Case " ", vbCr
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.TypeText DCQ
+                        ' otherwise preceding emdash = DOQ
                         Case Else
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.TypeText DOQ
@@ -213,9 +231,11 @@ Sub DoubleQuotes(MyStoryNo)
                     Selection.MoveRight Unit:=wdCharacter, Count:=1
                     Selection.Expand Unit:=wdCharacter
                     Select Case Selection.Text
+                        ' preceding space and trailing whitespace = DCQ
                         Case " ", vbCr
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.TypeText DCQ
+                        ' preceding space and trailing SP = DOQ-SOQ (replacing SP)
                         Case SP
                             Selection.TypeText SOQ
                             Selection.Expand Unit:=wdCharacter
@@ -225,47 +245,56 @@ Sub DoubleQuotes(MyStoryNo)
                             End Select
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.TypeText DOQ
+                        ' preceding space other = DOQ
                         Case Else
                             ActiveDocument.Bookmarks("temp").Select
                             Selection.TypeText DOQ
                     End Select
                 Case vbCr, vbTab, "("
+                    ' if preceding return, tab or open paren type DOQ
                     ActiveDocument.Bookmarks("temp").Select
                     Selection.TypeText DOQ
                     Selection.Expand Unit:=wdCharacter
                     Select Case Selection.Text
+                        ' if trailing char is SP replace it with SOQ
                         Case SP
                             Selection.TypeText SOQ
                             Selection.Expand Unit:=wdCharacter
+                            ' if trailing that SP is DP, replace it with another DOQ
                             Select Case Selection.Text
                                 Case DP
                                     Selection.TypeText DOQ
                             End Select
                     End Select
                 Case Else
+                    ' if we are the first char or doc, make DP a DOQ
                     If Clean_helpers.AtStartOfDocument Then
                         ActiveDocument.Bookmarks("temp").Select
                         Selection.TypeText DOQ
+                    ' otherwise make DP a DCQ
                     Else
                         ActiveDocument.Bookmarks("temp").Select
                         Selection.TypeText DCQ
                     End If
                     Selection.MoveLeft Unit:=wdCharacter, Count:=2
                     Select Case Selection.Text
+                        'if preceding char is SP, change to SCQ
                         Case SP
                             Selection.Delete
                             Selection.TypeText SCQ
                             Selection.MoveLeft Unit:=wdCharacter, Count:=2
                             Select Case Selection.Text
+                                ' if char preceding SP is DP, make it a DCQ
                                 Case DP
                                     Selection.Delete
                                     Selection.TypeText DCQ
                             End Select
                     End Select
                 End Select
+            ' get out of that selection region for next find!
             Selection.MoveRight Unit:=wdCharacter, Count:=3
        End If
-            If Clean_helpers.EndOfDocumentReached Then Exit Do
+            If Clean_helpers.EndOfStoryReached(MyStoryNo) Then Exit Do
             Selection.Find.Execute
 
     Loop
@@ -287,16 +316,20 @@ Sub SingleQuotes(MyStoryNo)
 
     Dim ChangeQ As Boolean
     ChangeQ = False
-     
+    
+    ' check backtick chars
     ActiveDocument.StoryRanges(MyStoryNo).Select
     Selection.Find.ClearFormatting
     Selection.Find.Execute findText:="`"
     While Selection.Find.Found
+        ' get preceding character
         ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
         Selection.MoveLeft Unit:=wdCharacter, Count:=2
+        ' if preceding char is space, return, or open paren, replace selection with SOQ
         If Selection.Text = " " Or Selection.Text = vbCr Or Selection.Text = "(" Then
             ActiveDocument.Bookmarks("temp").Select
             Selection.TypeText SOQ
+        ' else replace with SXQ
         Else:
             ActiveDocument.Bookmarks("temp").Select
             Selection.TypeText SCQ
@@ -330,11 +363,14 @@ Sub SingleQuotes(MyStoryNo)
                 ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
                 Selection.MoveLeft Unit:=wdCharacter, Count:=2
                 
+                ' if preceding char is open quote or double-prime, default is SOQ
+                '   else default is SCQ
                 Select Case Selection.Text
                         Case DP, DOQ, SOQ
                             OpenQuo = True
                 End Select
                 
+                ' if default is SOQ, for any of the following lookaheads we would flip to SCQ
                 Select Case Selection.Text
                         Case " ", vbCr, vbTab, vbNewLine, "(", DP, DOQ, SOQ
                             Selection.MoveRight Unit:=wdCharacter, Count:=2
@@ -485,11 +521,11 @@ Next
 '   Also, though they were previously set before DP conversion,
 '   SP & DP replacements captured relative OQ and CQ too;
 '   So moving them to the end of quote cleanup, where Primes have already become quotes
-FindReplaceSimple SOQ & aSPACE & DOQ, SOQ & DOQ
-FindReplaceSimple DOQ & aSPACE & SOQ, DOQ & SOQ
-FindReplaceSimple SCQ & aSPACE & DCQ, SCQ & DCQ
-FindReplaceSimple DOQ & aSPACE & SCQ, DOQ & SCQ
-FindReplaceSimple DCQ & aSPACE & SCQ, DCQ & SCQ
+FindReplaceSimple SOQ & aSPACE & DOQ, SOQ & DOQ, MyStoryNo
+FindReplaceSimple DOQ & aSPACE & SOQ, DOQ & SOQ, MyStoryNo
+FindReplaceSimple SCQ & aSPACE & DCQ, SCQ & DCQ, MyStoryNo
+FindReplaceSimple DOQ & aSPACE & SCQ, DOQ & SCQ, MyStoryNo
+FindReplaceSimple DCQ & aSPACE & SCQ, DCQ & SCQ, MyStoryNo
 'FindReplaceSimple SCQ & aSPACE & DOQ, SCQ & DOQ
 'FindReplaceSimple DCQ & aSPACE & SOQ, DCQ & SOQ
 'FindReplaceSimple SOQ & aSPACE & DCQ, SOQ & DCQ
@@ -539,7 +575,7 @@ Function IsYear(theNumber) As Boolean
 
 End Function
 
-Sub Dashes()
+Sub Dashes(MyStoryNo)
 
     thisStatus = "Fixing dashes "
     Clean_helpers.updateStatus (thisStatus)
@@ -547,12 +583,12 @@ Sub Dashes()
     Application.ScreenUpdating = False
     
      'phone number pattern
-     Call HighlightNumber("[0-9]{3}-[0-9]{3}-[0-9]{4}")
-     Call HighlightNumber("\([0-9]{3}\) [0-9]{3}-[0-9]{4}")
+     Call HighlightNumber("[0-9]{3}-[0-9]{3}-[0-9]{4}", MyStoryNo)
+     Call HighlightNumber("\([0-9]{3}\) [0-9]{3}-[0-9]{4}", MyStoryNo)
     
 '    FOLLOWING CAN BE USED TO FIND ISBN PATTERN AND FLAG FOR NO CHANGE
-     Call HighlightNumber("97[89]-[0-9]{10,14}")
-     Call HighlightNumber("97[89]-[0-9]-[0-9]{3}-[0-9]{5}-[0-9]")
+     Call HighlightNumber("97[89]-[0-9]{10,14}", MyStoryNo)
+     Call HighlightNumber("97[89]-[0-9]-[0-9]{3}-[0-9]{5}-[0-9]", MyStoryNo)
      
     thisStatus = "Fixing dashes: 10%"
     Clean_helpers.updateStatus (thisStatus)
@@ -560,7 +596,7 @@ Sub Dashes()
     For i = 0 To 9
         For J = 0 To 9
             ActiveDocument.StoryRanges(MyStoryNo).Select
-            Selection.Collapse direction:=wdCollapseStart
+            Selection.Collapse Direction:=wdCollapseStart
             
             With Selection.Find
                  .ClearFormatting
@@ -586,56 +622,56 @@ Sub Dashes()
     Clean_helpers.updateStatus (thisStatus)
 
     'weird-character = emdash
-    FindReplaceSimple ChrW(-3906), EMDASH
+    FindReplaceSimple ChrW(-3906), EMDASH, MyStoryNo
     'bar character = emdash
-    FindReplaceSimple ChrW(8213), EMDASH
+    FindReplaceSimple ChrW(8213), EMDASH, MyStoryNo
     
     thisStatus = "Fixing dashes: 30%"
     Clean_helpers.updateStatus (thisStatus)
     
     'figure dash=endash
-    FindReplaceSimple ChrW(8210), ENDASH
+    FindReplaceSimple ChrW(8210), ENDASH, MyStoryNo
     'hyphen.hyphen.hyphen=endash
-    FindReplaceSimple "---", EMDASH
+    FindReplaceSimple "---", EMDASH, MyStoryNo
     'space.hyphen.space=emdash
-    FindReplaceSimple " - ", "-"
+    FindReplaceSimple " - ", "-", MyStoryNo
     
     thisStatus = "Fixing dashes: 40%"
     Clean_helpers.updateStatus (thisStatus)
     
     'space.hyphen.hyphen.space=emdash
-    FindReplaceSimple " -- ", EMDASH
+    FindReplaceSimple " -- ", EMDASH, MyStoryNo
     'hyphen.hyphen=emdash
-    FindReplaceSimple "--", EMDASH
+    FindReplaceSimple "--", EMDASH, MyStoryNo
     
     thisStatus = "Fixing dashes: 50%"
     Clean_helpers.updateStatus (thisStatus)
     
    'dash.space=dash
-    FindReplaceSimple "-" & aSPACE, "-"
+    FindReplaceSimple "-" & aSPACE, "-", MyStoryNo
     'space.dash=dash
-    FindReplaceSimple aSPACE & "-", "-"
+    FindReplaceSimple aSPACE & "-", "-", MyStoryNo
     
     thisStatus = "Fixing dashes: 60%"
     Clean_helpers.updateStatus (thisStatus)
     
     'space.endash=emdash
-    FindReplaceSimple aSPACE & ENDASH, EMDASH
+    FindReplaceSimple aSPACE & ENDASH, EMDASH, MyStoryNo
     'endash.space=emdash
-    FindReplaceSimple ENDASH & aSPACE, ENDASH
+    FindReplaceSimple ENDASH & aSPACE, ENDASH, MyStoryNo
     
     thisStatus = "Fixing dashes: 70%"
     Clean_helpers.updateStatus (thisStatus)
     
     'emdash.space=emdash
-    FindReplaceSimple EMDASH & aSPACE, EMDASH
+    FindReplaceSimple EMDASH & aSPACE, EMDASH, MyStoryNo
     'space.emdash=emdash
-    FindReplaceSimple aSPACE & EMDASH, EMDASH
+    FindReplaceSimple aSPACE & EMDASH, EMDASH, MyStoryNo
     
     thisStatus = "Fixing dashes: 80%"
     Clean_helpers.updateStatus (thisStatus)
     
-    Call removeHighlight
+    Call removeHighlight(MyStoryNo)
     
     thisStatus = "Fixing dashes: 90%"
     Clean_helpers.updateStatus (thisStatus)
@@ -645,9 +681,11 @@ Sub Dashes()
     
 End Sub
 
-Function HighlightNumber(myPattern)
+Function HighlightNumber(myPattern, Optional storyNumber As Variant = 1)
     
-    Selection.HomeKey Unit:=wdStory
+    ActiveDocument.StoryRanges(storyNumber).Select
+    Selection.Collapse Direction:=wdCollapseStart
+    
     Selection.Find.ClearFormatting
     With Selection.Find
         .Text = myPattern
@@ -660,17 +698,19 @@ Function HighlightNumber(myPattern)
     Do While Selection.Find.Found
         Selection.Range.HighlightColorIndex = wdPink
         Selection.MoveRight
-        If Clean_helpers.EndOfDocumentReached Then Exit Do
+        If Clean_helpers.EndOfStoryReached(storyNumber) Then Exit Do
         Selection.Find.Execute
     Loop
 
 End Function
 
-Function removeHighlight()
 
+Function removeHighlight(Optional storyNumber As Variant = 1)
+    ActiveDocument.StoryRanges(storyNumber).Select
+    Selection.Collapse Direction:=wdCollapseStart
+    
     Options.DefaultHighlightColorIndex = wdPink
 
-    Selection.HomeKey Unit:=wdStory
     Selection.Find.ClearFormatting
     With Selection.Find
         .Text = ""
@@ -686,7 +726,7 @@ Function removeHighlight()
 
 End Function
 
-Function MakeTitleCase()
+Function MakeTitleCase(MyStoryNo)
 
     thisStatus = "Converting headings to title case "
     Clean_helpers.updateStatus (thisStatus)
@@ -700,7 +740,7 @@ Function MakeTitleCase()
         Clean_helpers.ClearSearch
         
         ActiveDocument.StoryRanges(MyStoryNo).Select
-        Selection.Collapse direction:=wdCollapseStart
+        Selection.Collapse Direction:=wdCollapseStart
     
         With Selection.Find
             .Wrap = wdFindStop
@@ -711,7 +751,7 @@ Function MakeTitleCase()
         Do While Selection.Find.Found
             Clean_helpers.TitleCase
             Selection.MoveRight
-            If Clean_helpers.EndOfDocumentReached Then Exit Do
+            If Clean_helpers.EndOfStoryReached(MyStoryNo) Then Exit Do
             Selection.Find.Execute
         Loop
     Next
@@ -721,14 +761,18 @@ Function MakeTitleCase()
 
 End Function
 
-Function CleanBreaks()
+
+Function CleanBreaks(MyStoryNo)
 
     thisStatus = "Cleaning breaks "
     Clean_helpers.updateStatus (thisStatus)
 
-    FindReplaceSimple "^l", "^p"
-    FindReplaceSimple "^m", "^p"
-    FindReplaceSimple "^b", "^p"
+    FindReplaceSimple "^l", "^p", MyStoryNo
+    FindReplaceSimple "^m", "^p", MyStoryNo
+    FindReplaceSimple "^b", "^p", MyStoryNo
+    
+    ActiveDocument.StoryRanges(MyStoryNo).Select
+    Selection.Collapse Direction:=wdCollapseStart
     
     With Selection.Find
         .ClearFormatting
@@ -739,17 +783,24 @@ Function CleanBreaks()
         .Execute
     End With
     
+    ' adding a counter to make sure we don't get caught in a loop trying to rm
+    '   unremoveable consectuive breaks (happened with consecutive breaks with
+    '   shape object in between in testing.
+    Dim counter As Integer
+    counter = 0
+    
     Do While Selection.Find.Found
-        If EndOfDocumentReached = False Then
-            FindReplaceSimple "^p^p", "^p"
+        If EndOfStoryReached(MyStoryNo) = False And counter < 3 Then
+            FindReplaceSimple "^p^p", "^p", MyStoryNo
             With Selection.Find
                 .ClearFormatting
                 .Replacement.ClearFormatting
                 .Text = "^p^p"
                 .Forward = True
-                .Wrap = wdFindContinue
+                .Wrap = wdFindStop
                 .Execute
             End With
+            counter = counter + 1
         Else
             Exit Do
         End If
@@ -763,17 +814,48 @@ End Function
 Function RemoveTrackChanges()
 
     thisStatus = "Removing Track Changes "
-    Clean_helpers.updateStatus (thisStatus)
+   ' Clean_helpers.updateStatus (thisStatus)
     
-    If ActiveDocument.Revisions.Count > 0 Then
+    Dim StoryNo As Variant
+    Dim tc_sum As Long
+    Dim tc_subtotal As Integer
+    Dim rm_revisions As Boolean
+    tc_sum = 0
+    accept_revisions = False
+    
+    'get a count of track changes for the whole document
+    'determine stories in document
+    For Each StoryNo In ActiveDocument.StoryRanges
+        'run on main (1) endnotes (2), and footnotes (3)
+        If StoryNo.StoryType < 4 Then
+            tc_sum = tc_sum + ActiveDocument.StoryRanges(StoryNo.StoryType).Revisions.Count
+        End If
+    Next
+    
+    'see if the user wants to accept changes
+    If tc_sum > 0 Then
         If Clean_helpers.MessageBox("ACCEPT TRACK CHANGES", "Your document contains unacccepted Track Changes, which must be removed before the file is transformed in RSuite." & vbNewLine & vbNewLine & _
           "Select YES to accept all changes in the document." & vbNewLine & vbNewLine & _
           "Select NO to retain Track Changes.") = vbYes Then
-                ActiveDocument.Revisions.AcceptAll
+                accept_revisions = True
         End If
     End If
     
+    ' if YES, delete revisions per story, where present
+    If accept_revisions = True Then
+        'determine stories in document
+        For Each StoryNo In ActiveDocument.StoryRanges
+            'run on main (1) endnotes (2), and footnotes (3)
+            If StoryNo.StoryType < 4 Then
+                If ActiveDocument.StoryRanges(StoryNo.StoryType).Revisions.Count > 0 Then
+                    ActiveDocument.StoryRanges(StoryNo.StoryType).Revisions.AcceptAll
+                End If
+            End If
+        Next
+    End If
+    
 End Function
+
 
 Function RemoveComments()
 
@@ -810,7 +892,7 @@ Function DeleteBookmarks()
     
 End Function
 
-Function DeleteObjects()
+Function DeleteObjects(MyStoryNo)
 
     thisStatus = "Deleting Objects "
     Clean_helpers.updateStatus (thisStatus)
@@ -845,11 +927,11 @@ Function DeleteObjects()
         End If
     Next
     
-    For Each i In ActiveDocument.InlineShapes
+    For Each i In ActiveDocument.StoryRanges(MyStoryNo).InlineShapes
         i.Delete
     Next
     
-    For Each F In ActiveDocument.Frames
+    For Each F In ActiveDocument.StoryRanges(MyStoryNo).Frames
         F.Delete
     Next
     
@@ -858,23 +940,33 @@ Function DeleteObjects()
     
 End Function
 
-Function RemoveHyperlinks()
+Function RemoveHyperlinks(Optional MyStoryNo As Variant = 1)
 
     thisStatus = "Removing hyperlinks "
     Clean_helpers.updateStatus (thisStatus)
     
+    Dim link_count As Integer
     Dim H As hyperlink
-    For Each H In ActiveDocument.Hyperlinks
-        H.Range.Style = "Hyperlink"
-        H.Delete
-    Next
+    link_count = 0
+
+    ' since in testing, one pass of the for loop did not catch all hyperlinks:
+    '   while hyperlink count is greater than 0 we run through again. If link_count ever
+    '   matches hyperlink count, we know we're passing through and not able to delete remaining links
+    '   for whatever reason, so exit to avoid a crash.
+    Do While ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks.Count > 0 And link_count <> ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks.Count
+        link_count = ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks.Count
+        For Each H In ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks
+            H.Range.Style = "Hyperlink"
+            H.Delete
+        Next
+    Loop
     
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
 
 End Function
 
-Sub LocalFormatting()
+Sub LocalFormatting(MyStoryNo)
 
     thisStatus = "Replacing Local Formatting with Character Styles "
     Clean_helpers.updateStatus (thisStatus)
@@ -882,43 +974,43 @@ Sub LocalFormatting()
     Application.ScreenUpdating = False
     
     'small caps bold italic
-    Call ConvertLocalFormatting(SmallCapsTF:=True, ItalTF:=True, BoldTF:=True, NewStyle:="smallcaps-bold-ital (scbi)")
+    Call ConvertLocalFormatting(MyStoryNo, SmallCapsTF:=True, ItalTF:=True, BoldTF:=True, NewStyle:="smallcaps-bold-ital (scbi)")
     
     'bold ital
-    Call ConvertLocalFormatting(ItalTF:=True, BoldTF:=True, NewStyle:="bold-ital (bi)")
+    Call ConvertLocalFormatting(MyStoryNo, ItalTF:=True, BoldTF:=True, NewStyle:="bold-ital (bi)")
     
     'small caps bold
-    Call ConvertLocalFormatting(SmallCapsTF:=True, BoldTF:=True, NewStyle:="smallcaps-bold (scb)")
+    Call ConvertLocalFormatting(MyStoryNo, SmallCapsTF:=True, BoldTF:=True, NewStyle:="smallcaps-bold (scb)")
     
     'small caps ital
-    Call ConvertLocalFormatting(SmallCapsTF:=True, ItalTF:=True, NewStyle:="smallcaps-ital (sci)")
+    Call ConvertLocalFormatting(MyStoryNo, SmallCapsTF:=True, ItalTF:=True, NewStyle:="smallcaps-ital (sci)")
     
     'strikethrough
-    Call ConvertLocalFormatting(StrikeTF:=True, NewStyle:="strike (str)")
+    Call ConvertLocalFormatting(MyStoryNo, StrikeTF:=True, NewStyle:="strike (str)")
     
     'superscript italic
-    Call ConvertLocalFormatting(superTF:=True, ItalTF:=True, NewStyle:="super-ital (supi)")
+    Call ConvertLocalFormatting(MyStoryNo, superTF:=True, ItalTF:=True, NewStyle:="super-ital (supi)")
     
     'superscript
-    Call ConvertLocalFormatting(superTF:=True, NewStyle:="super (sup)")
+    Call ConvertLocalFormatting(MyStoryNo, superTF:=True, NewStyle:="super (sup)")
     
     'subscript
-    Call ConvertLocalFormatting(subTF:=True, NewStyle:="sub (sub)")
+    Call ConvertLocalFormatting(MyStoryNo, subTF:=True, NewStyle:="sub (sub)")
     
     'ital
-    Call ConvertLocalFormatting(ItalTF:=True, NewStyle:="ital (i)")
+    Call ConvertLocalFormatting(MyStoryNo, ItalTF:=True, NewStyle:="ital (i)")
     
     'bold
-    Call ConvertLocalFormatting(BoldTF:=True, NewStyle:="bold (b)")
+    Call ConvertLocalFormatting(MyStoryNo, BoldTF:=True, NewStyle:="bold (b)")
 
     'small caps
-    Call ConvertLocalFormatting(SmallCapsTF:=True, NewStyle:="smallcaps (sc)")
+    Call ConvertLocalFormatting(MyStoryNo, SmallCapsTF:=True, NewStyle:="smallcaps (sc)")
         
     'underline
-    Call ConvertLocalFormatting(UnderlineTF:=True, NewStyle:="underline (u)")
+    Call ConvertLocalFormatting(MyStoryNo, UnderlineTF:=True, NewStyle:="underline (u)")
     
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
-    Clean_helpers.updateStatus ("")
+'    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+'    Clean_helpers.updateStatus ("")
     
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
@@ -927,131 +1019,139 @@ Sub LocalFormatting()
 
 End Sub
 
-Sub CheckAppliedCharStyles()
+Sub CheckAppliedCharStyles(MyStoryNo)
 
     thisStatus = "Checking Applied Character Styles "
     Clean_helpers.updateStatus (thisStatus)
 
         Application.ScreenUpdating = False
-        
+
         Dim styleList() As Variant
         Dim defaultStyle As Variant
         Dim b, i, sc, subs, sup, strk, u As Boolean
-        
+        Dim numChars As Integer
+        Dim selectedChar As Range
+
         defaultStyle = WdBuiltinStyle.wdStyleDefaultParagraphFont
-        
+
         If MyStoryNo < 1 Then MyStoryNo = 1
-        
+
         styleList = Array("bold (b)", "ital (i)", "smallcaps (sc)", "underline (u)", "super (sup)", "sub (sub)", _
                           "bold-ital (bi)", "smallcaps-ital (sci)", "smallcaps-bold (scb)", _
                           "smallcaps-bold-ital (scbi)", "super-ital (supi)", "strike (str)")
-        
+
         Clean_helpers.ClearSearch
-        
+
         For Each MyStyle In styleList
             ActiveDocument.StoryRanges(MyStoryNo).Select
-            Selection.Collapse direction:=wdCollapseStart
-        
+            Selection.Collapse Direction:=wdCollapseStart
+
             With Selection.Find
                 .Style = ActiveDocument.Styles(MyStyle)
                 .Execute
             End With
-            
+
             Do While Selection.Find.Found
-                
-                b = Selection.Font.Bold
-                i = Selection.Font.Italic
-                sc = Selection.Font.SmallCaps
-                subs = Selection.Font.Subscript
-                sup = Selection.Font.Superscript
-                strk = Selection.Font.StrikeThrough
-                u = Selection.Font.Underline
-                
-                Select Case MyStyle
-                
-                    Case "bold (b)"
-                        If Not b Then Selection.Style = defaultStyle
-                        
-                    Case "ital (i)"
-                        If Not i Then Selection.Style = defaultStyle
-                        
-                    Case "smallcaps (sc)"
-                        If Not sc Then Selection.Style = defaultStyle
-                        
-                    Case "underline (u)"
-                        If Not u Then Selection.Style = defaultStyle
-                        
-                    Case "super (sup)"
-                        If Not sup Then Selection.Style = defaultStyle
-                        
-                    Case "sub (sub)"
-                        If Not subs Then Selection.Style = defaultStyle
-                    
-                    Case "bold-ital (bi)"
-                        If Not b And Not i Then
-                            Selection.Style = defaultStyle
-                        ElseIf Not b Then
-                            Selection.Range.Style = "ital (i)"
-                        ElseIf Not i Then
-                            Selection.Range.Style = "bold (b)"
-                        End If
-                        
-                    Case "smallcaps-ital (sci)"
-                        If Not sc And Not i Then
-                            Selection.Style = defaultStyle
-                        ElseIf Not sc Then
-                            Selection.Range.Style = "ital (i)"
-                        ElseIf Not i Then
-                            Selection.Range.Style = "smallcaps (sc)"
-                        End If
-                    
-                    Case "smallcaps-bold (scb)"
-                        If Not sc And Not b Then
-                            Selection.Style = defaultStyle
-                        ElseIf Not sc Then
-                            Selection.Range.Style = "bold (b)"
-                        ElseIf Not b Then
-                            Selection.Range.Style = "smallcaps (sc)"
-                        End If
-                    
-                    Case "smallcaps-bold-ital (scbi)"
-                        If Not sc And Not b And Not i Then
-                            Selection.Style = defaultStyle
-                        ElseIf Not sc And Not i Then
-                            Selection.Range.Style = "bold (b)"
-                        ElseIf Not sc And Not b Then
-                            Selection.Range.Style = "ital (i)"
-                        ElseIf Not sc Then
-                            Selection.Range.Style = "bold-ital (bi)"
-                        ElseIf Not b Then
-                            Selection.Range.Style = "smallcaps-ital (sci)"
-                        ElseIf Not i Then
-                            Selection.Range.Style = "smallcaps-bold (scb)"
-                        End If
-                    
-                    Case "super-ital (supi)"
-                        If Not sup And Not i Then
-                            Selection.Style = defaultStyle
-                        ElseIf Not sup Then
-                            Selection.Range.Style = "ital (i)"
-                        ElseIf Not i Then
-                            Selection.Range.Style = "super (sup)"
-                        End If
-                    
-                    Case "strike (str)"
-                        If Not strk Then Selection.Style = defaultStyle
-                        
-                End Select
-                'Selection.ClearCharacterDirectFormatting
-                Selection.MoveRight
-                If Clean_helpers.EndOfDocumentReached Then Exit Do
+                numChars = Selection.Characters.Count
+
+                ' cycle through characters of selected range
+                For k = 1 To numChars
+                    Set selectedChar = Selection.Characters(k)
+
+                    b = selectedChar.Font.Bold
+                    i = selectedChar.Font.Italic
+                    sc = selectedChar.Font.SmallCaps
+                    subs = selectedChar.Font.Subscript
+                    sup = selectedChar.Font.Superscript
+                    strk = selectedChar.Font.StrikeThrough
+                    u = selectedChar.Font.Underline
+
+                    Select Case MyStyle
+
+                        Case "bold (b)"
+                            If Not b Then selectedChar.Style = defaultStyle
+
+                        Case "ital (i)"
+                           If Not i Then selectedChar.Style = defaultStyle
+
+                        Case "smallcaps (sc)"
+                            If Not sc Then selectedChar.Style = defaultStyle
+
+                        Case "underline (u)"
+                            If Not u Then selectedChar.Style = defaultStyle
+
+                        Case "super (sup)"
+                            If Not sup Then selectedChar.Style = defaultStyle
+
+                        Case "sub (sub)"
+                            If Not subs Then selectedChar.Style = defaultStyle
+
+                        Case "bold-ital (bi)"
+                            If Not b And Not i Then
+                                selectedChar.Style = defaultStyle
+                            ElseIf Not b Then
+                                selectedChar.Style = "ital (i)"
+                            ElseIf Not i Then
+                                selectedChar.Style = "bold (b)"
+                            End If
+
+                        Case "smallcaps-ital (sci)"
+                            If Not sc And Not i Then
+                                selectedChar.Style = defaultStyle
+                            ElseIf Not sc Then
+                                selectedChar.Style = "ital (i)"
+                            ElseIf Not i Then
+                                selectedChar.Style = "smallcaps (sc)"
+                            End If
+
+                        Case "smallcaps-bold (scb)"
+                            If Not sc And Not b Then
+                                selectedChar.Style = defaultStyle
+                            ElseIf Not sc Then
+                                selectedChar.Style = "bold (b)"
+                            ElseIf Not b Then
+                                selectedChar.Style = "smallcaps (sc)"
+                            End If
+
+                        Case "smallcaps-bold-ital (scbi)"
+                            If Not sc And Not b And Not i Then
+                                selectedChar.Style = defaultStyle
+                            ElseIf Not sc And Not i Then
+                                selectedChar.Style = "bold (b)"
+                            ElseIf Not sc And Not b Then
+                                selectedChar.Style = "ital (i)"
+                            ElseIf Not b And Not i Then
+                                selectedChar.Style = "smallcaps (sc)"
+                            ElseIf Not sc Then
+                                selectedChar.Style = "bold-ital (bi)"
+                            ElseIf Not b Then
+                                selectedChar.Style = "smallcaps-ital (sci)"
+                            ElseIf Not i Then
+                                selectedChar.Style = "smallcaps-bold (scb)"
+                            End If
+
+                        Case "super-ital (supi)"
+                            If Not sup And Not i Then
+                                selectedChar.Style = defaultStyle
+                            ElseIf Not sup Then
+                                selectedChar.Style = "ital (i)"
+                            ElseIf Not i Then
+                                selectedChar.Style = "super (sup)"
+                            End If
+
+                        Case "strike (str)"
+                            If Not strk Then selectedChar.Style = defaultStyle
+
+                    End Select
+                 Next k
+                If Clean_helpers.EndOfStoryReached(MyStoryNo) Then Exit Do
                 Selection.Find.Execute
             Loop
         Next
-        
+
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
-        
+
 End Sub
 
 
@@ -1130,6 +1230,8 @@ Sub NextElementRoutine()
     
 End Sub
 
+
+
 Sub ValidateCharStyles()
 
     Dim docActive As Document
@@ -1172,7 +1274,7 @@ Sub ValidateCharStyles()
                   Dim myRange As Range
                   Set myRange = ActiveDocument.StoryRanges(rng)
                   myRange.Select
-                  Selection.Collapse direction:=wdCollapseStart
+                  Selection.Collapse Direction:=wdCollapseStart
                   With Selection.Find
                       .ClearFormatting
                       .Text = ""

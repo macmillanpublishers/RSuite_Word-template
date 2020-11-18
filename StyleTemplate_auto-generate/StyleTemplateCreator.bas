@@ -449,6 +449,8 @@ Private Function WriteTemplatefromJsonCore(Optional p_boolNoColor As Boolean = F
     Dim docTemplate As Document
     Dim objBulletLT As ListTemplate
     Dim objChecklistLT As ListTemplate
+    Dim objNumberLT As ListTemplate
+    Dim objAlphaLT As ListTemplate
     
     ' file paths
     strJsonPath = ThisDocument.Path & Application.PathSeparator & "RSuite.json"
@@ -473,9 +475,12 @@ Private Function WriteTemplatefromJsonCore(Optional p_boolNoColor As Boolean = F
     
     ' read in the json data
     Set dictStyle_dict = localReadJson(strJsonPath)
-    ' create list templates for adding bullets to styles
-    Set objBulletLT = CreateListTemplate("objBulletLT", "61623", "Symbol")
-    Set objChecklistLT = CreateListTemplate("objChecklistLT", "61692", "Wingdings")
+    ' create list templates for adding to list styles
+    Set objBulletLT = CreateListTemplate("objBulletLT", wdListNumberStyleBullet, ChrW(61623), "Symbol")
+    Set objChecklistLT = CreateListTemplate("objChecklistLT", wdListNumberStyleBullet, ChrW(61692), "Wingdings")
+    Set objNumberLT = CreateListTemplate("objNumberLT", wdListNumberStyleArabic, "%1.")
+    Set objAlphaLT = CreateListTemplate("objAlphaLT", wdListNumberStyleLowercaseLetter)
+    
     ' how often we save and undo.clear on doc to prevent memory errs
     If IsMac Then
         lngIncrement = 10
@@ -597,6 +602,12 @@ Private Function WriteTemplatefromJsonCore(Optional p_boolNoColor As Boolean = F
             ElseIf dictStyle_dict(strStylename).Item("Checklist") = True Then
                 docTemplate.Styles(strStylename).LinkToListTemplate _
                 ListTemplate:=objChecklistLT, ListLevelNumber:=1
+            ElseIf dictStyle_dict(strStylename).Item("NumberWithDot") = True Then
+                docTemplate.Styles(strStylename).LinkToListTemplate _
+                ListTemplate:=objNumberLT, ListLevelNumber:=1
+            ElseIf dictStyle_dict(strStylename).Item("LowerLetterWithBracket") = True Then
+                docTemplate.Styles(strStylename).LinkToListTemplate _
+                ListTemplate:=objAlphaLT, ListLevelNumber:=1
             End If
         ''' For Character styles only:
         ElseIf dictStyle_dict(strStylename).Item("Type") = 2 Then
@@ -768,7 +779,7 @@ End Function
 
 
 
-Private Function CreateListTemplate(LTname As String, numFormat As String, fontName As String) As ListTemplate
+Private Function CreateListTemplate(LTname As String, numStyle As WdListNumberStyle, Optional numFormat As String = "", Optional fontName As String = "") As ListTemplate
     ' create List Template, so we can attach list styles to them; this is how
     ' we ensure that a list style is preceded by a bullet or checkmark
     Dim objListTemplate As ListTemplate
@@ -794,13 +805,17 @@ Private Function CreateListTemplate(LTname As String, numFormat As String, fontN
     
     '''Update settings for list templates:
     With objListTemplate.ListLevels(1)
-        .NumberFormat = ChrW(numFormat)
-        .NumberStyle = wdListNumberStyleBullet
+        If numFormat <> "" Then
+            .NumberFormat = numFormat
+        End If
+        .NumberStyle = numStyle
         .TextPosition = CentimetersToPoints(0.75)
         .TabPosition = CentimetersToPoints(1.25)
-        With .Font
-            .Name = fontName
-        End With
+        If fontName <> "" Then
+            With .Font
+                .Name = fontName
+            End With
+        End If
     End With
     
     Set CreateListTemplate = objListTemplate

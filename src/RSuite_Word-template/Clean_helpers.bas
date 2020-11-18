@@ -12,10 +12,9 @@ Public Function CheckTemplate()
 End Function
 
 
-Public Function FindReplaceSimple(ByVal sFind As String, ByVal sReplace As String)
-    If currentStoryNumber = Empty Then currentStoryNumber = 1
-    ActiveDocument.StoryRanges(currentStoryNumber).Select
-    Selection.Collapse direction:=wdCollapseStart
+Public Function FindReplaceSimple(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
+    ActiveDocument.StoryRanges(storyNumber).Select
+    Selection.Collapse Direction:=wdCollapseStart
     Call ClearSearch
     
     With Selection.Find
@@ -33,13 +32,13 @@ Public Function FindReplaceComplex(ByVal sFind As String, _
                                     Optional bMatchCase As Boolean = False, _
                                     Optional bUseWildcards As Boolean = False, _
                                     Optional bSmallCaps As Boolean = False, _
-                                    Optional bIncludeFormat As Boolean = False)
+                                    Optional bIncludeFormat As Boolean = False, _
+                                    Optional storyNumber As Variant = 1)
 
-    If currentStoryNumber = Empty Then currentStoryNumber = 1
     Call ClearSearch
 
-    ActiveDocument.StoryRanges(currentStoryNumber).Select
-    Selection.Collapse direction:=wdCollapseStart
+    ActiveDocument.StoryRanges(storyNumber).Select
+    Selection.Collapse Direction:=wdCollapseStart
     
     With Selection.Find
         .Forward = True
@@ -92,6 +91,18 @@ Public Function EndOfDocumentReached() As Boolean
     End Select
 End Function
 
+
+
+Public Function EndOfStoryReached(storyNumber As Variant) As Boolean
+    Select Case ActiveDocument.StoryRanges(storyNumber).End
+        Case Selection.End, Selection.End + 1
+           EndOfStoryReached = True
+        Case Else
+           EndOfStoryReached = False
+    End Select
+End Function
+
+
 Public Function AtStartOfDocument() As Boolean
     Select Case ActiveDocument.Content.Start
         Case Selection.Start
@@ -102,7 +113,7 @@ Public Function AtStartOfDocument() As Boolean
 End Function
 
 Sub TitleCase()
-    
+            
     Application.ScreenUpdating = False
     
     Dim HeadingSoFar As String, Q As String, NumWords As Integer
@@ -175,7 +186,7 @@ Function MessageBox(Title As String, Msg As String, Optional ByVal buttonType As
     MessageBox = MsgBox(Msg, buttonType, Title)
 End Function
 
-Public Function ConvertLocalFormatting(Optional ByVal ItalTF As Boolean = False, _
+Public Function ConvertLocalFormatting(MyStoryNo, Optional ByVal ItalTF As Boolean = False, _
                                         Optional ByVal BoldTF As Boolean = False, _
                                         Optional ByVal CapsTF As Boolean = False, _
                                         Optional ByVal SmallCapsTF As Boolean = False, _
@@ -198,7 +209,7 @@ Public Function ConvertLocalFormatting(Optional ByVal ItalTF As Boolean = False,
         Clean_helpers.ClearSearch
         
         ActiveDocument.StoryRanges(MyStoryNo).Select
-        Selection.Collapse direction:=wdCollapseStart
+        Selection.Collapse Direction:=wdCollapseStart
         
             With Selection.Find
                 .Text = ""
@@ -261,11 +272,15 @@ Public Function ConvertLocalFormatting(Optional ByVal ItalTF As Boolean = False,
                     Case "smallcaps-bold-ital (scbi)"
                         If Not oStyle.Font.Bold And Not oStyle.Font.SmallCaps And Not oStyle.Font.Italic Then
                             Selection.Style = NewStyle
-                        ElseIf oStyle.Font.Bold And Not oStyle.Font.Italic And Not oStyle.Font.SmallCaps Then
+                        ElseIf oStyle.Font.Bold And Not oStyle.Font.SmallCaps And Not oStyle.Font.Italic Then
                             Selection.Style = "smallcaps-ital (sci)"
                         ElseIf Not oStyle.Font.Bold And Not oStyle.Font.SmallCaps And oStyle.Font.Italic Then
                             Selection.Style = "smallcaps-bold (scb)"
-                        Else
+                        ElseIf Not oStyle.Font.Bold And oStyle.Font.SmallCaps And oStyle.Font.Italic Then
+                            Selection.Style = "bold (b)"
+                        ElseIf oStyle.Font.Bold And oStyle.Font.SmallCaps And Not oStyle.Font.Italic Then
+                            Selection.Style = "ital (i)"
+                        ElseIf oStyle.Font.Bold And Not oStyle.Font.SmallCaps And oStyle.Font.Italic Then
                             Selection.Style = "smallcaps (sc)"
                         End If
                     Case "super-ital (supi)"
@@ -273,7 +288,7 @@ Public Function ConvertLocalFormatting(Optional ByVal ItalTF As Boolean = False,
                             Selection.Style = NewStyle
                         ElseIf Not oStyle.Font.Superscript And oStyle.Font.Italic Then
                             Selection.Style = "super (sup)"
-                        Else
+                        ElseIf oStyle.Font.Superscript And Not oStyle.Font.Italic Then
                             Selection.Style = "ital (i)"
                         End If
                     Case "ital (i)"
