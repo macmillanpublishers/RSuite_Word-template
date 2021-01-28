@@ -1,4 +1,6 @@
 Attribute VB_Name = "Clean_helpers"
+Const excludeStyle As String = "cs-cleanup-exclude (cex)"
+
 Public Function CheckTemplate()
 
     Dim templateName As String
@@ -25,6 +27,64 @@ Public Function FindReplaceSimple(ByVal sFind As String, ByVal sReplace As Strin
         On Error GoTo 0
       End With
 
+End Function
+
+Public Function FindReplaceSimple_WithExclude(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
+    Dim Rg As Range
+    Set Rg = ActiveDocument.StoryRanges(storyNumber)
+
+    Call ClearSearch
+        
+    With Rg.Find
+        .Text = sFind
+        While .Execute
+            If Rg.Style <> excludeStyle Then
+                Rg.Text = sReplace
+                Rg.Collapse wdCollapseEnd
+            End If
+        Wend
+    End With
+        
+End Function
+
+Public Function FindReplaceComplex_WithExclude(ByVal sFind As String, _
+                                    ByVal sReplace As String, _
+                                    Optional bMatchCase As Boolean = False, _
+                                    Optional bUseWildcards As Boolean = False, _
+                                    Optional bSmallCaps As Boolean = False, _
+                                    Optional bIncludeFormat As Boolean = False, _
+                                    Optional storyNumber As Variant = 1)
+
+    Dim Rg As Range
+    Set Rg = ActiveDocument.StoryRanges(storyNumber)
+
+    Call ClearSearch
+    
+    With Rg.Find
+        .Forward = True
+        .Text = sFind
+'        .Wrap = wdFindContinue
+        .Wrap = wdFindStop
+        .MatchWildcards = bUseWildcards
+        .MatchSoundsLike = False
+        .MatchCase = bMatchCase
+        .MatchWholeWord = False
+        .MatchAllWordForms = False
+        If bIncludeFormat = True Then
+            .Format = True
+        Else: .Format = False
+        End If
+        .Font.SmallCaps = bSmallCaps
+        While .Execute
+            If Rg.Style <> excludeStyle Then
+                Rg.Text = sReplace
+                Rg.Collapse wdCollapseEnd
+            End If
+        Wend
+        Err.Clear
+        On Error GoTo 0
+      End With
+      
 End Function
 
 Public Function FindReplaceComplex(ByVal sFind As String, _

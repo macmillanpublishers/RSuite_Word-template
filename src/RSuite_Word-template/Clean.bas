@@ -130,25 +130,26 @@ Sub Spaces(MyStoryNo)
     Clean_helpers.FindReplaceSimple "<doneperiodellipsis>", PERIOD_ELLIPSIS, MyStoryNo
     Clean_helpers.FindReplaceSimple "<doneemdashellipsis>", EMDASH_ELLIPSIS, MyStoryNo
     'multiple tabs to regular space
-    Clean_helpers.FindReplaceComplex "^9{1,}", " ", False, True, , , MyStoryNo
+    Clean_helpers.FindReplaceComplex_WithExclude "^9{1,}", " ", False, True, , , MyStoryNo
     'multiple spaces to one space
-    Clean_helpers.FindReplaceComplex " {2,}", " ", False, True, , , MyStoryNo
+    Clean_helpers.FindReplaceComplex_WithExclude " {2,}", " ", False, True, , , MyStoryNo
     'soft returns to hard returns
-    Clean_helpers.FindReplaceSimple "^l", "^p", MyStoryNo
+    Clean_helpers.FindReplaceSimple_WithExclude "^l", vbNewLine, MyStoryNo
+        ' ^ replacing with ^p with WithExclude function must be done with vbnewline instead
     'spaces before/after line breaks
-    Clean_helpers.FindReplaceSimple ChrW(13) + " ", "^p", MyStoryNo
+    Clean_helpers.FindReplaceSimple_WithExclude ChrW(13) + " ", vbNewLine, MyStoryNo
     Clean_helpers.FindReplaceSimple " " + ChrW(13), "^p", MyStoryNo
-    Clean_helpers.FindReplaceSimple "^p ", "^p", MyStoryNo
+    Clean_helpers.FindReplaceSimple_WithExclude "^p ", vbNewLine, MyStoryNo
     Clean_helpers.FindReplaceSimple " ^p", "^p", MyStoryNo
     'space before/after brackets to no space
-    Clean_helpers.FindReplaceSimple "( ", "(", MyStoryNo
-    Clean_helpers.FindReplaceSimple "[ ", "[", MyStoryNo
-    Clean_helpers.FindReplaceSimple "{ ", "{", MyStoryNo
-    Clean_helpers.FindReplaceSimple " )", ")", MyStoryNo
-    Clean_helpers.FindReplaceSimple " ]", "]", MyStoryNo
-    Clean_helpers.FindReplaceSimple " }", "}", MyStoryNo
+    Clean_helpers.FindReplaceSimple_WithExclude "( ", "(", MyStoryNo
+    Clean_helpers.FindReplaceSimple_WithExclude "[ ", "[", MyStoryNo
+    Clean_helpers.FindReplaceSimple_WithExclude "{ ", "{", MyStoryNo
+    Clean_helpers.FindReplaceSimple_WithExclude " )", ")", MyStoryNo
+    Clean_helpers.FindReplaceSimple_WithExclude " ]", "]", MyStoryNo
+    Clean_helpers.FindReplaceSimple_WithExclude " }", "}", MyStoryNo
     'space after dollar sign to no space
-    Clean_helpers.FindReplaceSimple "$ ", "$", MyStoryNo
+    Clean_helpers.FindReplaceSimple_WithExclude "$ ", "$", MyStoryNo
     
     completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
     Clean_helpers.updateStatus ("")
@@ -632,41 +633,41 @@ Sub Dashes(MyStoryNo)
     'figure dash=endash
     FindReplaceSimple ChrW(8210), ENDASH, MyStoryNo
     'hyphen.hyphen.hyphen=endash
-    FindReplaceSimple "---", EMDASH, MyStoryNo
+    FindReplaceSimple_WithExclude "---", EMDASH, MyStoryNo
     'space.hyphen.space=emdash
-    FindReplaceSimple " - ", "-", MyStoryNo
+    FindReplaceSimple_WithExclude " - ", "-", MyStoryNo
     
     thisStatus = "Fixing dashes: 40%"
     Clean_helpers.updateStatus (thisStatus)
     
     'space.hyphen.hyphen.space=emdash
-    FindReplaceSimple " -- ", EMDASH, MyStoryNo
+    FindReplaceSimple_WithExclude " -- ", EMDASH, MyStoryNo
     'hyphen.hyphen=emdash
-    FindReplaceSimple "--", EMDASH, MyStoryNo
+    FindReplaceSimple_WithExclude "--", EMDASH, MyStoryNo
     
     thisStatus = "Fixing dashes: 50%"
     Clean_helpers.updateStatus (thisStatus)
     
    'dash.space=dash
-    FindReplaceSimple "-" & aSPACE, "-", MyStoryNo
+    FindReplaceSimple_WithExclude "-" & aSPACE, "-", MyStoryNo
     'space.dash=dash
-    FindReplaceSimple aSPACE & "-", "-", MyStoryNo
+    FindReplaceSimple_WithExclude aSPACE & "-", "-", MyStoryNo
     
     thisStatus = "Fixing dashes: 60%"
     Clean_helpers.updateStatus (thisStatus)
     
     'space.endash=emdash
-    FindReplaceSimple aSPACE & ENDASH, EMDASH, MyStoryNo
+    FindReplaceSimple_WithExclude aSPACE & ENDASH, EMDASH, MyStoryNo
     'endash.space=emdash
-    FindReplaceSimple ENDASH & aSPACE, ENDASH, MyStoryNo
+    FindReplaceSimple_WithExclude ENDASH & aSPACE, ENDASH, MyStoryNo
     
     thisStatus = "Fixing dashes: 70%"
     Clean_helpers.updateStatus (thisStatus)
     
     'emdash.space=emdash
-    FindReplaceSimple EMDASH & aSPACE, EMDASH, MyStoryNo
+    FindReplaceSimple_WithExclude EMDASH & aSPACE, EMDASH, MyStoryNo
     'space.emdash=emdash
-    FindReplaceSimple aSPACE & EMDASH, EMDASH, MyStoryNo
+    FindReplaceSimple_WithExclude aSPACE & EMDASH, EMDASH, MyStoryNo
     
     thisStatus = "Fixing dashes: 80%"
     Clean_helpers.updateStatus (thisStatus)
@@ -767,10 +768,11 @@ Function CleanBreaks(MyStoryNo)
     thisStatus = "Cleaning breaks "
     Clean_helpers.updateStatus (thisStatus)
 
-    FindReplaceSimple "^l", "^p", MyStoryNo
+    FindReplaceSimple_WithExclude "^l", vbNewLine, MyStoryNo
+    ' ^ replacing with ^p with WithExclude function must be done with vbnewline instead
     FindReplaceSimple "^m", "^p", MyStoryNo
     FindReplaceSimple "^b", "^p", MyStoryNo
-    
+
     ActiveDocument.StoryRanges(MyStoryNo).Select
     Selection.Collapse Direction:=wdCollapseStart
     

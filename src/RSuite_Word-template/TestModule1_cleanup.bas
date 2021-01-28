@@ -11,7 +11,8 @@ Private DQ_simplefinds_expected As String, DQ_emdash_expected As String, DQ_spac
     DQ_other_expected As String, SQ_backtick_expected As String, SQ_setasides_expected As String, SQ_openquo_expected As String, _
     SQ_fandr_expected As String, EL_frbasic_expected As String, EL_fr4dots_expected As String, EL_spaces_expected As String, _
     EL_emdashes_expected As String, SP_nbsps_expected As String, SP_brackets_expected As String, SP_breaks_expected As String, _
-    PN_expected As String, DSH_numbers_expected As String, DSH_expected As String, MTC_expected As String, BR_expected As String
+    SP_exclude_expected As String, PN_expected As String, DSH_numbers_expected As String, DSH_expected As String, _
+    DSH_exclude_expected As String, MTC_expected As String, BR_expected As String
 Private HL_expected As Integer
 
 Private testDocx As Document
@@ -63,11 +64,16 @@ SP_nbsps_expected = "Rm nbsps and preserve done ellipses:" + vbCr + ELLIPSIS + "
             + " <period " + DOQ + ELLIPSIS + NBSPchar + "<quote" + NBS_ELLIPSIS + NBSPchar + EMDASH + " <emdash"
 SP_brackets_expected = "Tabs (parens) [brackets] {braces} $dollars spaces again"
 SP_breaks_expected = "Soft" + vbCr + "break; space preceding break" + vbCr + "and space following"
+SP_exclude_expected = "Tabs" + vbTab + vbTab + vbTab + "( parens)  [   brackets   ] {braces } $ dollars         spaces again Soft" _
+            + vbVerticalTab + "break;" + vbCr + " and space following break"
 PN_expected = "Multicomma, multiperiods. Non-breaking-hyphens, optionalhyphens."
 DSH_expected = "Bar" + EMDASH + "character, figure" + ENDASH + "dash, triple" + EMDASH + "dash, double" + EMDASH _
             + "dash, double" + EMDASH + "andspaces" + vbCr _
             + "Space-space, dash-space, space-dash" + vbCr _
             + "Space" + EMDASH + "endash, endash" + ENDASH + "space, emdash" + EMDASH + "space, space" + EMDASH + "emdash"
+DSH_exclude_expected = "triple---dash, double--dash, double -- andspaces" + vbCr + "Space - space, dash- space, space -dash" + vbCr _
+            + "Space " + ENDASH + "endash, endash" + ENDASH + " space, emdash" + EMDASH + " space, space " + EMDASH + "emdash" + vbCr _
+            + "7" + ENDASH + "8, from 94" + ENDASH + "112, space emdash" + EMDASH + "space"
 DSH_numbers_expected = "Leave alone phone: 703-536-4247, (987) 654-3211" + vbCr _
             + "Leave alone Isbns: 978-5-426-01234-8, 979-022-2323212" + vbCr _
             + "Now endash: 7" + ENDASH + "8, from 94" + ENDASH + "112, also 15" + ENDASH + "34" + ENDASH + "41, 6.0" + ENDASH + "6.125"
@@ -77,7 +83,7 @@ MTC_expected = "Testing All of the Lowercase" + vbCr _
             + "keywords:" + vbCr _
             + "The the HBO HTML V past the Down"
 HL_expected = 3
-BR_expected = "Line" + vbCr + "break. Now page" + vbCr + "break. Now double new" + vbCr + "paras. Now five new" + vbCr + "paras."
+BR_expected = "Line" + vbCr + "break. Now excluded Line" + vbVerticalTab + "break. Now page" + vbCr + "break. Now double new" + vbCr + "paras. Now five new" + vbCr + "paras."
 
 
 End Function
@@ -100,8 +106,10 @@ EL_emdashes_expected = vbNullString
 SP_nbsps_expected = vbNullString
 SP_brackets_expected = vbNullString
 SP_breaks_expected = vbNullString
+SP_exclude_expected = vbNullString
 PN_expected = vbNullString
 DSH_expected = vbNullString
+DSH_exclude_expected = vbNullString
 DSH_numbers_expected = vbNullString
 MTC_expected = vbNullString
 HL_expected = 0
@@ -676,10 +684,28 @@ TestExit:
 TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
+'@TestMethod("CleanupMacro")
+Private Sub TestSpaces_exclude() 'TODO Rename test
+    Dim results As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestSpaces_exclude"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.Spaces(MyStoryNo)
+        results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual SP_exclude_expected, results
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
 
 '@TestMethod("CleanupMacro")
 Private Sub TestSpaces_secondrun() 'TODO Rename test
-    Dim results_nbsps As String, results_brackets As String, results_breaks As String
+    Dim results_nbsps As String, results_brackets As String, results_breaks As String, results_exclude As String
     On Error GoTo TestFail
     'Arrange:
         'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
@@ -689,11 +715,13 @@ Private Sub TestSpaces_secondrun() 'TODO Rename test
         results_nbsps = TestHelpers.returnTestResultString("TestSpaces_nbsps", MyStoryNo)
         results_brackets = TestHelpers.returnTestResultString("TestSpaces_brackets_and_whitespace", MyStoryNo)
         results_breaks = TestHelpers.returnTestResultString("TestSpaces_breaks", MyStoryNo)
+        results_exclude = TestHelpers.returnTestResultString("TestSpaces_exclude", MyStoryNo)
     'Assert:
         Assert.Succeed
         Assert.AreEqual SP_nbsps_expected, results_nbsps
         Assert.AreEqual SP_brackets_expected, results_brackets
         Assert.AreEqual SP_breaks_expected, results_breaks
+        Assert.AreEqual SP_exclude_expected, results_exclude
 TestExit:
     Exit Sub
 TestFail:
@@ -701,7 +729,7 @@ TestFail:
 End Sub
 '@TestMethod("CleanupMacro")
 Private Sub TestSpaces_footnotes() 'TODO Rename test
-    Dim results_nbsps As String, results_brackets As String, results_breaks As String
+    Dim results_nbsps As String, results_brackets As String, results_breaks As String, results_exclude As String
     On Error GoTo TestFail
     'Arrange:
         MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
@@ -711,11 +739,13 @@ Private Sub TestSpaces_footnotes() 'TODO Rename test
         results_nbsps = TestHelpers.returnTestResultString("TestSpaces_nbsps", MyStoryNo)
         results_brackets = TestHelpers.returnTestResultString("TestSpaces_brackets_and_whitespace", MyStoryNo)
         results_breaks = TestHelpers.returnTestResultString("TestSpaces_breaks", MyStoryNo)
+        results_exclude = TestHelpers.returnTestResultString("TestSpaces_exclude", MyStoryNo)
     'Assert:
         Assert.Succeed
         Assert.AreEqual SP_nbsps_expected, results_nbsps
         Assert.AreEqual SP_brackets_expected, results_brackets
         Assert.AreEqual SP_breaks_expected, results_breaks
+        Assert.AreEqual SP_exclude_expected, results_exclude
 TestExit:
     Exit Sub
 TestFail:
@@ -723,7 +753,7 @@ TestFail:
 End Sub
 '@TestMethod("CleanupMacro")
 Private Sub TestSpaces_endnotes() 'TODO Rename test
-    Dim results_nbsps As String, results_brackets As String, results_breaks As String
+    Dim results_nbsps As String, results_brackets As String, results_breaks As String, results_exclude As String
     On Error GoTo TestFail
     'Arrange:
         MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
@@ -733,11 +763,13 @@ Private Sub TestSpaces_endnotes() 'TODO Rename test
         results_nbsps = TestHelpers.returnTestResultString("TestSpaces_nbsps", MyStoryNo)
         results_brackets = TestHelpers.returnTestResultString("TestSpaces_brackets_and_whitespace", MyStoryNo)
         results_breaks = TestHelpers.returnTestResultString("TestSpaces_breaks", MyStoryNo)
+        results_exclude = TestHelpers.returnTestResultString("TestSpaces_exclude", MyStoryNo)
     'Assert:
         Assert.Succeed
         Assert.AreEqual SP_nbsps_expected, results_nbsps
         Assert.AreEqual SP_brackets_expected, results_brackets
         Assert.AreEqual SP_breaks_expected, results_breaks
+        Assert.AreEqual SP_exclude_expected, results_exclude
 TestExit:
     Exit Sub
 TestFail:
@@ -810,6 +842,24 @@ TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
 '@TestMethod("CleanupMacro")
+Private Sub TestDashes_exclude() 'TODO Rename test
+    Dim results As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestDashes_exclude"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.Dashes(MyStoryNo)
+        results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual DSH_exclude_expected, results
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+'@TestMethod("CleanupMacro")
 Private Sub TestDashes_numbers() 'TODO Rename test
     Dim results As String
     On Error GoTo TestFail
@@ -829,17 +879,19 @@ TestFail:
 End Sub
 '@TestMethod("CleanupMacro")
 Private Sub TestDashes_secondrun() 'TODO Rename test
-    Dim results_dashes As String, results_numbers As String
+    Dim results_dashes As String, results_numbers As String, results_exclude As String
     On Error GoTo TestFail
     'Act:
         Call Clean.Dashes(MyStoryNo)
         Call Clean.Dashes(MyStoryNo)
         results_dashes = TestHelpers.returnTestResultString("TestDashes", MyStoryNo)
         results_numbers = TestHelpers.returnTestResultString("TestDashes_numbers", MyStoryNo)
+        results_exclude = TestHelpers.returnTestResultString("TestDashes_exclude", MyStoryNo)
      'Assert:
         Assert.Succeed
         Assert.AreEqual DSH_expected, results_dashes
         Assert.AreEqual DSH_numbers_expected, results_numbers
+        Assert.AreEqual DSH_exclude_expected, results_exclude
 TestExit:
     Exit Sub
 TestFail:
@@ -847,7 +899,8 @@ TestFail:
 End Sub
 '@TestMethod("CleanupMacro")
 Private Sub TestDashes_notes() 'TODO Rename test
-    Dim results_fnotes As String, results_enotes As String, results_fnotes_numbers As String, results_enotes_numbers As String
+    Dim results_fnotes As String, results_enotes As String, results_fnotes_numbers As String, results_enotes_numbers As String, _
+        results_fnotes_exclude As String, results_enotes_exclude As String
     On Error GoTo TestFail
     'Arrange:
         MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
@@ -856,6 +909,7 @@ Private Sub TestDashes_notes() 'TODO Rename test
         Call Clean.Dashes(MyStoryNo)
         results_fnotes = TestHelpers.returnTestResultString("TestDashes", MyStoryNo)
         results_fnotes_numbers = TestHelpers.returnTestResultString("TestDashes_numbers", MyStoryNo)
+        results_fnotes_exclude = TestHelpers.returnTestResultString("TestDashes_exclude", MyStoryNo)
     'Arrange:
         MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
         copyBodyContentsToEndNotes
@@ -863,12 +917,15 @@ Private Sub TestDashes_notes() 'TODO Rename test
         Call Clean.Dashes(MyStoryNo)
         results_enotes = TestHelpers.returnTestResultString("TestDashes", MyStoryNo)
         results_enotes_numbers = TestHelpers.returnTestResultString("TestDashes_numbers", MyStoryNo)
+        results_enotes_exclude = TestHelpers.returnTestResultString("TestDashes_exclude", MyStoryNo)
      'Assert:
         Assert.Succeed
         Assert.AreEqual DSH_expected, results_fnotes
         Assert.AreEqual DSH_numbers_expected, results_fnotes_numbers
+        Assert.AreEqual DSH_exclude_expected, results_fnotes_exclude
         Assert.AreEqual DSH_expected, results_enotes
         Assert.AreEqual DSH_numbers_expected, results_enotes_numbers
+        Assert.AreEqual DSH_exclude_expected, results_enotes_exclude
 TestExit:
     Exit Sub
 TestFail:
