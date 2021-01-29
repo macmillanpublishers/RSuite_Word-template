@@ -171,6 +171,39 @@ Public Function AtStartOfDocument() As Boolean
            AtStartOfDocument = False
     End Select
 End Function
+Public Function TrimNoteSpaces(storyNumber As Variant)
+Dim oRng As Range
+' Can optionally fully trim note whitespace with commented whiles & Wends below,
+' But this is not necessary since previous f&r's are trimming multispaces to 1
+
+If storyNumber = 2 Then 'footnotes
+    For Each Note In ActiveDocument.Footnotes
+        Set oRng = Note.Range
+        With oRng
+            If .Characters.Last = " " Then    'While
+                .Characters.Last = ""
+            End If    'Wend
+            If .Characters.First = " " Then   'While
+                .Characters.First = ""
+            End If    'Wend
+        End With
+    Next Note
+ElseIf storyNumber = 3 Then 'endnotes
+    For Each Note In ActiveDocument.Endnotes
+        Set oRng = Note.Range
+        With oRng
+            If .Characters.Last = " " Then    'While
+                .Characters.Last = ""
+            End If    'Wend
+            If .Characters.First = " " Then   'While
+                .Characters.First = ""
+            End If    'Wend
+        End With
+    Next Note
+End If
+
+End Function
+
 
 Sub TitleCase()
             

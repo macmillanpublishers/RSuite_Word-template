@@ -10,7 +10,9 @@ Private Fakes As Object
 Private BR_sbreaks_expected As String
 Private BM_expected As Integer, CM_expected As Integer, TC_main_expected As Integer, TC_en_expected As Integer, _
     TC_fn_expected As Integer, OB_shapes_expected As Integer, OB_ishapes_expected As Integer, OB_frames_expected As Integer, _
-    OB_en_ishapes_expected As Integer, OB_fn_ishapes_expected As Integer
+    OB_en_ishapes_expected As Integer, OB_fn_ishapes_expected As Integer, SP_fn_control_expected As String, _
+    SP_fn_problem_expected As String, SP_en_control_expected As String, SP_en_problem_expected As String, _
+    SP_fn_num_c As Long, SP_fn_num_p As Long, SP_en_num_c As Long, SP_en_num_p As Long
 Private testDocx As Document
 Private testdotx_filepath As String
 Private testdotx As String
@@ -32,6 +34,14 @@ OB_ishapes_expected = 3
 OB_frames_expected = 5
 OB_en_ishapes_expected = 2
 OB_fn_ishapes_expected = 3
+SP_fn_num_c = 6
+SP_fn_control_expected = "Control footnote. A little extra white space, but no trimmable ws." + vbCr + "Same deal, 2nd paragraph."
+SP_fn_num_p = 7
+SP_fn_problem_expected = "Bad footnote." + vbCr + "Extra spaces everywhere."
+SP_en_num_c = 7
+SP_en_control_expected = "Control Endnote. Some random extra white space." + vbCr + "Second para. More of same."
+SP_en_num_p = 8
+SP_en_problem_expected = "Bad Endnote. Leading and trailing spaces." + vbCr + "For whole note! Not ideal?"
 
 End Function
 
@@ -49,6 +59,14 @@ OB_ishapes_expected = 0
 OB_frames_expected = 0
 OB_en_ishapes_expected = 0
 OB_fn_ishapes_expected = 0
+SP_fn_num_c = 0
+SP_fn_control_expected = vbNullString
+SP_fn_num_p = 0
+SP_fn_problem_expected = vbNullString
+SP_en_num_c = 0
+SP_en_control_expected = vbNullString
+SP_en_num_p = 0
+SP_en_problem_expected = vbNullString
 
 End Function
 
@@ -288,6 +306,34 @@ Private Sub TestBreaks_sectionbreaks() 'TODO Rename test
     'Assert:
         Assert.Succeed
         Assert.AreEqual BR_sbreaks_expected, results
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CleanupMacro_special")
+Private Sub TestSpaces_note_trim() 'TODO Rename test
+    Dim results_fn_c As String, results_fn_p As String, results_en_c As String, results_en_p As String
+    On Error GoTo TestFail
+    'Arrange:
+        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.Spaces(MyStoryNo)
+        results_fn_c = ActiveDocument.Footnotes(SP_fn_num_c).Range
+        results_fn_p = ActiveDocument.Footnotes(SP_fn_num_p).Range
+    'Arrange:
+        MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.Spaces(MyStoryNo)
+        results_en_c = ActiveDocument.Endnotes(SP_en_num_c).Range
+        results_en_p = ActiveDocument.Endnotes(SP_en_num_p).Range
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual SP_fn_control_expected, results_fn_c
+        Assert.AreEqual SP_fn_problem_expected, results_fn_p
+        Assert.AreEqual SP_en_control_expected, results_en_c
+        Assert.AreEqual SP_en_problem_expected, results_en_p
 TestExit:
     Exit Sub
 TestFail:
