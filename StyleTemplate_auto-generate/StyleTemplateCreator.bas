@@ -800,7 +800,6 @@ Private Function CreateListTemplate(LTname As String, numStyle As WdListNumberSt
     Dim blnLTExists As Boolean
     
     blnLTExists = False
-    Debug.Print LTname + "checking"
     '''Check for existence of templates
     For Each objListTemplate In ActiveDocument.ListTemplates
         If objListTemplate.Name = LTname Then
@@ -813,10 +812,8 @@ Private Function CreateListTemplate(LTname As String, numStyle As WdListNumberSt
     If blnLTExists = False Then
         Set objListTemplate = ActiveDocument.ListTemplates.Add _
         (OutlineNumbered:=True, Name:="" & LTname & "")
-        Debug.Print LTname + "here1"
     ElseIf blnLTExists = True Then
         Set objListTemplate = ActiveDocument.ListTemplates(LTname)
-        Debug.Print LTname + "here2"
     End If
     
     '''Update settings for list templates:
@@ -905,12 +902,4 @@ Sub ChangeNoteFonts(docNewTemplate As Document)
         .Font.Size = 12
         .Priority = 1
     End With
-End Sub
-
-Sub exploreLts()
-Dim lt As ListTemplate
-For Each lt In ActiveDocument.ListTemplates
-Debug.Print lt.Name
-Next
-
 End Sub
