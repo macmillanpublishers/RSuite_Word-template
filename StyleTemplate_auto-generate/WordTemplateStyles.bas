@@ -1,5 +1,6 @@
 Attribute VB_Name = "WordTemplateStyles"
 Option Explicit
+
 Dim rngList As Range
 
 ' Subs and Functions in this module require:
@@ -12,7 +13,7 @@ Private Function get24bitColorXLS(p_strRGB) As String
     Dim lngBitColor As Long
     
     'split rgb string into array
-    arrRGB = split(p_strRGB, ",")
+    arrRGB = Split(p_strRGB, ",")
     
     'use RGB function to get 24Bit color value
     lngBitColor = RGB(CInt(arrRGB(0)), CInt(arrRGB(1)), CInt(arrRGB(2)))
@@ -77,7 +78,7 @@ Function getColumnByHeadingValue(p_strFindString As String, p_lngHeaderRow As Lo
     ' exactly matching given string
         
     getColumnByHeadingValue = Sheet1.Cells(p_lngHeaderRow, 1).EntireRow.Find(What:=p_strFindString, LookIn:=xlValues, LookAt:=xlWhole).Column
-  
+
 End Function
 
 Public Sub UpdateRGBsamples()
@@ -330,10 +331,13 @@ Public Sub applyDataValidations()
         .ShowError = True
     End With
     'Apply llnumber enumeration validation -must be 0 I think?
+    ' ^ cannot use this property to directly apply to created style (is read-only)
+    '   but using this to dictate list-levels for listtemplates in create-template macro, _
+    '   so changing to 0-9
     With rngLLNum.Validation
     .Delete
         .Add Type:=xlValidateWholeNumber, AlertStyle:=xlValidAlertStop, _
-        Operator:=xlBetween, Formula1:="0", Formula2:="0"
+        Operator:=xlBetween, Formula1:="0", Formula2:="9"
         .IgnoreBlank = True
         .InCellDropdown = True
         .InputTitle = ""
@@ -434,7 +438,7 @@ Private Function ChangeColorRange(p_rngTarget As Range, p_boolFontOnly As Boolea
             ' this whole next block is to validate our rgb string
             ' make sure we have a string that has two commas
             If Len(strRGB) - Len(Replace(strRGB, ",", "")) = 2 Then
-                strRGBsplit = split(strRGB, ",")
+                strRGBsplit = Split(strRGB, ",")
                 For lngA = 0 To 2
                     ' make each string item  (split on commas) is numeric
                     If IsNumeric(strRGBsplit(lngA)) Then
@@ -475,7 +479,7 @@ Private Function ChangeColorRange(p_rngTarget As Range, p_boolFontOnly As Boolea
     Next
 
 End Function
-Private Function StylesColumnLoop(RowNum As Long, StartColumn As Long) As Dictionary
+Private Function StylesColumnLoop(rowNum As Long, StartColumn As Long) As Dictionary
   ' This sub borrowed and pared down from Erica's for creating jsons frm excel
   ' Creates dictionary of row contents (key = column heading)
   Dim colCount As Long
@@ -491,7 +495,7 @@ Private Function StylesColumnLoop(RowNum As Long, StartColumn As Long) As Dictio
     'make sure our key has a value
     If Not (strKey Like "no_export.*") And Not (strKey Like "html.*") And Not (strKey Like "vba.*") Then
         Debug.Print strKey
-        strValue = rngList.Cells(RowNum, colCount).Value
+        strValue = rngList.Cells(rowNum, colCount).Value
         Debug.Print strValue
         dict_Return.Item(strKey) = strValue
     End If
@@ -571,6 +575,50 @@ Private Function HTMLcolumnLoopC(ColNum As Long, StartRow As Long, nestedChildCo
     Set HTMLcolumnLoopC = parentDict
 End Function
 
+Private Function HTMLcolumnLoopE(ColNum As Long, StartRow As Long, nestedChildColName As String, parentDict As Dictionary, _
+  p_strFormatClassFor As String) As Dictionary
+    ' This sub borrowed and changed from Erica's for creating jsons frm excel
+    ' Creates a subdict dictionary of column contents (key = column childName (passed value)
+    ' nests that subdict in a collection named for the SectionStart classname (passed value)
+    ' adds them all to back to the dict that was passed in; adds subdict/collection to existing or creates new as needed
+    Dim rowCount As Long
+    Dim strKey As String
+    Dim strValue As String
+    Dim coll_Return As Collection
+    Dim dict_subReturn
+    Dim lngClassCol As Long
+    Dim coll As Collection
+
+    Select Case p_strFormatClassFor
+      Case "html"
+      ' Get the index # for column with contents in Row 2 exactly matching: "Class"
+        lngClassCol = getColumnByHeadingValue("Class", 2)
+      Case "vba"
+        lngClassCol = getColumnByHeadingValue("Full_Style_Name", 3)
+    End Select
+    
+    For rowCount = StartRow To rngList.Rows.Count
+        If rngList.Cells(rowCount, ColNum).Value <> vbNullString Then
+            ' reset our subDict for each row with values found
+            'Set dict_subReturn = New Dictionary
+            Set coll_Return = New Collection
+            'strValue = rngList.Cells(rowCount, lngClassCol).Value
+            coll_Return.Add rngList.Cells(rowCount, lngClassCol).Value
+            strKey = rngList.Cells(rowCount, ColNum).Value
+            If Not parentDict.Exists(strKey) Then
+                Set parentDict(strKey) = coll_Return
+            Else
+                Set coll = New Collection
+                Set coll = parentDict(strKey)
+                coll.Add rngList.Cells(rowCount, lngClassCol).Value
+                Set parentDict(strKey) = coll
+            End If
+        End If
+    Next rowCount
+    
+    Set HTMLcolumnLoopE = parentDict
+End Function
+
 
 
 'Private Function HTMLcolumnLoopA(ColNum As Long, StartRow As Long) As Dictionary
@@ -640,9 +688,9 @@ Public Sub StylesToJSON(Optional p_boolUserInteract As Boolean = True)
         ' set the key to value in col A
         strKey1 = rngList.Cells(rowCount, 1).Value
         ' make sure our row has a value in A1
-        If strKey1 <> vbNullString Then
+        If strKey1 <> vbNullString And cellValueCheck("html.legacy", rowCount, True) <> True Then
             ' Loop through each column in row and write to Dictionary
-            Set dict_Record = StylesColumnLoop(RowNum:=rowCount, StartColumn:=lngColStart)
+            Set dict_Record = StylesColumnLoop(rowNum:=rowCount, StartColumn:=lngColStart)
             ' Add dictionary to array or dictionary
             Debug.Print strKey1
             Set dict_Defaults.Item(strKey1) = dict_Record
@@ -659,7 +707,7 @@ Public Sub StylesToJSON(Optional p_boolUserInteract As Boolean = True)
 
     ' Create output file path
     'strPath = ThisWorkbook.Path & Application.PathSeparator & strSheet & ".json"
-    strPath = ThisWorkbook.Path & Application.PathSeparator & "macmillan.json"
+    strPath = ThisWorkbook.Path & Application.PathSeparator & "RSuite.json"
 
     ' write string to file
     fnum = FreeFile
@@ -728,6 +776,7 @@ Public Sub HTMLmappingsToJSON(p_strSearchFor As String, Optional p_boolUserInter
     Dim strColHeaderParent As String
     Dim strColHeaderChild As String
     Dim dict_ParentRecord As Dictionary
+    Dim dict_ParentRecordB As Dictionary
     
     ' Populate our htmlmappings json with data from columns!
     For colCount = 1 To rngList.Columns.Count
@@ -746,9 +795,9 @@ Public Sub HTMLmappingsToJSON(p_strSearchFor As String, Optional p_boolUserInter
         ' switching from above LoopA to get the new nested Collection>dict combo for toplevelheads
         If strColHeader Like p_strSearchFor & ".*.*" Then
             ' this will be the parent dict name
-            strColHeaderParent = split(strColHeader, ".")(1)
+            strColHeaderParent = Split(strColHeader, ".")(1)
             ' this will be passed to the function and used as the inner-dict key
-            strColHeaderChild = split(strColHeader, ".")(2)
+            strColHeaderChild = Split(strColHeader, ".")(2)
             If Not dict_Defaults.Exists(strColHeaderParent) Then
                 Set dict_ParentRecord = New Dictionary
             End If
@@ -758,6 +807,16 @@ Public Sub HTMLmappingsToJSON(p_strSearchFor As String, Optional p_boolUserInter
               nestedChildColName:=strColHeaderChild, parentDict:=dict_ParentRecord, p_strFormatClassFor:=p_strSearchFor)
             ' Add this dict to the main one
             Set dict_Defaults.Item(strColHeaderParent) = dict_ParentRecord
+            
+        ElseIf strColHeader Like p_strSearchFor & ".containerparas" Then
+            If Not dict_Defaults.Exists(strColHeaderParent) Then
+                Set dict_ParentRecordB = New Dictionary
+            End If
+            Set dict_ParentRecordB = HTMLcolumnLoopE(ColNum:=colCount, StartRow:=lngRowStart, _
+              nestedChildColName:=strColHeaderChild, parentDict:=dict_ParentRecordB, p_strFormatClassFor:=p_strSearchFor)
+            ' Add this dict to the main one
+            Set dict_Defaults.Item(strKey1) = dict_ParentRecordB
+            
             
         'find all other Cols with "html.*- these are arrays so we use a collection"
         ElseIf strColHeader Like p_strSearchFor & ".*" Then
@@ -820,6 +879,15 @@ Private Sub autorun_HTMLmappingsToJSON()
     'So if we call this script from outside of excel, the toJson macro doesn't hang on the msgbox!
     Call HTMLmappingsToJSON(p_strSearchFor:="html", p_boolUserInteract:=False)
 End Sub
+Public Sub autorun_VbaTxtFiles()
+    ' This is so we can still run the WriteStyles Macro directly from the "View Macros" menu-
+    ' Even though its public it wasn't appearing b/c of its parameter
+    Call vbaTxtFiles("sections", "vba.sections_menu", p_boolUserInteract:=False)
+    Call vbaTxtFiles("breaks", "vba.breaks_menu", p_boolUserInteract:=False)
+    Call vbaTxtFiles("containers", "vba.containers_menu", p_boolUserInteract:=False)
+    Call vbaTxtFiles("RSuite_styles", "Full_Style_Name", p_boolUserInteract:=False)
+End Sub
+
 
 Public Sub WriteHTMLmappingsToJSON()
     ' This is so we can still run the HTMLmappings Macro directly from the "View Macros" menu-
@@ -848,4 +916,150 @@ Public Sub WriteStylesToJson()
     ' Even though its public it wasn't appearing b/c of its parameter
     Call StylesToJSON
 End Sub
+
+Public Sub WriteVbaTxtFiles()
+    ' This is so we can still run the WriteStyles Macro directly from the "View Macros" menu-
+    ' Even though its public it wasn't appearing b/c of its parameter
+    Call vbaTxtFiles("sections", "vba.sections_menu")
+    Call vbaTxtFiles("breaks", "vba.breaks_menu")
+    Call vbaTxtFiles("containers", "vba.containers_menu")
+    Call vbaTxtFiles("RSuite_styles", "Full_Style_Name")
+End Sub
+
+Function SortArrayAtoZ(myArray As Variant)
+
+Dim i As Long
+Dim j As Long
+Dim Temp
+
+'Sort the Array A-Z
+For i = LBound(myArray) To UBound(myArray) - 1
+    For j = i + 1 To UBound(myArray)
+        If UCase(myArray(i)) > UCase(myArray(j)) Then
+            Temp = myArray(j)
+            myArray(j) = myArray(i)
+            myArray(i) = Temp
+        End If
+    Next j
+Next i
+
+SortArrayAtoZ = myArray
+
+End Function
+'
+Public Sub vbaTxtFiles(filebasename As String, col_Name As String, Optional p_boolUserInteract As Boolean = True)
+  ' This sub borrowed and pared down from Erica's for creating jsons frm excel
+    ' Creates an array of objects, each object uses header for key and
+    ' one object for each row. Column headers are keys.
+    ' "p_boolUserInteract" is so we can disable msgbox if autorunning via powershell
+    
+    Workbooks("WordTemplateStyles.xlsm").Activate
+    Worksheets("Styles").Activate
+    
+    ActiveSheet.Unprotect
+    Application.ScreenUpdating = False
+    
+    ' Get active range
+    Range("A1").Activate
+    Set rngList = ActiveCell.CurrentRegion
+    
+    ' Determine which sheet we're working with, set variables
+    Dim strSheet As String
+    strSheet = ActiveSheet.Name
+    Debug.Print "strSheet is : " & strSheet
+
+    ' Loop through rows
+    Dim rowCount As Long
+    Dim colCount As Long
+    Dim lngIndex As Long
+    Dim lngsectioncol As Long
+    Dim string_txtfiletext As String
+    Dim sectionArray() As String
+    Dim i As Long
+    
+    ' get key column for values
+    For colCount = 1 To rngList.Columns.Count
+        If rngList.Cells(3, colCount).Value = col_Name Then
+            lngsectioncol = colCount
+            Debug.Print (lngsectioncol)
+            Debug.Print (rngList.Cells(5, lngsectioncol).Value)
+        End If
+    Next colCount
+     
+    i = 0
+    ReDim sectionArray(1)
+    
+    ' Start at 4, header row, property info rows: don't count
+    For rowCount = 4 To rngList.Rows.Count
+        If rngList.Cells(rowCount, lngsectioncol).Value <> vbNullString And cellValueCheck("html.legacy", rowCount, True) <> True Then
+            ReDim Preserve sectionArray(i)
+            If filebasename = "RSuite_styles" Then
+                string_txtfiletext = rngList.Cells(rowCount, 1).Value
+            Else
+                string_txtfiletext = rngList.Cells(rowCount, 1).Value & ", " & rngList.Cells(rowCount, lngsectioncol)
+            End If
+            sectionArray(i) = string_txtfiletext
+            i = i + 1
+        End If
+    Next rowCount
+    
+    If filebasename <> "containers" Then
+        sectionArray = SortArrayAtoZ(sectionArray)
+    End If
+    
+    Dim stringSectionsfromarray As String
+    stringSectionsfromarray = Join(sectionArray, vbNewLine)
+
+    ' write our file
+    Dim strPath As String
+    Dim fnum As Long
+
+    ' Create output file path
+    strPath = ThisWorkbook.Path & Application.PathSeparator & filebasename & ".txt"
+
+    ' write string to file
+    fnum = FreeFile
+    ' creates the file if it doesn't exist, overwrites if it does
+    Open strPath For Output Access Write As #fnum
+    Print #fnum, stringSectionsfromarray
+    Close #fnum
+
+
+    If p_boolUserInteract = True Then
+        MsgBox "Done writing " & filebasename & ".txt!"
+    End If
+    
+    Application.ScreenUpdating = True
+    ActiveSheet.Protect DrawingObjects:=True, Contents:=True, Scenarios:=True _
+        , AllowFormattingCells:=True, AllowFormattingColumns:=True, _
+        AllowFormattingRows:=True, AllowInsertingColumns:=True, AllowInsertingRows _
+        :=True, AllowDeletingColumns:=True, AllowDeletingRows:=True, AllowSorting _
+        :=True, AllowFiltering:=True
+    
+End Sub
+
+Function cellValueCheck(col_Name As String, row_Num As Long, expectedCellValue As Boolean) As Boolean
+
+   ' Loop through rows
+    Dim colCount As Long
+    Dim lngsectioncol As Long
+    Dim i As Long
+    
+    ' get key column for values
+    'For colCount = 1 To rngList.Columns.Count
+     '   If rngList.Cells(3, colCount).Value = col_Name Then
+        colCount = getColumnByHeadingValue(col_Name, 3)
+            lngsectioncol = colCount
+            Debug.Print (rngList.Cells(5, colCount).Value)
+            Debug.Print (rngList.Cells(row_Num, colCount).Value)
+            If expectedCellValue = rngList.Cells(row_Num, colCount).Value Then
+                cellValueCheck = True
+            Else
+                cellValueCheck = False
+            End If
+      '  End If
+   ' Next colCount
+    
+End Function
+
 

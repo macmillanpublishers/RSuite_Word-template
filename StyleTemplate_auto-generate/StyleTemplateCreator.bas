@@ -451,6 +451,7 @@ Private Function WriteTemplatefromJsonCore(Optional p_boolNoColor As Boolean = F
     Dim objChecklistLT As ListTemplate
     Dim objNumberLT As ListTemplate
     Dim objAlphaLT As ListTemplate
+    Dim objNumParaLT As ListTemplate
     
     ' file paths
     strJsonPath = ThisDocument.Path & Application.PathSeparator & "RSuite.json"
@@ -480,6 +481,7 @@ Private Function WriteTemplatefromJsonCore(Optional p_boolNoColor As Boolean = F
     Set objChecklistLT = CreateListTemplate("objChecklistLT", wdListNumberStyleBullet, ChrW(61692), "Wingdings")
     Set objNumberLT = CreateListTemplate("objNumberLT", wdListNumberStyleArabic, "%1.")
     Set objAlphaLT = CreateListTemplate("objAlphaLT", wdListNumberStyleLowercaseLetter)
+    Set objNumParaLT = CreateListTemplate("objNumParaLT", wdListNumberStyleArabic, "%1.")
     
     ' how often we save and undo.clear on doc to prevent memory errs
     If IsMac Then
@@ -596,18 +598,30 @@ Private Function WriteTemplatefromJsonCore(Optional p_boolNoColor As Boolean = F
             End If
             docTemplate.Styles(strStylename).Frame.Delete
             'Add bullets or checklist symbols by linking to our ListTemplates:
+            
             If dictStyle_dict(strStylename).Item("Bullet") = True Then
-                docTemplate.Styles(strStylename).LinkToListTemplate _
-                ListTemplate:=objBulletLT, ListLevelNumber:=1
+                With objBulletLT.ListLevels(1)     'matching list levels does not seem to matter much except for resetting counts
+                    .LinkedStyle = strStylename
+                End With
             ElseIf dictStyle_dict(strStylename).Item("Checklist") = True Then
-                docTemplate.Styles(strStylename).LinkToListTemplate _
-                ListTemplate:=objChecklistLT, ListLevelNumber:=1
-            ElseIf dictStyle_dict(strStylename).Item("NumberWithDot") = True Then
-                docTemplate.Styles(strStylename).LinkToListTemplate _
-                ListTemplate:=objNumberLT, ListLevelNumber:=1
+                With objChecklistLT.ListLevels(1)   'matching list levels does not seem to matter much except for resetting counts
+                    .LinkedStyle = strStylename
+                End With
+            ElseIf dictStyle_dict(strStylename).Item("NumberWithDot") = True And _
+                dictStyle_dict(strStylename).Item("ListLevelNumber") <> 0 Then
+                With objNumberLT.ListLevels(dictStyle_dict(strStylename).Item("ListLevelNumber"))
+                    .LinkedStyle = strStylename
+                End With
             ElseIf dictStyle_dict(strStylename).Item("LowerLetterWithBracket") = True Then
-                docTemplate.Styles(strStylename).LinkToListTemplate _
-                ListTemplate:=objAlphaLT, ListLevelNumber:=1
+                With objAlphaLT.ListLevels(dictStyle_dict(strStylename).Item("ListLevelNumber"))
+                    .LinkedStyle = strStylename
+                End With
+            ' numbered paras are being set with list=level = 0. If we change that we could scan for stylename includes 'para'
+            ElseIf dictStyle_dict(strStylename).Item("NumberWithDot") = True And _
+                dictStyle_dict(strStylename).Item("ListLevelNumber") = 0 Then
+                With objNumParaLT.ListLevels(1)     'manually setting list level to '1'
+                    .LinkedStyle = strStylename
+                End With
             End If
         ''' For Character styles only:
         ElseIf dictStyle_dict(strStylename).Item("Type") = 2 Then
@@ -786,7 +800,7 @@ Private Function CreateListTemplate(LTname As String, numStyle As WdListNumberSt
     Dim blnLTExists As Boolean
     
     blnLTExists = False
-    
+    Debug.Print LTname + "checking"
     '''Check for existence of templates
     For Each objListTemplate In ActiveDocument.ListTemplates
         If objListTemplate.Name = LTname Then
@@ -799,8 +813,10 @@ Private Function CreateListTemplate(LTname As String, numStyle As WdListNumberSt
     If blnLTExists = False Then
         Set objListTemplate = ActiveDocument.ListTemplates.Add _
         (OutlineNumbered:=True, Name:="" & LTname & "")
+        Debug.Print LTname + "here1"
     ElseIf blnLTExists = True Then
         Set objListTemplate = ActiveDocument.ListTemplates(LTname)
+        Debug.Print LTname + "here2"
     End If
     
     '''Update settings for list templates:
@@ -818,9 +834,35 @@ Private Function CreateListTemplate(LTname As String, numStyle As WdListNumberSt
         End If
     End With
     
+    '''IF this is a sequential list type, create a couple lower list levels!
+    If LTname = "objNumberLT" Or LTname = "objAlphaLT" Then
+        With objListTemplate.ListLevels(1)
+            .ResetOnHigher = True
+            .StartAt = 1
+        End With
+        With objListTemplate.ListLevels(2)
+            If LTname = "objNumberLT" Then
+                .NumberFormat = "%2."
+            End If
+            .NumberStyle = numStyle
+            .ResetOnHigher = True
+            .StartAt = 1
+        End With
+        With objListTemplate.ListLevels(3)
+            If LTname = "objNumberLT" Then
+                .NumberFormat = "%3."
+            End If
+            .NumberStyle = numStyle
+            .ResetOnHigher = True
+            .StartAt = 1
+        End With
+    End If
+    
     Set CreateListTemplate = objListTemplate
 
 End Function
+
+
 
 Private Sub LowerPriorityBuiltInStyles(docTemplate As Document)
 Dim q As Long
@@ -856,10 +898,19 @@ Sub ChangeNoteFonts(docNewTemplate As Document)
         .Font.Name = "Times New Roman"
         .Font.Size = 12
         .Priority = 1
+        .ParagraphFormat.LineSpacingRule = 2
     End With
     With docNewTemplate.Styles("Footnote Text")
         .Font.Name = "Times New Roman"
         .Font.Size = 12
         .Priority = 1
     End With
+End Sub
+
+Sub exploreLts()
+Dim lt As ListTemplate
+For Each lt In ActiveDocument.ListTemplates
+Debug.Print lt.Name
+Next
+
 End Sub
