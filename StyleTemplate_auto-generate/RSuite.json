@@ -6320,7 +6320,7 @@
     "Font.Borders(1).LineWidth": "",
     "Font.Shading.BackgroundPatternColor": "",
     "BaseStyle": "Normal",
-    "ListLevelNumber": "0",
+    "ListLevelNumber": "1",
     "NoProofing": "False"
   },
   "Num-Level-1-List-Paragraph (Nl1p)": {
@@ -6456,7 +6456,7 @@
     "Font.Borders(1).LineWidth": "",
     "Font.Shading.BackgroundPatternColor": "",
     "BaseStyle": "Normal",
-    "ListLevelNumber": "0",
+    "ListLevelNumber": "2",
     "NoProofing": "False"
   },
   "Num-Level-2-List-Paragraph (Nl2p)": {
@@ -6592,7 +6592,7 @@
     "Font.Borders(1).LineWidth": "",
     "Font.Shading.BackgroundPatternColor": "",
     "BaseStyle": "Normal",
-    "ListLevelNumber": "0",
+    "ListLevelNumber": "3",
     "NoProofing": "False"
   },
   "Num-Level-3-List-Paragraph (Nl3p)": {
@@ -7136,7 +7136,7 @@
     "Font.Borders(1).LineWidth": "",
     "Font.Shading.BackgroundPatternColor": "",
     "BaseStyle": "Normal",
-    "ListLevelNumber": "0",
+    "ListLevelNumber": "1",
     "NoProofing": "False"
   },
   "Alpha-Level-1-List-Paragraph (Al1p)": {
@@ -7272,7 +7272,7 @@
     "Font.Borders(1).LineWidth": "",
     "Font.Shading.BackgroundPatternColor": "",
     "BaseStyle": "Normal",
-    "ListLevelNumber": "0",
+    "ListLevelNumber": "2",
     "NoProofing": "False"
   },
   "Alpha-Level-2-List-Paragraph (Al2p)": {
@@ -7408,7 +7408,7 @@
     "Font.Borders(1).LineWidth": "",
     "Font.Shading.BackgroundPatternColor": "",
     "BaseStyle": "Normal",
-    "ListLevelNumber": "0",
+    "ListLevelNumber": "3",
     "NoProofing": "False"
   },
   "Alpha-Level-3-List-Paragraph (Al3p)": {
