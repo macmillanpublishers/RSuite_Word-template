@@ -134,9 +134,13 @@ Sub Spaces(MyStoryNo)
     'multiple spaces to one space
     Clean_helpers.FindReplaceComplex_WithExclude " {2,}", " ", False, True, , , MyStoryNo
     'soft returns to hard returns
+    '  note: replacing with ^p using WithExclude function requires 'vbnewline' instead
     Clean_helpers.FindReplaceSimple_WithExclude "^l", vbNewLine, MyStoryNo
-        ' ^ replacing with ^p with WithExclude function must be done with vbnewline instead
-    'spaces before/after line breaks
+    'spaces before/after line breaks; run 'trim spaces' beforehand for Note storys:
+    '  as per wdv-354 bug
+    If MyStoryNo = 2 Or MyStoryNo = 3 Then
+        Clean_helpers.TrimNoteSpaces (MyStoryNo)
+    End If
     Clean_helpers.FindReplaceSimple_WithExclude ChrW(13) + " ", vbNewLine, MyStoryNo
     Clean_helpers.FindReplaceSimple " " + ChrW(13), "^p", MyStoryNo
     Clean_helpers.FindReplaceSimple_WithExclude "^p ", vbNewLine, MyStoryNo
