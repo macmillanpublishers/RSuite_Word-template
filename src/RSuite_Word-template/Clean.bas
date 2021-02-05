@@ -1055,11 +1055,11 @@ Sub CheckAppliedCharStyles(MyStoryNo)
             With Selection.Find
                 .Style = ActiveDocument.Styles(MyStyle)
                 .Execute
+                
             End With
 
             Do While Selection.Find.Found
                 numChars = Selection.Characters.Count
-
                 ' cycle through characters of selected range
                 For k = 1 To numChars
                     Set selectedChar = Selection.Characters(k)
@@ -1149,8 +1149,16 @@ Sub CheckAppliedCharStyles(MyStoryNo)
                             If Not strk Then selectedChar.Style = defaultStyle
 
                     End Select
-                 Next k
+                Next k
+                ' \/ this Collapse assures that the selection keeps moving forward & all items are found
+                Selection.Collapse Direction:=wdCollapseEnd
                 If Clean_helpers.EndOfStoryReached(MyStoryNo) Then Exit Do
+                ' this prevents getting stuck in a table cell (wdv-359)
+                If Selection.Tables.Count <> 0 Then
+                    If Clean_helpers.EndofTableCellReached Then
+                        Selection.MoveRight Unit:=wdCharacter, Count:=1
+                    End If
+                End If
                 Selection.Find.Execute
             Loop
         Next

@@ -522,15 +522,14 @@ TestFail:
 End Sub
 
 '@TestMethod("CharStylesMacro")
-Private Sub TestLocalFormatting_footnotes() 'TODO Rename test
+Private Sub TestLocalFormatting_tables() 'TODO Rename test
     Dim results_actual As Range, results_expected As Range
     Dim testResultsDocx As Document
     Dim result_compareStr As String
     On Error GoTo TestFail
     'Arrange:
-        Const C_PROC_NAME = "TestLocalFormatting"  '<-- name of this test procedure
-        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
-        copyBodyContentsToFootNotes
+        Const C_PROC_NAME = "TestLocalFormatting_tables"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
     'Act:
         Call Clean.LocalFormatting(MyStoryNo)
         Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
@@ -544,6 +543,41 @@ Private Sub TestLocalFormatting_footnotes() 'TODO Rename test
     'Assert:
         Assert.Succeed
         Assert.AreEqual "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CharStylesMacro")
+Private Sub TestLocalFormatting_footnotes() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range, results_tables_actual As Range, results_tables_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String, results_tables_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToFootNotes
+    'Act:
+        Call Clean.LocalFormatting(MyStoryNo)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+    'Compare function 1
+        Set results_actual = TestHelpers.returnTestResultRange("TestLocalFormatting", MyStoryNo, testDocx)
+        Set results_expected = TestHelpers.returnTestResultRange("TestLocalFormatting", 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+    'Compare function 2
+        Set results_tables_actual = TestHelpers.returnTestResultRange("TestLocalFormatting_tables", MyStoryNo, testDocx)
+        Set results_tables_expected = TestHelpers.returnTestResultRange("TestLocalFormatting_tables", 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        results_tables_compareStr = TestHelpers.compareRanges(results_tables_actual, results_tables_expected)
+    ' Close results doc
+        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual "Same", result_compareStr
+        Assert.AreEqual "Same", results_tables_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -552,27 +586,33 @@ End Sub
 
 '@TestMethod("CharStylesMacro")
 Private Sub TestLocalFormatting_endnotes() 'TODO Rename test
-    Dim results_actual As Range, results_expected As Range
+    Dim results_actual As Range, results_expected As Range, results_tables_actual As Range, results_tables_expected As Range
     Dim testResultsDocx As Document
-    Dim result_compareStr As String
+    Dim result_compareStr As String, results_tables_compareStr As String
     On Error GoTo TestFail
     'Arrange:
-        Const C_PROC_NAME = "TestLocalFormatting"  '<-- name of this test procedure
         MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
         copyBodyContentsToEndNotes
     'Act:
         Call Clean.LocalFormatting(MyStoryNo)
-        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
         ' Create new results docx from template
         Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
-        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+    'Compare function 1
+        Set results_actual = TestHelpers.returnTestResultRange("TestLocalFormatting", MyStoryNo, testDocx)
+        Set results_expected = TestHelpers.returnTestResultRange("TestLocalFormatting", 1, testResultsDocx)
         ' Compare known good output and output from just now
         result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
-        ' Close results doc
+    'Compare function 2
+        Set results_tables_actual = TestHelpers.returnTestResultRange("TestLocalFormatting_tables", MyStoryNo, testDocx)
+        Set results_tables_expected = TestHelpers.returnTestResultRange("TestLocalFormatting_tables", 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        results_tables_compareStr = TestHelpers.compareRanges(results_tables_actual, results_tables_expected)
+    ' Close results doc
         Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
         Assert.AreEqual "Same", result_compareStr
+        Assert.AreEqual "Same", results_tables_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -581,29 +621,36 @@ End Sub
 
 '@TestMethod("CharStylesMacro")
 Private Sub TestLocalFormatting_secondrun() 'TODO Rename test
-    Dim results_actual As Range, results_expected As Range
+    Dim results_actual As Range, results_expected As Range, results_tables_actual As Range, results_tables_expected As Range
     Dim testResultsDocx As Document
-    Dim result_compareStr As String
+    Dim result_compareStr As String, results_tables_compareStr As String
     On Error GoTo TestFail
-    'Arrange:
-        Const C_PROC_NAME = "TestLocalFormatting"  '<-- name of this test procedure
-        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
     'Act:
         Call Clean.LocalFormatting(MyStoryNo)
         Call Clean.LocalFormatting(MyStoryNo)
-        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
         ' Create new results docx from template
         Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
-        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+    'Compare function 1
+        Set results_actual = TestHelpers.returnTestResultRange("TestLocalFormatting", MyStoryNo, testDocx)
+        Set results_expected = TestHelpers.returnTestResultRange("TestLocalFormatting", 1, testResultsDocx)
         ' Compare known good output and output from just now
         result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
-        ' Close results doc
+    'Compare function 2
+        Set results_tables_actual = TestHelpers.returnTestResultRange("TestLocalFormatting_tables", MyStoryNo, testDocx)
+        Set results_tables_expected = TestHelpers.returnTestResultRange("TestLocalFormatting_tables", 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        results_tables_compareStr = TestHelpers.compareRanges(results_tables_actual, results_tables_expected)
+    ' Close results doc
         Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
         Assert.AreEqual "Same", result_compareStr
+        Assert.AreEqual "Same", results_tables_compareStr
 TestExit:
     Exit Sub
 TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
+
+
+

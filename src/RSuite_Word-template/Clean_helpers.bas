@@ -151,7 +151,27 @@ Public Function EndOfDocumentReached() As Boolean
     End Select
 End Function
 
+Public Function EndofTableCellReached()
+    If Selection.Tables.Count <> 0 Then
+        Select Case Selection.Cells(1).Range.End
+            Case Selection.End, Selection.End + 1
+                EndofTableCellReached = True
+            Case Else
+                EndofTableCellReached = False
+        End Select
+    End If
+End Function
 
+Public Function EndofTableReached()
+    If Selection.Tables.Count <> 0 Then
+        Select Case Selection.Tables(1).Range.End
+            Case Selection.End, Selection.End + 1, Selection.End + 2
+                EndofTableReached = True
+            Case Else
+                EndofTableReached = False
+        End Select
+    End If
+End Function
 
 Public Function EndOfStoryReached(storyNumber As Variant) As Boolean
     Select Case ActiveDocument.StoryRanges(storyNumber).End
@@ -326,6 +346,9 @@ Public Function ConvertLocalFormatting(MyStoryNo, Optional ByVal ItalTF As Boole
                     If oStyle = "Endnote Reference" Then
                         GoTo NextOne
                     End If
+                ' vbcr + chr7 combine to make table 'end-of-cell' character.
+                ElseIf Selection.Tables.Count <> 0 And CurrSel = vbCr + Chr(7) Then
+                    GoTo NextOne
                 End If
                 
                 If CurrSel = vbCr Or CurrSel = vbLf Or CurrSel = vbCrLf Or CurrSel = vbNewLine Or CurrSel = "" Then
