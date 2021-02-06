@@ -498,6 +498,35 @@ Private Function WriteTemplatefromJsonCore(Optional p_boolNoColor As Boolean = F
 
         ''CREATE THE STYLE!
         docTemplate.Styles.Add Name:=strStylename, Type:=dictStyle_dict(strStylename).Item("Type")
+            ' Setup list templates list-levels for applicable styles!
+            ' Add bullets or checklist symbols by linking to our ListTemplates:
+            '' <WDV-351>: turns out properly adding bullet and unnum list items
+            ''  to list templates overrides their settings coming from spreadsheet,
+            ''  and is not otherwise necessary: this link cmd does the trick for bullets just fine
+            If dictStyle_dict(strStylename).Item("Bullet") = True Then
+                docTemplate.Styles(strStylename).LinkToListTemplate _
+                ListTemplate:=objBulletLT, ListLevelNumber:=1
+            'ElseIf dictStyle_dict(strStylename).Item("Checklist") = True Then
+            '    With objChecklistLT.ListLevels(1)   'matching list levels does not seem to matter much except for resetting counts
+            '        .LinkedStyle = strStylename
+            '    End With
+            ElseIf dictStyle_dict(strStylename).Item("NumberWithDot") = True And _
+                dictStyle_dict(strStylename).Item("ListLevelNumber") <> 0 Then
+                With objNumberLT.ListLevels(dictStyle_dict(strStylename).Item("ListLevelNumber"))
+                    .LinkedStyle = strStylename
+                End With
+            ElseIf dictStyle_dict(strStylename).Item("LowerLetterWithBracket") = True Then
+                With objAlphaLT.ListLevels(dictStyle_dict(strStylename).Item("ListLevelNumber"))
+                    .LinkedStyle = strStylename
+                End With
+            ' numbered paras are being set with list=level = 0. If we change that we could scan for stylename includes 'para'
+            ElseIf dictStyle_dict(strStylename).Item("NumberWithDot") = True And _
+                dictStyle_dict(strStylename).Item("ListLevelNumber") = 0 Then
+                With objNumParaLT.ListLevels(1)     'manually setting list level to '1'
+                    .LinkedStyle = strStylename
+                End With
+            End If
+            
             With docTemplate.Styles(strStylename).Font
                 .Name = dictStyle_dict(strStylename).Item("Font.name")
                 .Size = Val(dictStyle_dict(strStylename).Item("Font.Size"))
@@ -597,32 +626,6 @@ Private Function WriteTemplatefromJsonCore(Optional p_boolNoColor As Boolean = F
                 End With
             End If
             docTemplate.Styles(strStylename).Frame.Delete
-            'Add bullets or checklist symbols by linking to our ListTemplates:
-            
-            If dictStyle_dict(strStylename).Item("Bullet") = True Then
-                With objBulletLT.ListLevels(1)     'matching list levels does not seem to matter much except for resetting counts
-                    .LinkedStyle = strStylename
-                End With
-            ElseIf dictStyle_dict(strStylename).Item("Checklist") = True Then
-                With objChecklistLT.ListLevels(1)   'matching list levels does not seem to matter much except for resetting counts
-                    .LinkedStyle = strStylename
-                End With
-            ElseIf dictStyle_dict(strStylename).Item("NumberWithDot") = True And _
-                dictStyle_dict(strStylename).Item("ListLevelNumber") <> 0 Then
-                With objNumberLT.ListLevels(dictStyle_dict(strStylename).Item("ListLevelNumber"))
-                    .LinkedStyle = strStylename
-                End With
-            ElseIf dictStyle_dict(strStylename).Item("LowerLetterWithBracket") = True Then
-                With objAlphaLT.ListLevels(dictStyle_dict(strStylename).Item("ListLevelNumber"))
-                    .LinkedStyle = strStylename
-                End With
-            ' numbered paras are being set with list=level = 0. If we change that we could scan for stylename includes 'para'
-            ElseIf dictStyle_dict(strStylename).Item("NumberWithDot") = True And _
-                dictStyle_dict(strStylename).Item("ListLevelNumber") = 0 Then
-                With objNumParaLT.ListLevels(1)     'manually setting list level to '1'
-                    .LinkedStyle = strStylename
-                End With
-            End If
         ''' For Character styles only:
         ElseIf dictStyle_dict(strStylename).Item("Type") = 2 Then
             '' Borders & Shading for Character styles
@@ -822,8 +825,9 @@ Private Function CreateListTemplate(LTname As String, numStyle As WdListNumberSt
             .NumberFormat = numFormat
         End If
         .NumberStyle = numStyle
-        .TextPosition = CentimetersToPoints(0.75)
-        .TabPosition = CentimetersToPoints(1.25)
+        '.TextPosition = 18 'CentimetersToPoints(0.75)
+        '.trailingCharacter = wdTrailingSpace
+        '.TabPosition = 36 'CentimetersToPoints(1.25)
         If fontName <> "" Then
             With .Font
                 .Name = fontName
@@ -843,6 +847,7 @@ Private Function CreateListTemplate(LTname As String, numStyle As WdListNumberSt
             End If
             .NumberStyle = numStyle
             .ResetOnHigher = True
+            '.trailingCharacter = wdTrailingSpace
             .StartAt = 1
         End With
         With objListTemplate.ListLevels(3)
@@ -851,6 +856,7 @@ Private Function CreateListTemplate(LTname As String, numStyle As WdListNumberSt
             End If
             .NumberStyle = numStyle
             .ResetOnHigher = True
+            '.trailingCharacter = wdTrailingSpace
             .StartAt = 1
         End With
     End If
