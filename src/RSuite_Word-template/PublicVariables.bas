@@ -2,7 +2,8 @@ Attribute VB_Name = "PublicVariables"
 Public OPTHYPH, OPTHYPH2, NBHYPH, NBHYPH2, SOQ, SCQ, DOQ, DCQ, DP, SP, aSPACE, RTN, RTN2, EMDASH, ENDASH, ELLIPSIS_SYM, TEMP_ELL, _
 NBS_ELLIPSIS, PERIOD_ELLIPSIS, ELLIPSIS, QUOTE_ELLIPSIS, EMDASH_ELLIPSIS, NBSP, NBSPchar, aTAB As String
 Public pBar As Progress_Bar
-Public partialStatus, completeStatus As String
+Public lastUpdate, completeStatus As String
+Public pBarCounter As Long
 Public MyStoryNo As Integer
 Public myRibbon As IRibbonUI
 Public endCharCheck As Boolean

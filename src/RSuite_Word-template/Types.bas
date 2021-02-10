@@ -10,5 +10,6 @@ Type tpOptions
     DeleteMarkup As Boolean
     DeleteObjects As Boolean
     RemoveHyperlinks As Boolean
+    IncludeNotes As Boolean
 End Type
 

@@ -82,6 +82,7 @@ Private Sub ModuleInitialize()
     SetResultStrings
     Application.ScreenUpdating = False
     Set pBar = New Progress_Bar
+    pBarCounter = 0
 End Sub
 
 '@ModuleCleanup
@@ -341,38 +342,25 @@ TestFail:
 End Sub
 
 '@TestMethod("CleanupMacro_special")
-Private Sub TestObjects() 'TODO Rename test
+Private Sub TestObjects_secondrun() 'TODO Rename test
     Dim init_shape_count As Integer, init_frame_count As Integer, init_ishape_count As Integer, _
         final_shape_count As Integer, final_frame_count As Integer, final_ishape_count As Integer
     On Error GoTo TestFail
     'Arrange:
     'Act:
         init_shape_count = ActiveDocument.Shapes.Count
-        init_frame_count = ActiveDocument.StoryRanges(1).Frames.Count _
-            + ActiveDocument.StoryRanges(2).Frames.Count _
-            + ActiveDocument.StoryRanges(3).Frames.Count
-        init_ishape_count = ActiveDocument.StoryRanges(1).InlineShapes.Count _
-            + ActiveDocument.StoryRanges(2).InlineShapes.Count _
-            + ActiveDocument.StoryRanges(3).InlineShapes.Count
+        init_frame_count = ActiveDocument.StoryRanges(1).Frames.Count
+        init_ishape_count = ActiveDocument.StoryRanges(1).InlineShapes.Count
         Call Clean.DeleteObjects(1)
-        Call Clean.DeleteObjects(2)
-        Call Clean.DeleteObjects(3)
+        Call Clean.DeleteObjects(1)
         final_shape_count = ActiveDocument.Shapes.Count
-        final_frame_count = ActiveDocument.StoryRanges(1).Frames.Count _
-            + ActiveDocument.StoryRanges(2).Frames.Count _
-            + ActiveDocument.StoryRanges(3).Frames.Count
-        final_ishape_count = ActiveDocument.StoryRanges(1).InlineShapes.Count _
-            + ActiveDocument.StoryRanges(2).InlineShapes.Count _
-            + ActiveDocument.StoryRanges(3).InlineShapes.Count
-        'doing a second run just to verify success on a second run, no need to test for '0' count again.
-        Call Clean.DeleteObjects(1)
-        Call Clean.DeleteObjects(2)
-        Call Clean.DeleteObjects(3)
+        final_frame_count = ActiveDocument.StoryRanges(1).Frames.Count
+        final_ishape_count = ActiveDocument.StoryRanges(1).InlineShapes.Count
     'Assert:
         Assert.Succeed
         Assert.AreEqual OB_shapes_expected, init_shape_count
         Assert.AreEqual OB_frames_expected, init_frame_count
-        Assert.AreEqual OB_ishapes_expected + OB_en_ishapes_expected + OB_fn_ishapes_expected, init_ishape_count
+        Assert.AreEqual OB_ishapes_expected, init_ishape_count
         Assert.AreEqual 0, final_shape_count
         Assert.AreEqual 0, final_frame_count
         Assert.AreEqual 0, final_ishape_count
@@ -381,4 +369,66 @@ TestExit:
 TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
+
+'@TestMethod("CleanupMacro_special")
+Private Sub TestObjects_notes() 'TODO Rename test
+    Dim init_shape_count As Integer, init_frame_count As Integer, init_ishape_count As Integer, _
+        final_shape_count As Integer, final_frame_count As Integer, final_ishape_count As Integer
+    On Error GoTo TestFail
+    'Arrange:
+    'Act:
+        init_shape_count = ActiveDocument.Shapes.Count
+        init_frame_count = ActiveDocument.StoryRanges(2).Frames.Count _
+            + ActiveDocument.StoryRanges(3).Frames.Count
+        init_ishape_count = ActiveDocument.StoryRanges(2).InlineShapes.Count _
+            + ActiveDocument.StoryRanges(3).InlineShapes.Count
+        Call Clean.DeleteObjects(2)
+        Call Clean.DeleteObjects(3)
+        final_shape_count = ActiveDocument.Shapes.Count
+        final_frame_count = ActiveDocument.StoryRanges(2).Frames.Count _
+            + ActiveDocument.StoryRanges(3).Frames.Count
+        final_ishape_count = ActiveDocument.StoryRanges(2).InlineShapes.Count _
+            + ActiveDocument.StoryRanges(3).InlineShapes.Count
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual OB_shapes_expected, init_shape_count
+        Assert.AreEqual 0, init_frame_count 'Was unable to create Frame in notes.
+        Assert.AreEqual OB_en_ishapes_expected + OB_fn_ishapes_expected, init_ishape_count
+        Assert.AreEqual 0, final_shape_count
+        Assert.AreEqual 0, final_frame_count
+        Assert.AreEqual 0, final_ishape_count
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("CleanupMacro_special")
+Private Sub TestObjects() 'TODO Rename test
+    Dim init_shape_count As Integer, init_frame_count As Integer, init_ishape_count As Integer, _
+        final_shape_count As Integer, final_frame_count As Integer, final_ishape_count As Integer
+    On Error GoTo TestFail
+    'Arrange:
+    'Act:
+        init_shape_count = ActiveDocument.Shapes.Count
+        init_frame_count = ActiveDocument.StoryRanges(1).Frames.Count
+        init_ishape_count = ActiveDocument.StoryRanges(1).InlineShapes.Count
+        Call Clean.DeleteObjects(1)
+        final_shape_count = ActiveDocument.Shapes.Count
+        final_frame_count = ActiveDocument.StoryRanges(1).Frames.Count
+        final_ishape_count = ActiveDocument.StoryRanges(1).InlineShapes.Count
+    'Assert:
+        Assert.Succeed
+        Assert.AreEqual OB_shapes_expected, init_shape_count
+        Assert.AreEqual OB_frames_expected, init_frame_count
+        Assert.AreEqual OB_ishapes_expected, init_ishape_count
+        Assert.AreEqual 0, final_shape_count
+        Assert.AreEqual 0, final_frame_count
+        Assert.AreEqual 0, final_ishape_count
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
 

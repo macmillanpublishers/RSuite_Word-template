@@ -42,6 +42,7 @@ Private Sub ModuleInitialize()
     SetResultStrings
     Application.ScreenUpdating = False
     Set pBar = New Progress_Bar
+    pBarCounter = 0
 End Sub
 
 '@ModuleCleanup
