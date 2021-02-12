@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} CleanupOptions 
    Caption         =   "Cleanup Options"
-   ClientHeight    =   7021
-   ClientLeft      =   91
-   ClientTop       =   406
-   ClientWidth     =   6041
+   ClientHeight    =   7332
+   ClientLeft      =   96
+   ClientTop       =   408
+   ClientWidth     =   6036
    OleObjectBlob   =   "CleanupOptions.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -30,8 +30,14 @@ Private Sub cbOK_Click()
     o.DeleteMarkup = chkDeleteMarkup.value
     o.DeleteObjects = chkDeleteBookmarks.value
     o.RemoveHyperlinks = chkRemoveHyperlinks.value
+    o.IncludeNotes = chkIncludeNotes.value
+    
     Unload CleanupOptions
     Clean_Start.StartCleanup opts:=o
+
+End Sub
+
+Private Sub CheckBox1_Click()
 
 End Sub
 
@@ -55,5 +61,6 @@ Private Sub UserForm_Initialize()
     chkDeleteMarkup.value = True
     chkDeleteBookmarks.value = True
     chkRemoveHyperlinks.value = True
+    chkIncludeNotes.value = True
 
 End Sub

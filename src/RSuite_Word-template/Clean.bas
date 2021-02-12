@@ -898,6 +898,7 @@ Function DeleteBookmarks()
     
 End Function
 
+
 Function DeleteObjects(MyStoryNo)
 
     thisStatus = "Deleting Objects "
@@ -909,29 +910,35 @@ Function DeleteObjects(MyStoryNo)
     Dim R As Range
     Dim G As Integer
     Dim TB As TextFrame
+    Dim shape_count As Long
     
-    For Each s In ActiveDocument.Shapes
-        If s.Type = msoTextBox Then
-            s.Anchor.Select
-            Selection.MoveLeft Unit:=wdCharacter
-            Selection.MoveDown Unit:=wdParagraph
-            Selection.TypeText s.TextFrame.TextRange.Text
-            s.Delete
-        ElseIf s.Type = msoGroup Then
-            For G = 1 To s.GroupItems.Count
-                If s.GroupItems(G).Type = 17 Then
-                    Set TB = s.GroupItems(G).TextFrame
-                    s.Anchor.Select
-                    Selection.MoveLeft Unit:=wdCharacter
-                    Selection.MoveDown Unit:=wdParagraph
-                    Selection.TypeText TB.TextRange.Text
-                End If
-            Next G
-            s.Delete
-        Else
-            s.Delete
-        End If
-    Next
+    'Like hyperlinks, cycling through via 'For each'  for some reason doesn't make it through all shapes
+    '  using same 'do while' concstruct, + exit if count is static through a cycle, to prevent loop on 'undeleteable'
+    Do While ActiveDocument.Shapes.Count > 0 And shape_count <> ActiveDocument.Shapes.Count
+        shape_count = ActiveDocument.Shapes.Count
+        For Each s In ActiveDocument.Shapes
+            If s.Type = msoTextBox Then
+                s.Anchor.Select
+                Selection.MoveLeft Unit:=wdCharacter
+                Selection.MoveDown Unit:=wdParagraph
+                Selection.TypeText s.TextFrame.TextRange.Text
+                s.Delete
+            ElseIf s.Type = msoGroup Then
+                For G = 1 To s.GroupItems.Count
+                    If s.GroupItems(G).Type = 17 Then
+                        Set TB = s.GroupItems(G).TextFrame
+                        s.Anchor.Select
+                        Selection.MoveLeft Unit:=wdCharacter
+                        Selection.MoveDown Unit:=wdParagraph
+                        Selection.TypeText TB.TextRange.Text
+                    End If
+                Next G
+                s.Delete
+            Else
+                s.Delete
+            End If
+        Next
+    Loop
     
     For Each i In ActiveDocument.StoryRanges(MyStoryNo).InlineShapes
         i.Delete

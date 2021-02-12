@@ -27,6 +27,7 @@ Sub LaunchTagCharacterStyles()
     On Error GoTo ErrorHandler
     
     Dim StoryNo As Range
+    Dim StoryName As Variant
     
     
     ' ======= Run startup checks ========
@@ -43,25 +44,44 @@ Sub LaunchTagCharacterStyles()
         End If
       End If
     
+    ' init progress bar
+    Set pBar = New Progress_Bar
+    pBarCounter = 0
+    pBar.Caption = "RSuite Character Style"
+    completeStatus = "Starting Character Style Replacement"
+    pBar.Status.Caption = completeStatus
+        
+    
     For Each StoryNo In ActiveDocument.StoryRanges
         
         If StoryNo.StoryType < 4 Then
         
             MyStoryNo = StoryNo.StoryType
             
-            Set pBar = New Progress_Bar
-            pBar.Caption = "RSuite Character Style"
-            completeStatus = "Starting Character Style Replacement"
-            pBar.Status.Caption = completeStatus
-        
+            Select Case MyStoryNo
+                Case 1
+                    StoryName = "Main Body"
+                Case 2
+                    StoryName = "Footnotes"
+                Case 3
+                    StoryName = "Endnotes"
+            End Select
+            
+            completeStatus = completeStatus + vbNewLine + _
+                            "=========================" + vbNewLine + _
+                            "Cleaning " & StoryName + vbNewLine + _
+                            "========================="
+            Clean_helpers.updateStatus ("")
+               
+            ' Clean up characters!
             Call Clean.LocalFormatting(MyStoryNo)
             Call Clean.CheckSpecialCharactersPC(MyStoryNo)
             Call CheckAppliedCharStyles(MyStoryNo)
             
-            Unload pBar
-            
         End If
     Next
+    
+    Unload pBar
     
     Call Clean_helpers.MessageBox("Done", "Character Styles is complete!", vbOK)
     
@@ -89,17 +109,20 @@ Sub StartCleanup(opts As tpOptions)
     Dim TCrun_bool As Boolean
     TCrun_bool = False
 
+    ' setup progress bar
     Set pBar = New Progress_Bar
+    pBarCounter = 0
     pBar.Caption = "RSuite Cleanup Macros"
     completeStatus = "Starting Cleanup"
     pBar.Status.Caption = completeStatus
 
     'determine stories in document
     For Each StoryNo In ActiveDocument.StoryRanges
-        
-        'run on main (1) endnotes (2), and footnotes (3)
-        If StoryNo.StoryType < 4 Then
-        
+        'run on main (1), and endnotes (2), and footnotes (3) if selected
+        If StoryNo.StoryType = 1 Or _
+            (StoryNo.StoryType = 2 And opts.IncludeNotes = True) Or _
+            (StoryNo.StoryType = 3 And opts.IncludeNotes = True) Then
+            
             MyStoryNo = StoryNo.StoryType
             
             Select Case MyStoryNo
@@ -149,7 +172,6 @@ Sub StartCleanup(opts As tpOptions)
             If opts.RemoveHyperlinks Then
                 Call Clean.RemoveHyperlinks(MyStoryNo)
             End If
-                
         End If
     Next
     

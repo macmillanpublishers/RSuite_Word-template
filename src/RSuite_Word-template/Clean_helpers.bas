@@ -444,7 +444,21 @@ NextOne:
 End Function
 
 Function updateStatus(ByVal update As String)
+
+    ' we use this bit to 'scroll' message up when the end of the window is reached
+    ' pbarcounter at 40 from tests. string-checking to skip blank lines and precentage updates.
+    ' pbar.status.fontsize is an option too if needed
+    If pBarCounter > 40 And lastUpdate <> update And InStr(update, "%") = 0 And update <> "" Then
+        completeStatus = Split(completeStatus, vbNewLine, 2)(1)
+    End If
+
     pBar.Status.Caption = completeStatus & vbNewLine & update
+    
+    'increment for loop / counter above
+    pBarCounter = pBarCounter + 1
+    lastUpdate = update
+    
     pBar.Repaint
     Application.ScreenRefresh
 End Function
+
