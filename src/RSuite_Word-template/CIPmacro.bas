@@ -132,7 +132,7 @@ Sub Main()
     ' ========================== Rm non-content, save file, cleanup ==============================
     ' Clean document of Sections and container paras, etc
     Call stripNonContentParas(sectionArray)
-    at = 5 / 0
+    
     ' save out text file
     If SaveAsTextFile(originalDoc) = False Then
         GoTo ProcessExit
