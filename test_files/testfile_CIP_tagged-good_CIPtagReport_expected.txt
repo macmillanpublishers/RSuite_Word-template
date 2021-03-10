@@ -1,0 +1,16 @@
+Congratulations!
+LOC Tags look good for testfile_CIP_tagged-good.docx
+See summary below:
+
+------------------------- Tag Summary -------------------------
+1  Titlepage open tag(s) found <tp>
+1  Titlepage close tag(s) found </tp>
+1  Copyright Page open tag(s) found <cp>
+1  Copyright Page close tag(s) found </cp>
+1  Series Page open tag(s) found <sp>
+1  Series Page close tag(s) found </sp>
+1  Table of Contents open tag(s) found <toc>
+1  Table of Contents close tag(s) found </toc>
+3  Chapter beginning tag(s) found (<ch1>, <ch2>, etc)
+1  End of last chapter tag(s) found </ch>
+

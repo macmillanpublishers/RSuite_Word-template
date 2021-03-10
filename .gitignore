@@ -1,2 +1,4 @@
 # Ignore Mac os cache files
 .DS_Store
+# ignore generated CIP reports
+*_CIPtagReport.txt

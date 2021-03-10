@@ -1,12 +1,16 @@
 Attribute VB_Name = "CIPmacro"
+Option Private Module
+
 Const sectionFileBasename As String = "sections.txt"
 Const containerFileBasename As String = "containers.txt"
 Const breakFileBasename As String = "breaks.txt"
 Const containerEndStylename As String = "END (END)"
 Const bookmakerPiStylename As String = "Bookmaker-Processing-Instruction (Bpi)"
 Const designNoteStylename As String = "Design-Note (Dn)"
-Dim activeDoc As Document
+
+Dim activedoc As Document
 Dim vPrompt As cipVolumePrompt
+
 
 Sub Main()
     On Error GoTo ErrorHandler
@@ -17,7 +21,7 @@ Sub Main()
     Dim tpTag As String, cpTag As String, spTag As String, tocTag As String, chTag As String
     Dim tpDisplayName As String, cpDisplayName As String, spDisplayName As String, tocDisplayName As String
     Dim tpRequired As Boolean, cpRequired As Boolean, spRequired As Boolean, tocRequired As Boolean
-    Dim bmsectionarray(), tagArray(), chNamesArray(), tagNameArray(), tagDisplayNameArray(), tagRequiredArray()
+    Dim bmSectionArray(), tagArray(), chNamesArray(), tagNameArray(), tagDisplayNameArray(), tagRequiredArray()
     Dim sectionArray, bmStyleArray, containerArray, breakArray, chStyleArray
     Dim maxsectionlength As Long
     Dim lastChapParaIndex As Long
@@ -48,12 +52,12 @@ Sub Main()
     tagNameArray = Array(tpName, cpName, spName, tocName)
     tagDisplayNameArray = Array(tpDisplayName, cpDisplayName, spDisplayName, tocDisplayName)
     tagRequiredArray = Array(tpRequired, cpRequired, spRequired, tocRequired)
-    
+
     ' chapter tagging handled separately
     chNamesArray = Array("Chapter", "Chapter 2")
     chTag = "ch"
     ' these backmatter strings match names in "sectionFile".
-    bmsectionarray = Array("About the Author", _
+    bmSectionArray = Array("About the Author", _
         "Acknowledgments", _
         "Afterword", _
         "Appendix", _
@@ -105,14 +109,14 @@ Sub Main()
     
     ' create tmpDoc, set as activeDoc
     ' Create var to track original active doc
-    Set originalDoc = activeDoc
-    Set tmpDoc = Documents.Add(activeDoc.FullName, visible:=False)
+    Set originalDoc = activedoc
+    Set tmpDoc = Documents.Add(activedoc.FullName, visible:=False)
     tmpDocName = tmpDoc.Name
-    Set activeDoc = tmpDoc
-    activeDoc.TrackRevisions = False 'stop tracking on tmpDoc (if we were still tracking).
+    Set activedoc = tmpDoc
+    activedoc.TrackRevisions = False 'stop tracking on tmpDoc (if we were still tracking).
     ' strip content controls, fieldcodes < this may not be necessary / apropos for CIP tagging
     '   but was part of prior incarnation of the application
-    Call rmContentCntrlsAndFieldCodes(activeDoc)
+    Call rmContentCntrlsAndFieldCodes(activedoc)
     
     ' ========================== Perform tagging, Tag Report ==============================
     ' insert tags for FM sections
@@ -121,7 +125,7 @@ Sub Main()
     
     ' tag chapters
     chStyleArray = getMultiSectionStyleNames(chNamesArray)
-    Call tagChapters(tagChaptersBool, chStyleArray, chTag, bmsectionarray)
+    Call tagChapters(tagChaptersBool, chStyleArray, chTag, bmSectionArray)
     
     ' Run tag summary / post-checks
     tagsPresent = reportOnTags(tagArray, tagDisplayNameArray, tagRequiredArray, chTag, tagChaptersBool, originalDoc)
@@ -146,7 +150,8 @@ ProcessExit:
     Exit Sub
 
 ErrorHandler:
-    Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="UNEXPECTED ERROR", Msg:="Sorry, an error occurred: " & Err.Number & " - " & Err.Description
+    Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="UNEXPECTED ERROR", Msg:="Sorry, an error occurred: " _
+        & Err.Number & " - " & Err.Description & "- Sub: Main"
     Resume ProcessExit
 End Sub
 
@@ -159,15 +164,15 @@ Function StartupSettings_CIP() As Boolean
     ' document during execution, won't switch to that doc.
     ' ALWAYS set to Nothing first to reset for this macro.
     ' Then only refer to this object, not ActiveDocument directly.
-     Set activeDoc = Nothing
-     Set activeDoc = ActiveDocument
+     Set activedoc = Nothing
+     Set activedoc = ActiveDocument
     
     ' check if file has doc protection on, quit function if it does
-    If activeDoc.ProtectionType <> wdNoProtection Then
+    If activedoc.ProtectionType <> wdNoProtection Then
       'If WT_Settings.InstallType = "server" Then
       '  Err.Raise MacError.err_DocProtectionOn
       'Else
-        MsgBox "Uh oh ... protection is enabled on document '" & activeDoc.Name & "'." & vbNewLine & _
+        MsgBox "Uh oh ... protection is enabled on document '" & activedoc.Name & "'." & vbNewLine & _
           "Please unprotect the document and run the macro again." & vbNewLine & vbNewLine & _
           "TIP: If you don't know the protection password, try pasting contents of this file into " & _
           "a new file, and run the macro on that.", , "Error 2"
@@ -180,14 +185,14 @@ Function StartupSettings_CIP() As Boolean
     'If WT_Settings.InstallType = "user" Then
     Dim iReply As Integer
     Dim docSaved As Boolean
-    docSaved = activeDoc.Saved
+    docSaved = activedoc.Saved
     
     If docSaved = False Then
-      iReply = MsgBox("Your document '" & activeDoc & "' contains unsaved changes." & vbNewLine & vbNewLine & _
+      iReply = MsgBox("Your document '" & activedoc & "' contains unsaved changes." & vbNewLine & vbNewLine & _
           "Click OK to save your document and run the macro." & vbNewLine & vbNewLine & "Click 'Cancel' to exit.", _
               vbOKCancel, "WARNING")
       If iReply = vbOK Then
-        activeDoc.Save
+        activedoc.Save
       Else
         StartupSettings_CIP = True
         Exit Function
@@ -247,7 +252,7 @@ Private Function FixTrackChanges_CIP() As Boolean
     ' returns True if changes were fixed or not present, False if changes remain in doc
     Dim n As Long
     Dim oComments As Comments
-    Set oComments = activeDoc.Comments
+    Set oComments = activedoc.Comments
     Dim tcPresentBool As Boolean
     
     FixTrackChanges_CIP = True
@@ -255,7 +260,7 @@ Private Function FixTrackChanges_CIP() As Boolean
     
     ' check if TC are present.
     Dim stry As Object
-    For Each stry In activeDoc.StoryRanges
+    For Each stry In activedoc.StoryRanges
         If stry.Revisions.Count >= 1 Then tcPresentBool = True
     Next
     
@@ -270,7 +275,7 @@ Private Function FixTrackChanges_CIP() As Boolean
               FixTrackChanges_CIP = False
               Exit Function
         Else 'User clicked OK, so accept all tracked changes and delete all comments
-          activeDoc.AcceptAllRevisions
+          activedoc.AcceptAllRevisions
           For n = oComments.Count To 1 Step -1
               oComments(n).Delete
           Next n
@@ -302,7 +307,7 @@ Sub cleanOnExit(successBool, originalDoc, tmpDoc, tmpDocName)
     ' if we've created originalDoc object, make sure that is activeDoc, and activated
     If Not originalDoc Is Nothing Then
         originalDoc.Activate
-        Set activeDoc = originalDoc
+        Set activedoc = originalDoc
     End If
     ' clear find
     Call clearFind
@@ -373,22 +378,23 @@ End Function
 Private Sub stripNonContentParas(sectionArray)
 
     '' begin update progress bar
-    thisstatus = "* Stripping 'Section' and 'Container' paras " ', standardizing 'Break' para contents "
+    thisstatus = "* Cleaning 'Section', 'Container', 'Break' paras " ', standardizing 'Break' para contents "
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     ' get array of all containerstylenames (Except END), and breaks
     containerArray = getStyleArrayfromFile(containerFileBasename)
     breakArray = getStyleArrayfromFile(breakFileBasename)
     
-    ' rm section styles, container styles, break styles, "END" style (can we save as text file first??)
-    Call rmParasWithStylesArray(sectionArray)
+    ' rm container styles, break styles, "END" style
+    'Call rmParasWithStylesArray(sectionArray)  ' < moving this below wth breaks, for more readable CIP txt
     Call rmParasWithStylesArray(containerArray)
     Call rmParasWithStyle(containerEndStylename)
     Call rmParasWithStyle(designNoteStylename)
     Call rmParasWithStyle(bookmakerPiStylename)
     
-    ' empty contents of break paras
+    ' empty contents of break paras & Section paras
     Call changeBreakParaContents(breakArray, "^p")
+    Call changeBreakParaContents(sectionArray, "^p")
     
     ' update progress bar - done
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
@@ -396,7 +402,7 @@ Private Sub stripNonContentParas(sectionArray)
 
 End Sub
 '
-Private Sub tagChapters(tagChaptersBool, chStyleArray, chTag As String, bmsectionarray)
+Private Sub tagChapters(tagChaptersBool, chStyleArray, chTag As String, bmSectionArray)
 
     ' tag chapters if user agreed in volume-prompt
     If tagChaptersBool = True Then
@@ -405,12 +411,11 @@ Private Sub tagChapters(tagChaptersBool, chStyleArray, chTag As String, bmsectio
         If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
         ' insert chapter start tags
-        'chaptercount = tagChapterStartsWithCount(chStyleArray, chTag)
         Call tagChapterStarts(chStyleArray, chTag)
         lastChapParaIndex = numberChapterTags(chTag)
     
         ' insert chapter end tag
-        bmStyleArray = getMultiSectionStyleNames(bmsectionarray)
+        bmStyleArray = getMultiSectionStyleNames(bmSectionArray)
         Call tagChaptersEnd(lastChapParaIndex, bmStyleArray, chTag)
     
         ' update progress bar
@@ -422,7 +427,7 @@ Private Sub tagChapters(tagChaptersBool, chStyleArray, chTag As String, bmsectio
     End If
 
 End Sub
-Private Function preCheckTags(tagArray, chTag) As Boolean
+Function preCheckTags(tagArray, chTag, Optional unittestDoc As Document = Nothing) As Boolean
     Dim i As Long, j As Long
     Dim foundTags()
     Dim openTagStr As String, closeTagStr As String, chOpenTagStr As String, chCloseTagStr As String
@@ -432,17 +437,20 @@ Private Function preCheckTags(tagArray, chTag) As Boolean
     chFoundStr = ""
     nonChFoundStr = ""
     foundStr = ""
+    ' for unittests:
+    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    
     
     ' all non-chapter tags
     For i = 0 To UBound(tagArray)
         openTagStr = "<" & tagArray(i) & ">"
-        If tagCheck(openTagStr) = True Then
+        If tagCheck(openTagStr, unittestDoc:=activedoc) = True Then
             ReDim Preserve foundTags(j)
             foundTags(j) = openTagStr
             j = j + 1
         End If
         closeTagStr = "</" & tagArray(i) & ">"
-        If tagCheck(closeTagStr) = True Then
+        If tagCheck(closeTagStr, unittestDoc:=activedoc) = True Then
             ReDim Preserve foundTags(j)
             foundTags(j) = closeTagStr
             j = j + 1
@@ -451,12 +459,12 @@ Private Function preCheckTags(tagArray, chTag) As Boolean
     
     ' now chapter tags:
     chOpenTagStr = "\<" & chTag & "[0-9]{1,}\>" 'backslashes to include angle brackets, since we will search w. wildcards
-    If tagCheck(chOpenTagStr, True) = True Then
+    If tagCheck(chOpenTagStr, True, activedoc) = True Then
         chFoundStr = "one or more chapter heading tags (e.g. <ch1>, <ch2>, ... )"
     End If
     
     chCloseTagStr = "</" & chTag & ">"
-    If tagCheck(chCloseTagStr) = True Then
+    If tagCheck(chCloseTagStr, unittestDoc:=activedoc) = True Then
         ReDim Preserve foundTags(j)
         foundTags(j) = chCloseTagStr
     End If
@@ -473,17 +481,20 @@ Private Function preCheckTags(tagArray, chTag) As Boolean
     End If
     
     If foundStr <> "" Then
-        MsgBox "Your document: '" & activeDoc & "' already contains the following CIP tag(s):" & vbNewLine & vbNewLine & foundStr & vbNewLine & vbNewLine & _
+        MsgBox "Your document: '" & activedoc & "' already contains the following CIP tag(s):" & vbNewLine & vbNewLine & foundStr & vbNewLine & vbNewLine & _
         "This macro may have already been run on this document. To run this macro, you MUST find and remove all existing CIP tags first.", , "Alert"
         preCheckTags = True
         Exit Function
     End If
 
 End Function
-Private Function tagCheck(tagName, Optional wildcardsBool = False) As Boolean
+Function tagCheck(tagName, Optional wildcardsBool = False, Optional unittestDoc As Document = Nothing) As Boolean
     Dim tagFound As Boolean
     tagFound = False
-    With activeDoc.Range.Find
+    ' for unittests
+    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    
+    With activedoc.Range.Find
         .ClearFormatting
         .Text = tagName
         .Wrap = wdFindContinue
@@ -500,39 +511,46 @@ Private Function tagCheck(tagName, Optional wildcardsBool = False) As Boolean
     End With
     tagCheck = tagFound
 End Function
-Private Sub tagChaptersEnd(lastChapParaIndex, bmStyleArray, chTag)
+Sub tagChaptersEnd(lastChapParaIndex, bmStyleArray, chTag, Optional unittestDoc As Document = Nothing)
     Dim endChapsTag As String
     Dim activeRng As Range, targetRange As Range
     Dim i As Long
     Dim tmpTargetParaIndex As Long, targetParaindex As Long
     Dim lastChapterIndex As Long
     
+    ' for unittests:
+    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    
     endChapsTag = "</" & chTag & ">"
-    lastChapterIndex = activeDoc.Paragraphs.Count
+    lastChapterIndex = activedoc.Paragraphs.Count
     targetParaindex = lastChapterIndex
     tmpTargetParaIndex = lastChapterIndex
-    Set activeRng = activeDoc.Range
-    ' skip if this index val is 0, that means hthere are no tagged chaps here,
+    
+    Set activeRng = activedoc.Range
+    ' skip if this index val is 0, that means there are no tagged chaps here,
     '   which means we cannot determine if a section like Acknowledgements is fm or bm
     If lastChapParaIndex <> 0 Then
         ' cycle through bm sections, comparing index of first of each to lastchaptag index.
         For i = 0 To UBound(bmStyleArray)
-            'Debug.Print "here"
-            tmpTargetParaIndex = getFirstParaIndexAfterChapterEnd(bmStyleArray(i), lastChapParaIndex)
+            tmpTargetParaIndex = getFirstParaIndexAfterChapterEnd(bmStyleArray(i), lastChapParaIndex, activedoc)
             If tmpTargetParaIndex < targetParaindex Then
                 targetParaindex = tmpTargetParaIndex
             End If
         Next i
         ' no backmatter sections found, insert tag at end of document
         If targetParaindex = lastChapterIndex Then
-            activeRng.InsertAfter endChapsTag
+            With activeRng
+                .InsertAfter (endChapsTag)
+                .Style = "Default Paragraph Font"
+            End With
         ' else insert right before first bm section
         Else
-            Set targetRange = activeDoc.Paragraphs(targetParaindex).Range
+            Set targetRange = activedoc.Paragraphs(targetParaindex).Range
             With targetRange
                 .MoveEnd Unit:=wdParagraph, Count:=-1
                 .MoveEnd Unit:=wdCharacter, Count:=-1
                 .InsertAfter endChapsTag
+                .Style = "Default Paragraph Font"
             End With
         End If
     Else
@@ -546,40 +564,58 @@ Sub rmParasWithStylesArray(targetStyleArray)
         rmParasWithStyle (targetStyleArray(i))
     Next i
 End Sub
-Sub rmParasWithStyle(targetStyle)
-    With activeDoc.Range.Find
-        .ClearFormatting
-        .Text = ""
-        .Format = True
-        .Style = targetStyle
-        .MatchCase = False
-        .MatchWholeWord = False
-        .MatchWildcards = False
-        .MatchSoundsLike = False
-        .MatchAllWordForms = False
-        .MatchWildcards = False
-        .Execute ReplaceWith:="", Replace:=wdReplaceAll
-    End With
-End Sub
-Sub changeBreakParaContents(targetStyleArray, replacementStr)
-    Dim i As Long
-    For i = 0 To UBound(targetStyleArray)
-        With activeDoc.Range.Find
+Sub rmParasWithStyle(targetStyle, Optional unittestDoc As Document = Nothing)
+    ' for unittests
+    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    
+    If styleExists(targetStyle, activedoc) Then
+        With activedoc.Range.Find
             .ClearFormatting
             .Text = ""
             .Format = True
-            .Style = targetStyleArray(i)
+            .Style = targetStyle
             .MatchCase = False
             .MatchWholeWord = False
             .MatchWildcards = False
             .MatchSoundsLike = False
             .MatchAllWordForms = False
             .MatchWildcards = False
-            .Execute ReplaceWith:=replacementStr, Replace:=wdReplaceAll
+            .Execute ReplaceWith:="", Replace:=wdReplaceAll
         End With
+    End If
+End Sub
+Sub changeBreakParaContents(targetStyleArray, replacementStr, Optional unittestDoc As Document = Nothing)
+    Dim i As Long
+    ' for unittests:
+    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    
+    For i = 0 To UBound(targetStyleArray)
+        If styleExists(targetStyleArray(i), activedoc) Then
+            With activedoc.Range.Find
+                .ClearFormatting
+                .Text = ""
+                .Format = True
+                .Style = targetStyleArray(i)
+                .MatchCase = False
+                .MatchWholeWord = False
+                .MatchWildcards = False
+                .MatchSoundsLike = False
+                .MatchAllWordForms = False
+                .MatchWildcards = False
+                .Execute ReplaceWith:=replacementStr, Replace:=wdReplaceAll
+            End With
+        End If
     Next i
 End Sub
-Public Function IsInArray(stringToBeFound As String, arr As Variant) As Boolean
+Private Function styleExists(ByVal styleToTest As String, myDoc As Document) As Boolean
+    ' borrowed from https://roxtonlabs.blogspot.com/2015/09/vba-test-if-style-exists-in-word.html
+    Dim testStyle As Word.Style
+    On Error Resume Next
+    Set testStyle = myDoc.styles(styleToTest)
+    styleExists = Not testStyle Is Nothing
+End Function
+
+Private Function IsInArray(stringToBeFound As String, arr As Variant) As Boolean
     Dim i
     For i = LBound(arr) To UBound(arr)
         If arr(i) = stringToBeFound Then
@@ -589,28 +625,8 @@ Public Function IsInArray(stringToBeFound As String, arr As Variant) As Boolean
     Next i
     IsInArray = False
 End Function
-Private Function countStyleUses(targetStyle As String) As Long
-    Dim stylecount As Long
-    stylecount = 0
-    With activeDoc.Range.Find
-        .ClearFormatting
-        .Text = ""
-        .Wrap = wdFindStop
-        .Format = True
-        .Style = targetStyle
-        .MatchCase = False
-        .MatchWholeWord = False
-        .MatchWildcards = False
-        .MatchSoundsLike = False
-        .MatchAllWordForms = False
-        .MatchWildcards = False
-        Do While .Execute(Forward:=True) = True
-            stylecount = stylecount + 1
-        Loop
-    End With
-    countStyleUses = stylecount
-End Function
-Private Function reportOnTags(tagArray, tagDisplayNames, tagRequired, chTag, tagChaptersBool, originalDoc As Document) As Boolean
+
+Function reportOnTags(tagArray, tagDisplayNames, tagRequired, chTag, tagChaptersBool, originalDoc As Document, Optional unittestDoc As Document = Nothing) As Boolean
     On Error GoTo reportOnTagsError
     Dim activeRng As Range
     Dim docTxt As String, newTxt As String
@@ -619,14 +635,17 @@ Private Function reportOnTags(tagArray, tagDisplayNames, tagRequired, chTag, tag
     Dim i As Long, j As Long, k As Long, L As Long
     Dim errStr As String, reportStr As String
     
+    ' for unittests:
+    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    
     ' begin update progress bar
     thisstatus = "* Generating tag Report "
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     '  =============== Count Tags ================
     
-    Set activeRng = activeDoc.Range
-    docTxt = activeDoc.Range.Text
+    Set activeRng = activedoc.Range
+    docTxt = activedoc.Range.Text
     tagTotal = 0
     
     ' count fm tags
@@ -720,12 +739,12 @@ Private Function reportOnTags(tagArray, tagDisplayNames, tagRequired, chTag, tag
         
     ' Print to text file
     Dim thisDoc As Document
-    Set thisDoc = activeDoc
+    Set thisDoc = activedoc
     Call MacroHelpers.CreateTextFile(strText:=reportStr, suffix:="CIPtagReport", thisDoc:=originalDoc)
 
     ' update progress bar
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
     Exit Function
     
@@ -734,22 +753,18 @@ reportOnTagsError:
         Err.Number & " - " & Err.Description & " - Sub:ReportOnTags"
     reportOnTags = False
 End Function
-Private Sub tagChapterStarts(targetStyles, chTag As String)
+Sub tagChapterStarts(targetStyles, chTag As String, Optional unittestDoc As Document = Nothing)
     Dim activeRng As Range
-    Dim chaptercount As Long
-    Dim i As Long, h As Long, j As Long
-    chaptercount = 0
-    Dim targetStyle As String
+    Dim i As Long
     
-    For h = 0 To UBound(targetStyles)
-        targetStyle = targetStyles(h)
-        chaptercount = chaptercount + countStyleUses(targetStyle)
-    Next h
-    
-    If chaptercount > 0 Then
-        ' tag all chapters with unnumbered tag, since we may be handling > 1 chap style
-        For i = 0 To UBound(targetStyles)
-            Set activeRng = activeDoc.Range
+    ' for unittests:
+    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+        
+    ' tag all chapters with unnumbered tag, since we may be handling > 1 chap style
+    For i = 0 To UBound(targetStyles)
+        ' make sure style exists in doc, or we error(!)
+        If styleExists(targetStyles(i), activedoc) Then
+            Set activeRng = activedoc.Range
             With activeRng.Find
               .ClearFormatting
               .Replacement.ClearFormatting
@@ -758,6 +773,7 @@ Private Sub tagChapterStarts(targetStyles, chTag As String)
               .Wrap = wdFindContinue
               .Format = True
               .Style = targetStyles(i)
+              .Replacement.Style = "Default Paragraph Font"
               .MatchCase = False
               .MatchWholeWord = False
               .MatchWildcards = False
@@ -765,21 +781,27 @@ Private Sub tagChapterStarts(targetStyles, chTag As String)
               .MatchAllWordForms = False
               .Execute Replace:=wdReplaceAll
             End With
-        Next i
-    End If
+        End If
+    Next i
+
 End Sub
 Function getSelectParaIndex() As Long ' gets para-index of 1st selected para
-    getSelectParaIndex = activeDoc.Range(0, Selection.Paragraphs(1).Range.End).Paragraphs.Count
+    getSelectParaIndex = activedoc.Range(0, Selection.Paragraphs(1).Range.End).Paragraphs.Count
 End Function
 Function getRangeParaIndex(myRange As Range) As Long ' gets para-index of 1st para in Range
-    getRangeParaIndex = activeDoc.Range(0, myRange.Paragraphs(1).Range.End).Paragraphs.Count
+    getRangeParaIndex = activedoc.Range(0, myRange.Paragraphs(1).Range.End).Paragraphs.Count
 End Function
-Private Function numberChapterTags(chTag As String) As Long
+Function numberChapterTags(chTag As String, Optional unittestDoc As Document = Nothing) As Long
     ' cycle back through and add increments
     Dim activeRng As Range
     Dim j As Long, paraIndex As Long
-    Set activeRng = activeDoc.Range
+    
+    ' for unittests:
+    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    
+    Set activeRng = activedoc.Range
     j = 1
+    
     With activeRng.Find
         .ClearFormatting
         .Text = "<" & chTag & ">"
@@ -788,8 +810,9 @@ Private Function numberChapterTags(chTag As String) As Long
             With activeRng
                 .MoveEnd Unit:=wdCharacter, Count:=-1
                 .InsertAfter (j)
+                .Style = "Default Paragraph Font"
                 paraIndex = getRangeParaIndex(activeRng)
-                .Collapse direction:=wdCollapseEnd
+                .Collapse Direction:=wdCollapseEnd
                 .Move Unit:=wdCharacter, Count:=1
             End With
             j = j + 1
@@ -797,40 +820,40 @@ Private Function numberChapterTags(chTag As String) As Long
     End With
     numberChapterTags = paraIndex
 End Function
-Private Function getFirstParaIndexAfterChapterEnd(myStyle, chapEndIndex) As Long
+Private Function getFirstParaIndexAfterChapterEnd(myStyle, chapEndIndex, myDoc As Document) As Long
     ' cycle back through and add increments
     Dim activeRng As Range
     Dim paraIndex As Long, tmpParaIndex As Long
     
-    Set activeRng = activeDoc.Range
-    paraIndex = activeDoc.Paragraphs.Count
-    
-    With activeRng.Find
-        .ClearFormatting
-        .Text = ""
-        .Format = True
-        .Style = myStyle
-        .Wrap = wdFindStop
-        .MatchCase = False
-        .MatchWholeWord = False
-        .MatchWildcards = False
-        .MatchSoundsLike = False
-        .MatchAllWordForms = False
-        Do While .Execute(Forward:=True) = True
-            With activeRng
-                tmpParaIndex = getRangeParaIndex(activeRng)
-                If tmpParaIndex > chapEndIndex And tmpParaIndex < paraIndex Then
-                    paraIndex = tmpParaIndex
-                End If
-                .Collapse direction:=wdCollapseEnd
-            End With
-        Loop
-    End With
-    
+    Set activeRng = myDoc.Range
+    paraIndex = myDoc.Paragraphs.Count
+    If styleExists(myStyle, myDoc) Then
+        With activeRng.Find
+            .ClearFormatting
+            .Text = ""
+            .Format = True
+            .Style = myStyle
+            .Wrap = wdFindStop
+            .MatchCase = False
+            .MatchWholeWord = False
+            .MatchWildcards = False
+            .MatchSoundsLike = False
+            .MatchAllWordForms = False
+            Do While .Execute(Forward:=True) = True
+                With activeRng
+                    tmpParaIndex = getRangeParaIndex(activeRng)
+                    If tmpParaIndex > chapEndIndex And tmpParaIndex < paraIndex Then
+                        paraIndex = tmpParaIndex
+                    End If
+                    .Collapse Direction:=wdCollapseEnd
+                End With
+            Loop
+        End With
+    End If
     getFirstParaIndexAfterChapterEnd = paraIndex
 
 End Function
-Private Sub tagFMSection(targetStyle As String, sectionArray, maxsectionlength As Long, tagStr As String, tagEndStr As String, sectionName)
+Sub tagFMSection(targetStyle As String, sectionArray, maxsectionlength As Long, tagStr As String, tagEndStr As String, sectionName, Optional unittestDoc As Document = Nothing)
 
     Dim activeRng As Range
     Dim parastyle As String
@@ -840,48 +863,61 @@ Private Sub tagFMSection(targetStyle As String, sectionArray, maxsectionlength A
     thisstatus = "* Adding tags for " & sectionName & " "
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
-    ' search and tag
-    Set activeRng = activeDoc.Range
+    ' for unittests:
+    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+
+    ' makrs sure style is present
+    If styleExists(targetStyle, activedoc) Then
+
+        ' search and tag
+        Set activeRng = activedoc.Range
     
-    With activeRng.Find
-        .ClearFormatting
-        .Text = ""
-        .Wrap = wdFindContinue
-        .Format = True
-        .Style = targetStyle
-        .MatchCase = False
-        .MatchWholeWord = False
-        .MatchWildcards = False
-        .MatchSoundsLike = False
-        .MatchAllWordForms = False
-        .Execute
-        If .Found = True Then
-            ' go to next paragraph and insert opening tag
-            activeRng.MoveStart wdParagraph, 1
-            activeRng.InsertBefore (tagStr)
-            
-            ' now we cycle downwards until we find next section, or reach maxlength (or end of document)
-            parastyle = activeRng.ParagraphStyle
-            i = 0
-            While Not IsInArray(parastyle, sectionArray) And Not EndOfDocumentReached And i < maxsectionlength
+        With activeRng.Find
+            .ClearFormatting
+            .Text = ""
+            .Wrap = wdFindContinue
+            .Format = True
+            .Style = targetStyle
+            .MatchCase = False
+            .MatchWholeWord = False
+            .MatchWildcards = False
+            .MatchSoundsLike = False
+            .MatchAllWordForms = False
+            .Execute
+            If .Found = True Then
+                ' go to next paragraph and insert opening tag
                 activeRng.MoveStart wdParagraph, 1
+                With activeRng
+                    .InsertBefore (tagStr)
+                    .Style = "Default Paragraph Font"
+                End With
+                ' now we cycle downwards until we find next section, or reach maxlength (or end of document)
                 parastyle = activeRng.ParagraphStyle
-    
-                i = i + 1
-            Wend
-            
-            ' If we reached a new section, tag end of style
-            If IsInArray(parastyle, sectionArray) Then
-                activeRng.End = activeRng.End - 1
-                activeRng.InsertAfter (tagEndStr)
-            ' otherwise we quit and prompt the user:
-            ElseIf i = maxsectionlength Then
-                Debug.Print "FM section over " & maxsectionlength & " paras!"
-            ElseIf EndOfDocumentReached Then
-                Debug.Print "endless section!"
+                i = 0
+                While Not IsInArray(parastyle, sectionArray) And Not EndOfDocumentReached And i < maxsectionlength
+                    activeRng.MoveStart wdParagraph, 1
+                    parastyle = activeRng.ParagraphStyle
+        
+                    i = i + 1
+                Wend
+                
+                ' If we reached a new section, tag end of style
+                If IsInArray(parastyle, sectionArray) Then
+                    activeRng.End = activeRng.End - 1
+                    With activeRng
+                        .InsertAfter (tagEndStr)
+                        .Style = "Default Paragraph Font"
+                End With
+                ' otherwise we quit and prompt the user:
+                ElseIf i = maxsectionlength Then
+                    Debug.Print "FM section over " & maxsectionlength & " paras!"
+                ElseIf EndOfDocumentReached Then
+                    Debug.Print "endless section!"
+                End If
             End If
-        End If
-    End With
+        End With
+        
+    End If
         
     ' tell pbar we finished something
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
@@ -901,7 +937,7 @@ Private Sub tagFMSections(sectionArray, maxsectionlength As Long, tagNameArray, 
     Next i
 
 End Sub
-Private Function getMultiSectionStyleNames(sectionNames)
+Function getMultiSectionStyleNames(sectionNames)
     Dim styleHash
     Dim stylenames()
     Dim j As Long
@@ -918,7 +954,7 @@ Private Function getMultiSectionStyleNames(sectionNames)
     Next i
     getMultiSectionStyleNames = stylenames
 End Function
-Private Function getSectionStyleName(sectionName As String) As String
+Function getSectionStyleName(sectionName As String) As String
     Dim styleHash
     Dim styleName As String
     styleHash = getList(sectionFileBasename)
@@ -929,7 +965,7 @@ Private Function getSectionStyleName(sectionName As String) As String
     Next i
     getSectionStyleName = styleName
 End Function
-Private Function getStyleArrayfromFile(fileBasename As String) '(fileBasename As String)
+Function getStyleArrayfromFile(fileBasename As String) '(fileBasename As String)
     Dim styleHash
     styleHash = getList(fileBasename)
     Dim sectionStyleHash() As String
@@ -1003,7 +1039,7 @@ Private Function getFilePathWithNewSuffix(myDocument, suffixStr) 'expects file e
     #End If
     getFilePathWithNewSuffix = strdocname
 End Function
-Private Function SaveAsTextFile(originalDocument) As Boolean
+Function SaveAsTextFile(originalDocument) As Boolean
     On Error GoTo SaveAsTextFileError
     ' Saves a copy of the document as a text file in the same path as the parent document
     Dim txtDoc As Document
@@ -1012,8 +1048,9 @@ Private Function SaveAsTextFile(originalDocument) As Boolean
     Dim intPos As Integer
     Dim encodingFmt As String
     Dim lineBreak As Boolean
-    ' for debug tests:
-    If activeDoc Is Nothing Then Set activeDoc = ActiveDocument
+    
+    ' for debug/testing standalone:
+    ' If activedoc Is Nothing Then Set activedoc = ActiveDocument
            
     ' begin update progress bar
     thisstatus = "* Saving CIP text file "
@@ -1026,7 +1063,7 @@ Private Function SaveAsTextFile(originalDocument) As Boolean
     'Copy text of active document and paste into a new document
     'Because otherwise open document is converted to .txt, and we want it to stay .doc*
     ' ^ 2/23/21-mr- we can revise this if we end up closing docx anyways
-    activeDoc.Select
+    activedoc.Select
     Selection.Copy
     
     'DebugPrint Len(Selection)
@@ -1066,9 +1103,8 @@ Private Function SaveAsTextFile(originalDocument) As Boolean
     ' wrap up
     Application.DisplayAlerts = wdAlertsAll
     
-    Debug.Print
     txtDoc.Close savechanges:=wdDoNotSaveChanges
-    activeDoc.Close savechanges:=wdDoNotSaveChanges
+    activedoc.Close savechanges:=wdDoNotSaveChanges
             
     'Application.ScreenUpdating = True
         
@@ -1087,7 +1123,7 @@ SaveAsTextFileError:
 End Function
 Private Sub clearFind()
     Dim clearRng As Range
-    Set clearRng = activeDoc.Words.First
+    Set clearRng = activedoc.Words.First
     With clearRng.Find
       .ClearFormatting
       .Replacement.ClearFormatting

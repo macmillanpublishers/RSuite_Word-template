@@ -1,12 +1,48 @@
 Attribute VB_Name = "TestHelpers"
+Function strFromLocation(myDoc As Document, paraNumber As Long, char_offset As Long, returnStr_length As Long) As String
+    Dim myRange As Range
+    
+    Set myRange = myDoc.Paragraphs(paraNumber).Range
+    myRange.Collapse Direction:=wdCollapseStart
+    With myRange
+        .Move Unit:=wdCharacter, Count:=char_offset
+        .MoveEnd Unit:=wdCharacter, Count:=returnStr_length
+    End With
+    
+    strFromLocation = myRange.Text
+End Function
+Function smallCapsCheckFromLocation(myDoc As Document, paraNumber As Long, char_offset As Long, returnStr_length As Long) As Boolean
+' for CIP tag insertions, to verify they are not picking up local styling (that could override the tag charCase when converted to txt)
+    Dim myRange As Range
+    
+    Set myRange = myDoc.Paragraphs(paraNumber).Range
+    myRange.Collapse Direction:=wdCollapseStart
+    With myRange
+        .Move Unit:=wdCharacter, Count:=char_offset
+        .MoveEnd Unit:=wdCharacter, Count:=returnStr_length
+    End With
+    
+    smallCapsCheckFromLocation = myRange.Font.SmallCaps
+End Function
+Function stringCountInDoc(myDoc As Document, targetStr As String) As Long
+    Dim docTxt As String, newTxt As String
+    docTxt = myDoc.Range.Text
+    newTxt = Replace(docTxt, targetStr, "")
+    stringCountInDoc = ((Len(docTxt) - Len(newTxt)) / Len(targetStr))
+End Function
+
+Sub testsub()
+Debug.Print """" & strFromLocation(ActiveDocument, 25, 0, 4) & """"
+End Sub
+
 Function compareRanges(actualRange As Range, expectedRange As Range) As String
 Dim returnString As String
 Dim i As Integer
 returnString = "Same"
 
 If actualRange.Characters.Count <> expectedRange.Characters.Count Then
-    returnString = "Compared ranges are different lengths, expected: " + Str(expectedRange.Characters.Count) + _
-        ", actual: " + Str(actualRange.Characters.Count)
+    returnString = "Compared ranges are different lengths, expected: " + str(expectedRange.Characters.Count) + _
+        ", actual: " + str(actualRange.Characters.Count)
     GoTo TheEnd
 ElseIf actualRange.Text <> expectedRange.Text Then
     returnString = "Range text mismatch, expected: '" + actualRange.Text + "', actual: '" + expectedRange.Text + "'"
@@ -15,31 +51,31 @@ Else
     For i = 1 To actualRange.Characters.Count
         ' namelocal reports char style where present, otherwise give para style
         If actualRange.Characters(i).Style.NameLocal <> expectedRange.Characters(i).Style.NameLocal Then
-            returnString = "Different styles detected for char #" + Str(i) + " ('" + actualRange.Characters(i) + _
+            returnString = "Different styles detected for char #" + str(i) + " ('" + actualRange.Characters(i) + _
                 "'), expected: '" + expectedRange.Characters(i).Style.NameLocal + "', actual: '" + _
                 actualRange.Characters(i).Style.NameLocal + "'"
             GoTo TheEnd
         ' checking local formatting types one by one
         ElseIf actualRange.Characters(i).Font.Bold <> expectedRange.Characters(i).Font.Bold Then
-            returnString = "Diff in 'bold' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            returnString = "Diff in 'bold' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
             GoTo TheEnd
         ElseIf actualRange.Characters(i).Font.Italic <> expectedRange.Characters(i).Font.Italic Then
-            returnString = "Diff in 'italic' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            returnString = "Diff in 'italic' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
             GoTo TheEnd
         ElseIf actualRange.Characters(i).Font.SmallCaps <> expectedRange.Characters(i).Font.SmallCaps Then
-            returnString = "Diff in 'smallcaps' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            returnString = "Diff in 'smallcaps' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
             GoTo TheEnd
         ElseIf actualRange.Characters(i).Font.Subscript <> expectedRange.Characters(i).Font.Subscript Then
-            returnString = "Diff in 'Subscript' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            returnString = "Diff in 'Subscript' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
             GoTo TheEnd
         ElseIf actualRange.Characters(i).Font.Superscript <> expectedRange.Characters(i).Font.Superscript Then
-            returnString = "Diff in 'Superscript' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            returnString = "Diff in 'Superscript' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
             GoTo TheEnd
         ElseIf actualRange.Characters(i).Font.StrikeThrough <> expectedRange.Characters(i).Font.StrikeThrough Then
-            returnString = "Diff in 'strikethrough' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            returnString = "Diff in 'strikethrough' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
             GoTo TheEnd
         ElseIf actualRange.Characters(i).Font.Underline <> expectedRange.Characters(i).Font.Underline Then
-            returnString = "Diff in 'underline' found for char #" + Str(i) + " ('" + actualRange.Characters(i) + "')"
+            returnString = "Diff in 'underline' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
             GoTo TheEnd
         End If
     Next i
@@ -324,8 +360,8 @@ gitrepo_anchorfile = "devSetup"
 
 For Each vbProj In Application.VBE.VBProjects   'Loop through each project
     If Not vbProj.Description = "" Then
-        If InStr(vbProj.FileName, gitrepo_anchorfile) Then
-            repo_pathStr = Left(vbProj.FileName, InStrRev(vbProj.FileName, "\"))
+        If InStr(vbProj.fileName, gitrepo_anchorfile) Then
+            repo_pathStr = Left(vbProj.fileName, InStrRev(vbProj.fileName, "\"))
         End If
     End If
     i = i + 1
