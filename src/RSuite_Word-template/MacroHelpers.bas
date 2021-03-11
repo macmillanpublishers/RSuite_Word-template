@@ -130,14 +130,14 @@ Public Function ErrorChecker(objError As Object, Optional strValue As _
     ' BUT: How can we be sure this means *style* is not present?
     
       'Anyway, If style is not present, add style
-      Dim MyStyle As Style
+      Dim myStyle As Style
       Dim styleType As WdStyleType
       If InStr(strValue, "span") > 0 Then
         styleType = wdStyleTypeCharacter
       Else
         styleType = wdStyleTypeParagraph
       End If
-      Set MyStyle = activeDoc.Styles.Add(strValue, styleType)
+      Set myStyle = activeDoc.styles.Add(strValue, styleType)
       ErrorChecker = False
       DebugPrint "ErrorChecker: False"
       Exit Function
@@ -384,11 +384,11 @@ WriteToLogError:
     End If
 End Sub
 
-Public Function IsStyleInUse(StyleName As String) As Boolean
+Public Function IsStyleInUse(styleName As String) As Boolean
   On Error GoTo IsStyleInUseError
   
 ' First confirm style is even in document to begin with
-  If MacroHelpers.IsStyleInDoc(StyleName) = False Then
+  If MacroHelpers.IsStyleInDoc(styleName) = False Then
     IsStyleInUse = False
     Exit Function
   End If
@@ -399,7 +399,7 @@ Public Function IsStyleInUse(StyleName As String) As Boolean
   With activeDoc.Range.Find
     .Text = ""
     .Format = True
-    .Style = activeDoc.Styles(StyleName)
+    .Style = activeDoc.styles(styleName)
     .Execute
     
     If .Found = True Then
@@ -412,7 +412,7 @@ Public Function IsStyleInUse(StyleName As String) As Boolean
   Exit Function
 IsStyleInUseError:
   Err.Source = strModule & "IsStyleInUse"
-  If ErrorChecker(Err, StyleName) = False Then
+  If ErrorChecker(Err, styleName) = False Then
     Resume
   Else
     Call MacroHelpers.GlobalCleanup
@@ -420,13 +420,13 @@ IsStyleInUseError:
 End Function
 
 
-Public Function IsStyleInDoc(StyleName As String) As Boolean
+Public Function IsStyleInDoc(styleName As String) As Boolean
   On Error GoTo IsStyleInDocError
   Dim blnResult As Boolean: blnResult = True
   Dim TestStyle As Style
   
 ' Try to access this style. If not present in doc, will error
-  Set TestStyle = activeDoc.Styles.item(StyleName)
+  Set TestStyle = activeDoc.styles.item(styleName)
   IsStyleInDoc = blnResult
   Exit Function
   
@@ -439,7 +439,7 @@ IsStyleInDocError:
   End If
 ' Otherwise, usual error stuff:
   Err.Source = strModule & "IsStyleInDoc"
-  If ErrorChecker(Err, StyleName) = False Then
+  If ErrorChecker(Err, styleName) = False Then
     Resume
   Else
     Call MacroHelpers.GlobalCleanup
@@ -485,12 +485,12 @@ End Function
 ' Returns the paragraph index of the current selection. Default is to return the
 ' END paragraph index if selection is more than 1 paragraph. `UseEnd:=False`
 ' would return the index of the START paragraph.
-Public Function ParaIndex(Optional UseEnd As Boolean = True) As Long
+Public Function paraIndex(Optional UseEnd As Boolean = True) As Long
   On Error GoTo ParaIndexError
   If UseEnd = True Then
-    ParaIndex = activeDoc.Range(0, Selection.End).Paragraphs.Count
+    paraIndex = activeDoc.Range(0, Selection.End).Paragraphs.Count
   Else
-    ParaIndex = activeDoc.Range(0, Selection.Start).Paragraphs.Count
+    paraIndex = activeDoc.Range(0, Selection.Start).Paragraphs.Count
   End If
   Exit Function
 ParaIndexError:
@@ -531,12 +531,12 @@ ParaInfoError:
   End If
 End Function
 
-Public Sub zz_clearFind(Optional TargetRange As Range)
+Public Sub zz_clearFind(Optional targetRange As Range)
   On Error GoTo zz_clearFindError
 
 ' If we didn't pass a Range, reset the Selection.Find
 ' Can sometimes have sticky properties if not reset properly.
-  If TargetRange Is Nothing Then
+  If targetRange Is Nothing Then
     With Selection.Find
         .ClearFormatting
         .Replacement.ClearFormatting
@@ -556,7 +556,7 @@ Public Sub zz_clearFind(Optional TargetRange As Range)
         .Execute Replace:=wdReplaceNone
     End With
   Else
-    With TargetRange.Find
+    With targetRange.Find
         .ClearFormatting
         .Replacement.ClearFormatting
         .Text = ""
@@ -593,11 +593,13 @@ zz_clearFindError:
   End If
 End Sub
 
-Public Function ActiveStories() As Collection
+Public Function ActiveStories(Optional thisDoc As Document = Nothing) As Collection
   On Error GoTo ActiveStoriesError
     '------------check for endnotes and footnotes--------------------------
     Dim colStories As Collection
     Set colStories = New Collection
+    If Not thisDoc Is Nothing Then Set activeDoc = thisDoc  '< for CIP macro, where activeDoc is not in scope
+
 
     Dim storyAdd As WdStoryType
     storyAdd = wdMainTextStory
@@ -659,7 +661,7 @@ Function PatternMatch(SearchPattern As String, SearchText As String, WholeString
             ' The final paragraph return is the only character the new doc had it in,
             ' it 's not part of the added string
             If InStrRev(Selection.Text, Chr(13)) = Len(Selection.Text) Then
-                Selection.MoveEnd unit:=wdCharacter, Count:=-1
+                Selection.MoveEnd Unit:=wdCharacter, Count:=-1
             End If
             
             ' the SearchText requires vbCrLf to start text on a new line, but Word for some reason
@@ -752,12 +754,13 @@ IsArrayEmptyError:
 End Function
 
 
-Public Sub CreateTextFile(strText As String, suffix As String)
+Public Sub CreateTextFile(strText As String, suffix As String, Optional thisDoc As Document = Nothing)
 
     Application.ScreenUpdating = False
     
     'Create report file
     Dim activeRng As Range
+    If Not thisDoc Is Nothing Then Set activeDoc = thisDoc  '< for CIP macro, where activeDoc is not in scope
     Set activeRng = activeDoc.Range
     Dim activeDocName As String
     Dim activeDocPath As String
@@ -816,7 +819,7 @@ Public Sub CreateTextFile(strText As String, suffix As String)
     End If
 End Sub
 
-Function GetText(StyleName As String, Optional ReturnArray As Boolean = False) _
+Function GetText(styleName As String, Optional ReturnArray As Boolean = False) _
   As Variant
   On Error GoTo GetTextError
   
@@ -826,7 +829,7 @@ Function GetText(StyleName As String, Optional ReturnArray As Boolean = False) _
   fCount = 0
   
   'Move selection to start of document
-  Selection.HomeKey unit:=wdStory
+  Selection.HomeKey Unit:=wdStory
 
       MacroHelpers.zz_clearFind
       With Selection.Find
@@ -835,7 +838,7 @@ Function GetText(StyleName As String, Optional ReturnArray As Boolean = False) _
           .Forward = True
           .Wrap = wdFindStop
           .Format = True
-          .Style = activeDoc.Styles(StyleName)
+          .Style = activeDoc.styles(styleName)
           .MatchCase = False
           .MatchWholeWord = False
           .MatchWildcards = False
@@ -848,7 +851,7 @@ Function GetText(StyleName As String, Optional ReturnArray As Boolean = False) _
       
       'If paragraph return exists in selection, don't select last character (the last paragraph retunr)
       If InStr(Selection.Text, Chr(13)) > 0 Then
-          Selection.MoveEnd unit:=wdCharacter, Count:=-1
+          Selection.MoveEnd Unit:=wdCharacter, Count:=-1
       End If
       
       'Assign selected text to variable
@@ -857,7 +860,7 @@ Function GetText(StyleName As String, Optional ReturnArray As Boolean = False) _
       
       'If the next character is a paragraph return, add that to the selection
       'Otherwise the next Find will just select the same text with the paragraph return
-      If InStr(StyleName, "span") = 0 Then        'Don't select terminal para mark if char style, sends into an infinite loop
+      If InStr(styleName, "span") = 0 Then        'Don't select terminal para mark if char style, sends into an infinite loop
           Selection.MoveEndWhile Cset:=Chr(13), Count:=1
       End If
   Loop
@@ -1076,7 +1079,7 @@ End Function
 ' each field. If this is our cookbook template with the automatic TOC, that
 ' will be unlinked as well.
 
-Public Sub UpdateUnlinkFieldCodes(Optional p_stories As Collection)
+Public Sub UpdateUnlinkFieldCodes(Optional p_stories As Collection, Optional thisDoc As Document = Nothing)
   Dim objField As Field
   Dim thisRange As Range
   Dim strContent As String
@@ -1096,6 +1099,8 @@ Public Sub UpdateUnlinkFieldCodes(Optional p_stories As Collection)
 
   Dim varStory As Variant
   Dim currentStory As WdStoryType
+  If Not thisDoc Is Nothing Then Set activeDoc = thisDoc  '< for CIP macro, where activeDoc is not in scope
+
 
   For Each varStory In p_stories
     currentStory = varStory
@@ -1135,7 +1140,7 @@ Private Sub ReMapTOCStyles()
   Dim objDictKey As Variant
   Dim objDictValue As Variant
   Dim rngActiveDoc As Range
-  Dim MyStyle As Style  ' for error handling
+  Dim myStyle As Style  ' for error handling
   
   Set objStyleMapDict = CookbookTOCStyleMap
   Set rngActiveDoc = activeDoc.Range
@@ -1161,7 +1166,7 @@ Private Sub ReMapTOCStyles()
 
 ReMapTOCStylesError:
   If Err.Number = 5834 Or Err.Number = 5941 Then  ' style not present
-    Set MyStyle = activeDoc.Styles.Add(Name:=objDictKey, _
+    Set myStyle = activeDoc.styles.Add(Name:=objDictKey, _
       Type:=wdStyleTypeParagraph)
     Resume
   Else
@@ -1208,7 +1213,7 @@ Private Function FixTrackChanges() As Boolean
     
     'See if there are tracked changes or comments in document
     On Error Resume Next
-    Selection.HomeKey unit:=wdStory   'start search at beginning of doc
+    Selection.HomeKey Unit:=wdStory   'start search at beginning of doc
     'search for a tracked change or comment. error if none are found.
     WordBasic.NextChangeOrComment
     
@@ -1323,12 +1328,14 @@ Private Sub CleanUpRecipeContentControls()
 
 End Sub
 
-Private Sub ClearContentControls()
+Public Sub ClearContentControls(Optional thisDoc As Document = Nothing)
 ' Run CleanupRecipeContentControls first.
   On Error GoTo ClearContentControlsError
     'This is it's own sub because doesn't exist in Mac Word,
     ' breaks whole sub if included
     Dim cc As ContentControl
+    If Not thisDoc Is Nothing Then Set activeDoc = thisDoc  '< for CIP macro, where activeDoc is not in scope
+
     
     For Each cc In activeDoc.ContentControls
         cc.Delete
@@ -1571,7 +1578,7 @@ Private Sub StyleHyperlinksA(StoryType As WdStoryType)
         If fld.Kind <> wdFieldKindNone And fld.Type = wdFieldHyperlink Then
         ' If field is a link but no text appears in the document for it,
         ' just delete the whole thing (otherwise replace link w/ display text)
-          If Len(fld.Result.Text) = 0 Then
+          If Len(fld.result.Text) = 0 Then
             fld.Delete
           Else
             fld.Unlink
@@ -1594,7 +1601,7 @@ Private Sub StyleHyperlinksA(StoryType As WdStoryType)
             .ClearFormatting
             .Replacement.ClearFormatting
             .Style = HyperlinkStyleArray(P)
-            .Replacement.Style = activeDoc.Styles("Default Paragraph Font")
+            .Replacement.Style = activeDoc.styles("Default Paragraph Font")
             .Text = ""
             .Replacement.Text = ""
             .Forward = True
@@ -1617,8 +1624,8 @@ StyleHyperlinksAError:
         If Err.Number = 5834 Or Err.Number = 5941 Then
             
             'If style is not present, add style
-            Dim MyStyle As Style
-            Set MyStyle = activeDoc.Styles.Add(Name:="span hyperlink (url)", Type:=wdStyleTypeCharacter)
+            Dim myStyle As Style
+            Set myStyle = activeDoc.styles.Add(Name:="span hyperlink (url)", Type:=wdStyleTypeCharacter)
             Resume
 '            ' Used to add highlight color, but actually if style is missing, it's
 '            ' probably a MS w/o Macmillan's styles and the highlight will be annoying.
@@ -1733,7 +1740,7 @@ Private Sub AutoFormatHyperlinks()
         Set oEN = Nothing
     End If
     
-    oTemp.Close SaveChanges:=wdDoNotSaveChanges
+    oTemp.Close savechanges:=wdDoNotSaveChanges
     Set oTemp = Nothing
     Set oRng = Nothing
     Set oNote = Nothing
@@ -1760,7 +1767,7 @@ Private Sub StyleHyperlinksB(StoryType As WdStoryType)
         .ClearFormatting
         .Replacement.ClearFormatting
         .Style = "Hyperlink"
-        .Replacement.Style = activeDoc.Styles("span hyperlink (url)")
+        .Replacement.Style = activeDoc.styles("span hyperlink (url)")
         .Text = ""
         .Replacement.Text = ""
         .Forward = True
@@ -1820,9 +1827,9 @@ End Function
 ' Returns text of paragraph with index number, with trailing newlines and other
 ' whitespace removed.
 
-Public Function GetTextByIndex(ParaIndex As Long) As String
+Public Function GetTextByIndex(paraIndex As Long) As String
   Dim strParaText As String
-  strParaText = ActiveDocument.Paragraphs(ParaIndex).Range.Text
+  strParaText = ActiveDocument.Paragraphs(paraIndex).Range.Text
   If IsNewLine(Right(strParaText, 1)) = True Then
     strParaText = Left(strParaText, Len(strParaText) - 1)
   End If
@@ -1908,7 +1915,7 @@ Public Sub PageBreakCleanup()
 
   For Each varStyle In WT_StyleConfig.SectionStartStyles
     MacroHelpers.zz_clearFind
-    Selection.HomeKey unit:=wdStory
+    Selection.HomeKey Unit:=wdStory
     With Selection.Find
       .Format = True
       .Style = varStyle
@@ -1918,7 +1925,7 @@ Public Sub PageBreakCleanup()
       
       Do While .Found = True
       ' Check previous paragraph for Page Break
-        lngSectionStyle = MacroHelpers.ParaIndex
+        lngSectionStyle = MacroHelpers.paraIndex
         If lngSectionStyle > 1 Then
           lngPrevSibling = lngSectionStyle - 1
           

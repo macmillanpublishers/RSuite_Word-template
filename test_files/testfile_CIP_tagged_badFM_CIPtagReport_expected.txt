@@ -1,0 +1,26 @@
+BAD NEWS:
+
+Problems were found with LOC tags in your document 'testfile_CIP_tagged_badFM.docx':
+
+
+------------------------- ERRORS -------------------------
+ERROR: No Copyright Page tags found. Copyright Page tags are REQUIRED for LOC submission.
+ERROR: Problem with Titlepage tags: either too many were found or one is missing
+ERROR: Problem with Series Page tags: either too many were found or one is missing
+ERROR: Problem with Table of Contents tags: either too many were found or one is missing
+ERROR: No Chapter Heading tags were found.
+ERROR: No 'End of Last Chapter' tag was found.
+
+
+------------------------- Tag Summary -------------------------
+1  Titlepage open tag(s) found <tp>
+2  Titlepage close tag(s) found </tp>
+0  Copyright Page open tag(s) found <cp>
+0  Copyright Page close tag(s) found </cp>
+1  Series Page open tag(s) found <sp>
+0  Series Page close tag(s) found </sp>
+1  Table of Contents open tag(s) found <toc>
+0  Table of Contents close tag(s) found </toc>
+0  Chapter beginning tag(s) found (<ch1>, <ch2>, etc)
+0  End of last chapter tag(s) found </ch>
+

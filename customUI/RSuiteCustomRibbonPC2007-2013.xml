@@ -15,6 +15,7 @@
           <button id="AttachTemplateMacro.zz_AttachBoundMSTemplate" label="Remove Color Guides" image="removefile" size="normal" onAction="RibbonControl.LaunchMacros" />
           <!--<button id="PrintStyles.PrintStyles" label="Print Styles in Margin" image="print" size="normal" onAction="RibbonControl.LaunchMacros" />-->
           <button id="ViewStyles.StylesViewLaunch" size="normal" image="eye" onAction="RibbonControl.LaunchMacros" label="View Styles"/>
+		  <button id="CIPMacro.Main" label="CIP Application" image="index" size="normal" onAction="RibbonControl.LaunchMacros" />
         </group>
 
         <!--<group id="CustGrp2" label="Manuscript Tools" >
