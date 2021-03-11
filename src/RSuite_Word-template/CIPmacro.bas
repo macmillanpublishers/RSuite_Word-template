@@ -8,7 +8,8 @@ Const containerEndStylename As String = "END (END)"
 Const bookmakerPiStylename As String = "Bookmaker-Processing-Instruction (Bpi)"
 Const designNoteStylename As String = "Design-Note (Dn)"
 
-Dim activedoc As Document
+Dim activeDoc As Document
+Dim reportDoc As Document
 Dim vPrompt As cipVolumePrompt
 
 
@@ -76,7 +77,7 @@ Sub Main()
     ' pre check: is doc saved, protected, track changes etc
     ' True means a check failed (e.g., doc protection on)
     
-    ' set activeDoc, check if saved, check protection, check track changes.
+    ' set activedoc, check if saved, check protection, check track changes.
     If StartupSettings_CIP() = True Then
         GoTo ProcessExit
     End If
@@ -109,14 +110,14 @@ Sub Main()
     
     ' create tmpDoc, set as activeDoc
     ' Create var to track original active doc
-    Set originalDoc = activedoc
-    Set tmpDoc = Documents.Add(activedoc.FullName, visible:=False)
+    Set originalDoc = activeDoc
+    Set tmpDoc = Documents.Add(activeDoc.FullName, visible:=False)
     tmpDocName = tmpDoc.Name
-    Set activedoc = tmpDoc
-    activedoc.TrackRevisions = False 'stop tracking on tmpDoc (if we were still tracking).
+    Set activeDoc = tmpDoc
+    activeDoc.TrackRevisions = False 'stop tracking on tmpDoc (if we were still tracking).
     ' strip content controls, fieldcodes < this may not be necessary / apropos for CIP tagging
     '   but was part of prior incarnation of the application
-    Call rmContentCntrlsAndFieldCodes(activedoc)
+    Call rmContentCntrlsAndFieldCodes(activeDoc)
     
     ' ========================== Perform tagging, Tag Report ==============================
     ' insert tags for FM sections
@@ -130,7 +131,7 @@ Sub Main()
     ' Run tag summary / post-checks
     tagsPresent = reportOnTags(tagArray, tagDisplayNameArray, tagRequiredArray, chTag, tagChaptersBool, originalDoc)
     If tagsPresent = False Then
-        GoTo ProcessExit
+         GoTo ProcessExit
     End If
     
     ' ========================== Rm non-content, save file, cleanup ==============================
@@ -164,15 +165,15 @@ Function StartupSettings_CIP() As Boolean
     ' document during execution, won't switch to that doc.
     ' ALWAYS set to Nothing first to reset for this macro.
     ' Then only refer to this object, not ActiveDocument directly.
-     Set activedoc = Nothing
-     Set activedoc = ActiveDocument
+     Set activeDoc = Nothing
+     Set activeDoc = ActiveDocument
     
     ' check if file has doc protection on, quit function if it does
-    If activedoc.ProtectionType <> wdNoProtection Then
+    If activeDoc.ProtectionType <> wdNoProtection Then
       'If WT_Settings.InstallType = "server" Then
       '  Err.Raise MacError.err_DocProtectionOn
       'Else
-        MsgBox "Uh oh ... protection is enabled on document '" & activedoc.Name & "'." & vbNewLine & _
+        MsgBox "Uh oh ... protection is enabled on document '" & activeDoc.Name & "'." & vbNewLine & _
           "Please unprotect the document and run the macro again." & vbNewLine & vbNewLine & _
           "TIP: If you don't know the protection password, try pasting contents of this file into " & _
           "a new file, and run the macro on that.", , "Error 2"
@@ -185,14 +186,14 @@ Function StartupSettings_CIP() As Boolean
     'If WT_Settings.InstallType = "user" Then
     Dim iReply As Integer
     Dim docSaved As Boolean
-    docSaved = activedoc.Saved
+    docSaved = activeDoc.Saved
     
     If docSaved = False Then
-      iReply = MsgBox("Your document '" & activedoc & "' contains unsaved changes." & vbNewLine & vbNewLine & _
+      iReply = MsgBox("Your document '" & activeDoc & "' contains unsaved changes." & vbNewLine & vbNewLine & _
           "Click OK to save your document and run the macro." & vbNewLine & vbNewLine & "Click 'Cancel' to exit.", _
               vbOKCancel, "WARNING")
       If iReply = vbOK Then
-        activedoc.Save
+        activeDoc.Save
       Else
         StartupSettings_CIP = True
         Exit Function
@@ -252,7 +253,7 @@ Private Function FixTrackChanges_CIP() As Boolean
     ' returns True if changes were fixed or not present, False if changes remain in doc
     Dim n As Long
     Dim oComments As Comments
-    Set oComments = activedoc.Comments
+    Set oComments = activeDoc.Comments
     Dim tcPresentBool As Boolean
     
     FixTrackChanges_CIP = True
@@ -260,11 +261,9 @@ Private Function FixTrackChanges_CIP() As Boolean
     
     ' check if TC are present.
     Dim stry As Object
-    For Each stry In activedoc.StoryRanges
+    For Each stry In activeDoc.StoryRanges
         If stry.Revisions.Count >= 1 Then tcPresentBool = True
     Next
-    
-    'Debug.Print "commentscount " & oComments.Count & " tc " & tcPresentBool
     
     ' If there are changes, ask user if they want macro to accept changes or cancel
     If oComments.Count > 0 Or tcPresentBool = True Then
@@ -275,7 +274,7 @@ Private Function FixTrackChanges_CIP() As Boolean
               FixTrackChanges_CIP = False
               Exit Function
         Else 'User clicked OK, so accept all tracked changes and delete all comments
-          activedoc.AcceptAllRevisions
+          activeDoc.AcceptAllRevisions
           For n = oComments.Count To 1 Step -1
               oComments(n).Delete
           Next n
@@ -289,6 +288,8 @@ End Function
 
 Sub cleanOnExit(successBool, originalDoc, tmpDoc, tmpDocName)
     On Error GoTo cleanOnExit_ErrorHandler:
+    Dim TheOS As String
+    TheOS = System.OperatingSystem
     
     ' close progress bar if up
     If isFormLoaded("Progress_Bar") = True Then Unload pBar
@@ -306,8 +307,12 @@ Sub cleanOnExit(successBool, originalDoc, tmpDoc, tmpDocName)
     End If
     ' if we've created originalDoc object, make sure that is activeDoc, and activated
     If Not originalDoc Is Nothing Then
-        originalDoc.Activate
-        Set activedoc = originalDoc
+        If TheOS Like "*Mac*" And Not reportDoc Is Nothing Then  ' < in Mac OS we want to leave tag report as active Word Doc
+            reportDoc.Activate
+        Else
+            originalDoc.Activate
+        End If
+        Set activeDoc = originalDoc
     End If
     ' clear find
     Call clearFind
@@ -316,9 +321,9 @@ Sub cleanOnExit(successBool, originalDoc, tmpDoc, tmpDocName)
     Application.ScreenUpdating = True
     Application.ScreenRefresh
     ' display pop-up for a complete run
-    If successBool = True Then
-        Call Clean_helpers.MessageBox("Done", "CIP Tagging macro complete!", vbOK)
-    End If
+        If successBool = True Then
+            Call Clean_helpers.MessageBox("Done", "CIP Tagging macro complete!", vbOK)
+        End If
     Exit Sub
     
 cleanOnExit_ErrorHandler:
@@ -355,12 +360,15 @@ End Sub
 
 Private Function volumeCheckPrompt()
     Set vPrompt = New cipVolumePrompt
-    
+    Dim formControl As MSForms.control
+    Dim macResizeFactor As Double
+    macResizeFactor = 1.5
+
     With vPrompt
         .Caption = "Notice"
         .text1.Caption = "The Library of Congress has special rules for tagging 'Multivolume Sets'" & vbNewLine & vbNewLine & _
             "If this book is not part of a multivolume set, or you wish to submit this as a single volume, click 'STANDARD CIP TAGS'" & vbNewLine & vbNewLine & _
-            "If submitting as a 'single application for multiple volumes': click 'SKIP CHAPTER TAGS' to proceed with auto-tagging, exempting chapter tags (<ch></ch>)" & vbNewLine & vbNewLine & _
+            "If submitting as a 'single application for multiple volumes': click 'SKIP CHAPTER TAGS' to proceed with auto-tagging, exempting chapter tags (<ch></ch>). " & _
             "Chapter tags will unfortunately need to be applied manually in this case." & vbNewLine & vbNewLine & _
             "For more information, please peruse CIP guidleines on Multivolume Sets via the link below."
         .text1.FontSize = 9
@@ -369,6 +377,20 @@ Private Function volumeCheckPrompt()
         .cbCancel.FontSize = 9
         .LOC_hyperlink.FontSize = 9
         .LOC_hyperlink.Caption = "https://www.loc.gov/publish/cip/techinfo/formattingecip.html#multi"
+         #If Mac Then
+            ' resize and cleanup for the Mac
+            .Height = Round(macResizeFactor * .Height, 0)
+            .Width = Round(macResizeFactor * .Width, 0)
+            .text1.BackColor = RGB(255, 255, 255)
+            .LOC_hyperlink.ForeColor = RGB(0, 0, 200)
+              For Each formControl In vPrompt.Controls
+                    formControl.Height = Round(macResizeFactor * formControl.Height, 0)
+                    formControl.Width = Round(macResizeFactor * formControl.Width, 0)
+                    formControl.Left = Round(macResizeFactor * formControl.Left, 0)
+                    formControl.Top = Round(macResizeFactor * formControl.Top, 0)
+                    formControl.FontSize = Round(macResizeFactor * formControl.FontSize, 0)
+                Next formControl
+         #End If
         .Show
     End With
     
@@ -438,19 +460,19 @@ Function preCheckTags(tagArray, chTag, Optional unittestDoc As Document = Nothin
     nonChFoundStr = ""
     foundStr = ""
     ' for unittests:
-    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    If Not unittestDoc Is Nothing Then Set activeDoc = unittestDoc
     
     
     ' all non-chapter tags
     For i = 0 To UBound(tagArray)
         openTagStr = "<" & tagArray(i) & ">"
-        If tagCheck(openTagStr, unittestDoc:=activedoc) = True Then
+        If tagCheck(openTagStr, unittestDoc:=activeDoc) = True Then
             ReDim Preserve foundTags(j)
             foundTags(j) = openTagStr
             j = j + 1
         End If
         closeTagStr = "</" & tagArray(i) & ">"
-        If tagCheck(closeTagStr, unittestDoc:=activedoc) = True Then
+        If tagCheck(closeTagStr, unittestDoc:=activeDoc) = True Then
             ReDim Preserve foundTags(j)
             foundTags(j) = closeTagStr
             j = j + 1
@@ -459,12 +481,12 @@ Function preCheckTags(tagArray, chTag, Optional unittestDoc As Document = Nothin
     
     ' now chapter tags:
     chOpenTagStr = "\<" & chTag & "[0-9]{1,}\>" 'backslashes to include angle brackets, since we will search w. wildcards
-    If tagCheck(chOpenTagStr, True, activedoc) = True Then
+    If tagCheck(chOpenTagStr, True, activeDoc) = True Then
         chFoundStr = "one or more chapter heading tags (e.g. <ch1>, <ch2>, ... )"
     End If
     
     chCloseTagStr = "</" & chTag & ">"
-    If tagCheck(chCloseTagStr, unittestDoc:=activedoc) = True Then
+    If tagCheck(chCloseTagStr, unittestDoc:=activeDoc) = True Then
         ReDim Preserve foundTags(j)
         foundTags(j) = chCloseTagStr
     End If
@@ -481,7 +503,7 @@ Function preCheckTags(tagArray, chTag, Optional unittestDoc As Document = Nothin
     End If
     
     If foundStr <> "" Then
-        MsgBox "Your document: '" & activedoc & "' already contains the following CIP tag(s):" & vbNewLine & vbNewLine & foundStr & vbNewLine & vbNewLine & _
+        MsgBox "Your document: '" & activeDoc & "' already contains the following CIP tag(s):" & vbNewLine & vbNewLine & foundStr & vbNewLine & vbNewLine & _
         "This macro may have already been run on this document. To run this macro, you MUST find and remove all existing CIP tags first.", , "Alert"
         preCheckTags = True
         Exit Function
@@ -492,9 +514,9 @@ Function tagCheck(tagName, Optional wildcardsBool = False, Optional unittestDoc 
     Dim tagFound As Boolean
     tagFound = False
     ' for unittests
-    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    If Not unittestDoc Is Nothing Then Set activeDoc = unittestDoc
     
-    With activedoc.Range.Find
+    With activeDoc.Range.Find
         .ClearFormatting
         .Text = tagName
         .Wrap = wdFindContinue
@@ -519,20 +541,20 @@ Sub tagChaptersEnd(lastChapParaIndex, bmStyleArray, chTag, Optional unittestDoc 
     Dim lastChapterIndex As Long
     
     ' for unittests:
-    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    If Not unittestDoc Is Nothing Then Set activeDoc = unittestDoc
     
     endChapsTag = "</" & chTag & ">"
-    lastChapterIndex = activedoc.Paragraphs.Count
+    lastChapterIndex = activeDoc.Paragraphs.Count
     targetParaindex = lastChapterIndex
     tmpTargetParaIndex = lastChapterIndex
     
-    Set activeRng = activedoc.Range
+    Set activeRng = activeDoc.Range
     ' skip if this index val is 0, that means there are no tagged chaps here,
     '   which means we cannot determine if a section like Acknowledgements is fm or bm
     If lastChapParaIndex <> 0 Then
         ' cycle through bm sections, comparing index of first of each to lastchaptag index.
         For i = 0 To UBound(bmStyleArray)
-            tmpTargetParaIndex = getFirstParaIndexAfterChapterEnd(bmStyleArray(i), lastChapParaIndex, activedoc)
+            tmpTargetParaIndex = getFirstParaIndexAfterChapterEnd(bmStyleArray(i), lastChapParaIndex, activeDoc)
             If tmpTargetParaIndex < targetParaindex Then
                 targetParaindex = tmpTargetParaIndex
             End If
@@ -545,7 +567,7 @@ Sub tagChaptersEnd(lastChapParaIndex, bmStyleArray, chTag, Optional unittestDoc 
             End With
         ' else insert right before first bm section
         Else
-            Set targetRange = activedoc.Paragraphs(targetParaindex).Range
+            Set targetRange = activeDoc.Paragraphs(targetParaindex).Range
             With targetRange
                 .MoveEnd Unit:=wdParagraph, Count:=-1
                 .MoveEnd Unit:=wdCharacter, Count:=-1
@@ -566,10 +588,10 @@ Sub rmParasWithStylesArray(targetStyleArray)
 End Sub
 Sub rmParasWithStyle(targetStyle, Optional unittestDoc As Document = Nothing)
     ' for unittests
-    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    If Not unittestDoc Is Nothing Then Set activeDoc = unittestDoc
     
-    If styleExists(targetStyle, activedoc) Then
-        With activedoc.Range.Find
+    If styleExists(targetStyle, activeDoc) Then
+        With activeDoc.Range.Find
             .ClearFormatting
             .Text = ""
             .Format = True
@@ -587,11 +609,11 @@ End Sub
 Sub changeBreakParaContents(targetStyleArray, replacementStr, Optional unittestDoc As Document = Nothing)
     Dim i As Long
     ' for unittests:
-    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    If Not unittestDoc Is Nothing Then Set activeDoc = unittestDoc
     
     For i = 0 To UBound(targetStyleArray)
-        If styleExists(targetStyleArray(i), activedoc) Then
-            With activedoc.Range.Find
+        If styleExists(targetStyleArray(i), activeDoc) Then
+            With activeDoc.Range.Find
                 .ClearFormatting
                 .Text = ""
                 .Format = True
@@ -636,7 +658,7 @@ Function reportOnTags(tagArray, tagDisplayNames, tagRequired, chTag, tagChapters
     Dim errStr As String, reportStr As String
     
     ' for unittests:
-    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    If Not unittestDoc Is Nothing Then Set activeDoc = unittestDoc
     
     ' begin update progress bar
     thisstatus = "* Generating tag Report "
@@ -644,8 +666,8 @@ Function reportOnTags(tagArray, tagDisplayNames, tagRequired, chTag, tagChapters
     
     '  =============== Count Tags ================
     
-    Set activeRng = activedoc.Range
-    docTxt = activedoc.Range.Text
+    Set activeRng = activeDoc.Range
+    docTxt = activeDoc.Range.Text
     tagTotal = 0
     
     ' count fm tags
@@ -739,8 +761,8 @@ Function reportOnTags(tagArray, tagDisplayNames, tagRequired, chTag, tagChapters
         
     ' Print to text file
     Dim thisDoc As Document
-    Set thisDoc = activedoc
-    Call MacroHelpers.CreateTextFile(strText:=reportStr, suffix:="CIPtagReport", thisDoc:=originalDoc)
+    Set thisDoc = activeDoc
+    Call CreateTextFile_CIP(reportStr, "CIPtagReport", originalDoc, thisDoc)
 
     ' update progress bar
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
@@ -758,13 +780,13 @@ Sub tagChapterStarts(targetStyles, chTag As String, Optional unittestDoc As Docu
     Dim i As Long
     
     ' for unittests:
-    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    If Not unittestDoc Is Nothing Then Set activeDoc = unittestDoc
         
     ' tag all chapters with unnumbered tag, since we may be handling > 1 chap style
     For i = 0 To UBound(targetStyles)
         ' make sure style exists in doc, or we error(!)
-        If styleExists(targetStyles(i), activedoc) Then
-            Set activeRng = activedoc.Range
+        If styleExists(targetStyles(i), activeDoc) Then
+            Set activeRng = activeDoc.Range
             With activeRng.Find
               .ClearFormatting
               .Replacement.ClearFormatting
@@ -786,10 +808,10 @@ Sub tagChapterStarts(targetStyles, chTag As String, Optional unittestDoc As Docu
 
 End Sub
 Function getSelectParaIndex() As Long ' gets para-index of 1st selected para
-    getSelectParaIndex = activedoc.Range(0, Selection.Paragraphs(1).Range.End).Paragraphs.Count
+    getSelectParaIndex = activeDoc.Range(0, Selection.Paragraphs(1).Range.End).Paragraphs.Count
 End Function
 Function getRangeParaIndex(myRange As Range) As Long ' gets para-index of 1st para in Range
-    getRangeParaIndex = activedoc.Range(0, myRange.Paragraphs(1).Range.End).Paragraphs.Count
+    getRangeParaIndex = activeDoc.Range(0, myRange.Paragraphs(1).Range.End).Paragraphs.Count
 End Function
 Function numberChapterTags(chTag As String, Optional unittestDoc As Document = Nothing) As Long
     ' cycle back through and add increments
@@ -797,9 +819,9 @@ Function numberChapterTags(chTag As String, Optional unittestDoc As Document = N
     Dim j As Long, paraIndex As Long
     
     ' for unittests:
-    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    If Not unittestDoc Is Nothing Then Set activeDoc = unittestDoc
     
-    Set activeRng = activedoc.Range
+    Set activeRng = activeDoc.Range
     j = 1
     
     With activeRng.Find
@@ -864,13 +886,13 @@ Sub tagFMSection(targetStyle As String, sectionArray, maxsectionlength As Long, 
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     ' for unittests:
-    If Not unittestDoc Is Nothing Then Set activedoc = unittestDoc
+    If Not unittestDoc Is Nothing Then Set activeDoc = unittestDoc
 
     ' makrs sure style is present
-    If styleExists(targetStyle, activedoc) Then
+    If styleExists(targetStyle, activeDoc) Then
 
         ' search and tag
-        Set activeRng = activedoc.Range
+        Set activeRng = activeDoc.Range
     
         With activeRng.Find
             .ClearFormatting
@@ -1015,36 +1037,29 @@ Private Function getList(fileName As String)
 End Function
 Private Function getFilePathWithNewSuffix(myDocument, suffixStr) 'expects file extension too, ex: "_2.docx"
     Dim strdocname As String
-    'Separate code by OS because myDocument.Path returns file name too
-    ' on Mac but doesn't for PC
+    
+    strdocname = myDocument.Name
+    docPath = myDocument.Path
+    'Find position of extension in filename
+    intPos = InStrRev(strdocname, ".")
+    'Strip off extension and add ".txt" extension
+    strdocname = Left(strdocname, intPos - 1)
     #If Mac Then        'For Mac
-        If Val(Application.Version) > 14 Then
-            'Find position of extension in filename
-            strdocname = myDocument.Path
-            intPos = InStrRev(strdocname, ".")
-            
-            'Strip off extension and add ".txt" extension
-            strdocname = Left(strdocname, intPos - 1)
-            strdocname = strdocname & suffixStr
-        End If
-    #Else                           'For Windows
-        'Find position of extension in filename
-        strdocname = myDocument.Name
-        DocPath = myDocument.Path
-        intPos = InStrRev(strdocname, ".")
-        
-        'Strip off extension and add ".txt" extension
-        strdocname = Left(strdocname, intPos - 1)
-        strdocname = DocPath & "\" & strdocname & suffixStr
-    #End If
+        strdocname = docPath & "/" & strdocname & suffixStr
+   #Else                           'For Windows
+        strdocname = docPath & "\" & strdocname & suffixStr
+   #End If
+   
     getFilePathWithNewSuffix = strdocname
+    
 End Function
+
 Function SaveAsTextFile(originalDocument) As Boolean
     On Error GoTo SaveAsTextFileError
     ' Saves a copy of the document as a text file in the same path as the parent document
     Dim txtDoc As Document
     Dim strdocname As String
-    Dim DocPath As String
+    Dim docPath As String
     Dim intPos As Integer
     Dim encodingFmt As String
     Dim lineBreak As Boolean
@@ -1063,7 +1078,7 @@ Function SaveAsTextFile(originalDocument) As Boolean
     'Copy text of active document and paste into a new document
     'Because otherwise open document is converted to .txt, and we want it to stay .doc*
     ' ^ 2/23/21-mr- we can revise this if we end up closing docx anyways
-    activedoc.Select
+    activeDoc.Select
     Selection.Copy
     
     'DebugPrint Len(Selection)
@@ -1104,7 +1119,7 @@ Function SaveAsTextFile(originalDocument) As Boolean
     Application.DisplayAlerts = wdAlertsAll
     
     txtDoc.Close savechanges:=wdDoNotSaveChanges
-    activedoc.Close savechanges:=wdDoNotSaveChanges
+    activeDoc.Close savechanges:=wdDoNotSaveChanges
             
     'Application.ScreenUpdating = True
         
@@ -1123,7 +1138,7 @@ SaveAsTextFileError:
 End Function
 Private Sub clearFind()
     Dim clearRng As Range
-    Set clearRng = activedoc.Words.First
+    Set clearRng = activeDoc.Words.First
     With clearRng.Find
       .ClearFormatting
       .Replacement.ClearFormatting
@@ -1139,4 +1154,53 @@ Private Sub clearFind()
       .Execute
     End With
 End Sub
+Public Sub CreateTextFile_CIP(strText As String, suffix As String, originalDoc, myActiveDoc)
+    'Create report file
+    Dim origDocName As String
+    Dim origDocPath As String
+    Dim reqReportDoc As String
+    Dim fnum As Integer
+    
+    ' precautiona from theoretical prev. crashed instance
+    Set reportDoc = Nothing
+    
+    'string manipulation below works for .Doc and .Docx
+    origDocName = Left(originalDoc.Name, InStrRev(originalDoc.Name, ".do") - 1)
+    origDocPath = Replace(originalDoc.Path, originalDoc.Name, "")
+    
+    'create text file
+    'reqReportDoc = origDocPath & origDocName & "_" & suffix & ".txt" '< this appears to be missing the slash on newer Mac OS.
+    '   redefining per OS below
+    
+  ' 32 char bug appears to no longer be extant in Word v 16. Able to get rid of a lot of conditional renaming malarkey
+   #If Mac Then
+        reqReportDoc = origDocPath & "/" & origDocName & "_" & suffix & ".txt"
+    #Else
+        reqReportDoc = origDocPath & "\" & origDocName & "_" & suffix & ".txt"
+    #End If
+    
+    'set and open file for output
+    Dim E As Integer
+    fnum = FreeFile()
+    Open reqReportDoc For Output As fnum
+    
+        Print #fnum, strText
+
+    Close #fnum
+    
+    '----------------open Report for user once it is complete--------------------------.
+    Dim Shex As Object
+    
+    ' for PC we open the tag report in default Text Editor
+    '  new Mac OS gatekeeping prevents that; so we open in Word and set reportDoc object to the new doc
+    #If Mac Then
+        Set reportDoc = Application.Documents.Open(fileName:=reqReportDoc, Encoding:=MsoEncoding.msoEncodingWestern)
+        myActiveDoc.Activate
+    #Else
+        Set Shex = CreateObject("Shell.Application")
+        Shex.Open (reqReportDoc)
+    #End If
+
+End Sub
+
 
