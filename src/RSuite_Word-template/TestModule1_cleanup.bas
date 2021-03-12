@@ -74,7 +74,7 @@ DSH_expected = "Bar" + EMDASH + "character, figure" + ENDASH + "dash, triple" + 
 DSH_exclude_expected = "triple---dash, double--dash, double -- andspaces" + vbCr + "Space - space, dash- space, space -dash" + vbCr _
             + "Space " + ENDASH + "endash, endash" + ENDASH + " space, emdash" + EMDASH + " space, space " + EMDASH + "emdash" + vbCr _
             + "7" + ENDASH + "8, from 94" + ENDASH + "112, space emdash" + EMDASH + "space"
-DSH_numbers_expected = "Leave alone phone: 703-536-4247, (987) 654-3211" + vbCr _
+DSH_numbers_expected = "Leave alone phone: 703-536-4247, (987) 654-3211, 1-800-123-4567" + vbCr _
             + "Leave alone Isbns: 978-5-426-01234-8, 979-022-2323212" + vbCr _
             + "Now endash: 7" + ENDASH + "8, from 94" + ENDASH + "112, also 15" + ENDASH + "34" + ENDASH + "41, 6.0" + ENDASH + "6.125"
 MTC_expected = "Testing All of the Lowercase" + vbCr _
@@ -158,7 +158,7 @@ End Sub
 Private Sub TestCleanup()
     'this method runs after every test in the module.
     Unload pBar
-    Application.Documents(testDocx).Close SaveChanges:=wdDoNotSaveChanges
+    Application.Documents(testDocx).Close savechanges:=wdDoNotSaveChanges
 End Sub
 
 '@TestMethod("CleanupMacro")
@@ -176,7 +176,7 @@ Private Sub TestDoubleQuotes_simplefinds() 'TODO Rename test
     'Assert:
         'Assert.AreEqual 5, 4, "Test: compare ints"     '< Example
         Assert.Succeed
-        Assert.AreEqual DQ_simplefinds_expected, results
+        Assert.areequal DQ_simplefinds_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -195,7 +195,7 @@ Private Sub TestDoubleQuotes_emdash() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual DQ_emdash_expected, results
+        Assert.areequal DQ_emdash_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -213,7 +213,7 @@ Private Sub TestDoubleQuotes_spaces() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual DQ_spaces_expected, results
+        Assert.areequal DQ_spaces_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -231,7 +231,7 @@ Private Sub TestDoubleQuotes_special() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual DQ_special_expected, results
+        Assert.areequal DQ_special_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -253,11 +253,11 @@ Private Sub TestDoubleQuotes_secondrun() 'TODO Rename test
         results_special = TestHelpers.returnTestResultString("TestDoubleQuotes_special", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual DQ_emdash_expected, results_emdash
-        Assert.AreEqual DQ_other_expected, results_other
-        Assert.AreEqual DQ_simplefinds_expected, results_simplefinds
-        Assert.AreEqual DQ_spaces_expected, results_spaces
-        Assert.AreEqual DQ_special_expected, results_special
+        Assert.areequal DQ_emdash_expected, results_emdash
+        Assert.areequal DQ_other_expected, results_other
+        Assert.areequal DQ_simplefinds_expected, results_simplefinds
+        Assert.areequal DQ_spaces_expected, results_spaces
+        Assert.areequal DQ_special_expected, results_special
 TestExit:
     Exit Sub
 TestFail:
@@ -279,11 +279,11 @@ Private Sub TestDoubleQuotes_footnotes() 'TODO Rename test
         results_special = TestHelpers.returnTestResultString("TestDoubleQuotes_special", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual DQ_emdash_expected, results_emdash
-        Assert.AreEqual DQ_other_expected, results_other
-        Assert.AreEqual DQ_simplefinds_expected, results_simplefinds
-        Assert.AreEqual DQ_spaces_expected, results_spaces
-        Assert.AreEqual DQ_special_expected, results_special
+        Assert.areequal DQ_emdash_expected, results_emdash
+        Assert.areequal DQ_other_expected, results_other
+        Assert.areequal DQ_simplefinds_expected, results_simplefinds
+        Assert.areequal DQ_spaces_expected, results_spaces
+        Assert.areequal DQ_special_expected, results_special
 TestExit:
     Exit Sub
 TestFail:
@@ -305,11 +305,11 @@ Private Sub TestDoubleQuotes_endnotes() 'TODO Rename test
         results_special = TestHelpers.returnTestResultString("TestDoubleQuotes_special", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual DQ_emdash_expected, results_emdash
-        Assert.AreEqual DQ_other_expected, results_other
-        Assert.AreEqual DQ_simplefinds_expected, results_simplefinds
-        Assert.AreEqual DQ_spaces_expected, results_spaces
-        Assert.AreEqual DQ_special_expected, results_special
+        Assert.areequal DQ_emdash_expected, results_emdash
+        Assert.areequal DQ_other_expected, results_other
+        Assert.areequal DQ_simplefinds_expected, results_simplefinds
+        Assert.areequal DQ_spaces_expected, results_spaces
+        Assert.areequal DQ_special_expected, results_special
 TestExit:
     Exit Sub
 TestFail:
@@ -327,7 +327,7 @@ Private Sub TestDoubleQuotes_other() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual DQ_other_expected, results
+        Assert.areequal DQ_other_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -345,7 +345,7 @@ Private Sub TestSingleQuotes_backtick() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SQ_backtick_expected, results
+        Assert.areequal SQ_backtick_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -364,7 +364,7 @@ Private Sub TestSingleQuotes_word_setasides() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SQ_setasides_expected, results
+        Assert.areequal SQ_setasides_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -383,7 +383,7 @@ Private Sub TestSingleQuotes_openquo() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SQ_openquo_expected, results
+        Assert.areequal SQ_openquo_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -402,7 +402,7 @@ Private Sub TestSingleQuotes_fandr() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SQ_fandr_expected, results
+        Assert.areequal SQ_fandr_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -424,10 +424,10 @@ Private Sub TestSingleQuotes_secondrun() 'TODO Rename test
         results_backtick = TestHelpers.returnTestResultString("TestSingleQuotes_backtick", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SQ_fandr_expected, results_fandr
-        Assert.AreEqual SQ_openquo_expected, results_openquo
-        Assert.AreEqual SQ_setasides_expected, results_setasides
-        Assert.AreEqual SQ_backtick_expected, results_backtick
+        Assert.areequal SQ_fandr_expected, results_fandr
+        Assert.areequal SQ_openquo_expected, results_openquo
+        Assert.areequal SQ_setasides_expected, results_setasides
+        Assert.areequal SQ_backtick_expected, results_backtick
 TestExit:
     Exit Sub
 TestFail:
@@ -449,10 +449,10 @@ Private Sub TestSingleQuotes_endnotes() 'TODO Rename test
         results_backtick = TestHelpers.returnTestResultString("TestSingleQuotes_backtick", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SQ_fandr_expected, results_fandr
-        Assert.AreEqual SQ_openquo_expected, results_openquo
-        Assert.AreEqual SQ_setasides_expected, results_setasides
-        Assert.AreEqual SQ_backtick_expected, results_backtick
+        Assert.areequal SQ_fandr_expected, results_fandr
+        Assert.areequal SQ_openquo_expected, results_openquo
+        Assert.areequal SQ_setasides_expected, results_setasides
+        Assert.areequal SQ_backtick_expected, results_backtick
 TestExit:
     Exit Sub
 TestFail:
@@ -474,10 +474,10 @@ Private Sub TestSingleQuotes_footnotes() 'TODO Rename test
         results_backtick = TestHelpers.returnTestResultString("TestSingleQuotes_backtick", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SQ_fandr_expected, results_fandr
-        Assert.AreEqual SQ_openquo_expected, results_openquo
-        Assert.AreEqual SQ_setasides_expected, results_setasides
-        Assert.AreEqual SQ_backtick_expected, results_backtick
+        Assert.areequal SQ_fandr_expected, results_fandr
+        Assert.areequal SQ_openquo_expected, results_openquo
+        Assert.areequal SQ_setasides_expected, results_setasides
+        Assert.areequal SQ_backtick_expected, results_backtick
 TestExit:
     Exit Sub
 TestFail:
@@ -495,7 +495,7 @@ Private Sub TestEllipses_frbasic() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual EL_frbasic_expected, results
+        Assert.areequal EL_frbasic_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -513,7 +513,7 @@ Private Sub TestEllipses_fr4dots() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual EL_fr4dots_expected, results
+        Assert.areequal EL_fr4dots_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -531,7 +531,7 @@ Private Sub TestEllipses_spaces() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual EL_spaces_expected, results
+        Assert.areequal EL_spaces_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -549,7 +549,7 @@ Private Sub TestEllipses_emdashes() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual EL_emdashes_expected, results
+        Assert.areequal EL_emdashes_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -571,10 +571,10 @@ Private Sub TestEllipses_secondrun() 'TODO Rename test
         results_emdashes = TestHelpers.returnTestResultString("TestEllipses_emdashes", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual EL_frbasic_expected, results_frbasic
-        Assert.AreEqual EL_fr4dots_expected, results_fr4dots
-        Assert.AreEqual EL_spaces_expected, results_spaces
-        Assert.AreEqual EL_emdashes_expected, results_emdashes
+        Assert.areequal EL_frbasic_expected, results_frbasic
+        Assert.areequal EL_fr4dots_expected, results_fr4dots
+        Assert.areequal EL_spaces_expected, results_spaces
+        Assert.areequal EL_emdashes_expected, results_emdashes
 TestExit:
     Exit Sub
 TestFail:
@@ -596,10 +596,10 @@ Private Sub TestEllipses_footnotes() 'TODO Rename test
         results_emdashes = TestHelpers.returnTestResultString("TestEllipses_emdashes", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual EL_frbasic_expected, results_frbasic
-        Assert.AreEqual EL_fr4dots_expected, results_fr4dots
-        Assert.AreEqual EL_spaces_expected, results_spaces
-        Assert.AreEqual EL_emdashes_expected, results_emdashes
+        Assert.areequal EL_frbasic_expected, results_frbasic
+        Assert.areequal EL_fr4dots_expected, results_fr4dots
+        Assert.areequal EL_spaces_expected, results_spaces
+        Assert.areequal EL_emdashes_expected, results_emdashes
 TestExit:
     Exit Sub
 TestFail:
@@ -621,10 +621,10 @@ Private Sub TestEllipses_endnotes() 'TODO Rename test
         results_emdashes = TestHelpers.returnTestResultString("TestEllipses_emdashes", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual EL_frbasic_expected, results_frbasic
-        Assert.AreEqual EL_fr4dots_expected, results_fr4dots
-        Assert.AreEqual EL_spaces_expected, results_spaces
-        Assert.AreEqual EL_emdashes_expected, results_emdashes
+        Assert.areequal EL_frbasic_expected, results_frbasic
+        Assert.areequal EL_fr4dots_expected, results_fr4dots
+        Assert.areequal EL_spaces_expected, results_spaces
+        Assert.areequal EL_emdashes_expected, results_emdashes
 TestExit:
     Exit Sub
 TestFail:
@@ -642,7 +642,7 @@ Private Sub TestSpaces_nbsps() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SP_nbsps_expected, results
+        Assert.areequal SP_nbsps_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -661,7 +661,7 @@ Private Sub TestSpaces_brackets_and_whitespace() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SP_brackets_expected, results
+        Assert.areequal SP_brackets_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -679,7 +679,7 @@ Private Sub TestSpaces_breaks() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SP_breaks_expected, results
+        Assert.areequal SP_breaks_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -697,7 +697,7 @@ Private Sub TestSpaces_exclude() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SP_exclude_expected, results
+        Assert.areequal SP_exclude_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -719,10 +719,10 @@ Private Sub TestSpaces_secondrun() 'TODO Rename test
         results_exclude = TestHelpers.returnTestResultString("TestSpaces_exclude", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SP_nbsps_expected, results_nbsps
-        Assert.AreEqual SP_brackets_expected, results_brackets
-        Assert.AreEqual SP_breaks_expected, results_breaks
-        Assert.AreEqual SP_exclude_expected, results_exclude
+        Assert.areequal SP_nbsps_expected, results_nbsps
+        Assert.areequal SP_brackets_expected, results_brackets
+        Assert.areequal SP_breaks_expected, results_breaks
+        Assert.areequal SP_exclude_expected, results_exclude
 TestExit:
     Exit Sub
 TestFail:
@@ -743,10 +743,10 @@ Private Sub TestSpaces_footnotes() 'TODO Rename test
         results_exclude = TestHelpers.returnTestResultString("TestSpaces_exclude", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SP_nbsps_expected, results_nbsps
-        Assert.AreEqual SP_brackets_expected, results_brackets
-        Assert.AreEqual SP_breaks_expected, results_breaks
-        Assert.AreEqual SP_exclude_expected, results_exclude
+        Assert.areequal SP_nbsps_expected, results_nbsps
+        Assert.areequal SP_brackets_expected, results_brackets
+        Assert.areequal SP_breaks_expected, results_breaks
+        Assert.areequal SP_exclude_expected, results_exclude
 TestExit:
     Exit Sub
 TestFail:
@@ -767,10 +767,10 @@ Private Sub TestSpaces_endnotes() 'TODO Rename test
         results_exclude = TestHelpers.returnTestResultString("TestSpaces_exclude", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SP_nbsps_expected, results_nbsps
-        Assert.AreEqual SP_brackets_expected, results_brackets
-        Assert.AreEqual SP_breaks_expected, results_breaks
-        Assert.AreEqual SP_exclude_expected, results_exclude
+        Assert.areequal SP_nbsps_expected, results_nbsps
+        Assert.areequal SP_brackets_expected, results_brackets
+        Assert.areequal SP_breaks_expected, results_breaks
+        Assert.areequal SP_exclude_expected, results_exclude
 TestExit:
     Exit Sub
 TestFail:
@@ -788,7 +788,7 @@ Private Sub TestPunctuation() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual PN_expected, results
+        Assert.areequal PN_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -816,9 +816,9 @@ Private Sub TestPunctuation_notes_and_secondrun() 'TODO Rename test
         results_enotes = TestHelpers.returnTestResultString("TestPunctuation", MyStoryNo)
      'Assert:
         Assert.Succeed
-        Assert.AreEqual PN_expected, results_fnotes
-        Assert.AreEqual PN_expected, results_enotes
-        Assert.AreEqual PN_expected, results_secondrun
+        Assert.areequal PN_expected, results_fnotes
+        Assert.areequal PN_expected, results_enotes
+        Assert.areequal PN_expected, results_secondrun
 TestExit:
     Exit Sub
 TestFail:
@@ -836,7 +836,7 @@ Private Sub TestDashes() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual DSH_expected, results
+        Assert.areequal DSH_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -854,7 +854,7 @@ Private Sub TestDashes_exclude() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual DSH_exclude_expected, results
+        Assert.areequal DSH_exclude_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -872,7 +872,7 @@ Private Sub TestDashes_numbers() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual DSH_numbers_expected, results
+        Assert.areequal DSH_numbers_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -890,9 +890,9 @@ Private Sub TestDashes_secondrun() 'TODO Rename test
         results_exclude = TestHelpers.returnTestResultString("TestDashes_exclude", MyStoryNo)
      'Assert:
         Assert.Succeed
-        Assert.AreEqual DSH_expected, results_dashes
-        Assert.AreEqual DSH_numbers_expected, results_numbers
-        Assert.AreEqual DSH_exclude_expected, results_exclude
+        Assert.areequal DSH_expected, results_dashes
+        Assert.areequal DSH_numbers_expected, results_numbers
+        Assert.areequal DSH_exclude_expected, results_exclude
 TestExit:
     Exit Sub
 TestFail:
@@ -921,12 +921,12 @@ Private Sub TestDashes_notes() 'TODO Rename test
         results_enotes_exclude = TestHelpers.returnTestResultString("TestDashes_exclude", MyStoryNo)
      'Assert:
         Assert.Succeed
-        Assert.AreEqual DSH_expected, results_fnotes
-        Assert.AreEqual DSH_numbers_expected, results_fnotes_numbers
-        Assert.AreEqual DSH_exclude_expected, results_fnotes_exclude
-        Assert.AreEqual DSH_expected, results_enotes
-        Assert.AreEqual DSH_numbers_expected, results_enotes_numbers
-        Assert.AreEqual DSH_exclude_expected, results_enotes_exclude
+        Assert.areequal DSH_expected, results_fnotes
+        Assert.areequal DSH_numbers_expected, results_fnotes_numbers
+        Assert.areequal DSH_exclude_expected, results_fnotes_exclude
+        Assert.areequal DSH_expected, results_enotes
+        Assert.areequal DSH_numbers_expected, results_enotes_numbers
+        Assert.areequal DSH_exclude_expected, results_enotes_exclude
 TestExit:
     Exit Sub
 TestFail:
@@ -944,7 +944,7 @@ Private Sub TestBreaks() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual BR_expected, results
+        Assert.areequal BR_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -974,9 +974,9 @@ Private Sub TestBreaks_notes_and_secondrun() 'TODO Rename test
          
      'Assert:
         Assert.Succeed
-        Assert.AreEqual BR_expected, results_fnotes
-        Assert.AreEqual BR_expected, results_enotes
-        Assert.AreEqual BR_expected, results_secondrun
+        Assert.areequal BR_expected, results_fnotes
+        Assert.areequal BR_expected, results_enotes
+        Assert.areequal BR_expected, results_secondrun
 TestExit:
     Exit Sub
 TestFail:
@@ -995,7 +995,7 @@ Private Sub TestTitlecase() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual MTC_expected, results
+        Assert.areequal MTC_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -1024,9 +1024,9 @@ Private Sub TestTitlecase_notes_and_secondrun() 'TODO Rename test
      
      'Assert:
         Assert.Succeed
-        Assert.AreEqual MTC_expected, results_fnotes
-        Assert.AreEqual MTC_expected, results_enotes
-        Assert.AreEqual MTC_expected, results_secondrun
+        Assert.areequal MTC_expected, results_fnotes
+        Assert.areequal MTC_expected, results_enotes
+        Assert.areequal MTC_expected, results_secondrun
 TestExit:
     Exit Sub
 TestFail:
@@ -1065,13 +1065,13 @@ Private Sub TestHyperlinks() 'TODO Rename test
        
     'Assert:
         Assert.Succeed
-        Assert.AreEqual init_link_count, HL_expected
-        Assert.AreEqual final_link_count, 0
-        Assert.AreEqual second_run_count, 0
-        Assert.AreEqual init_link_count_fn, HL_expected
-        Assert.AreEqual final_link_count_fn, 0
-        Assert.AreEqual init_link_count_en, HL_expected
-        Assert.AreEqual final_link_count_en, 0
+        Assert.areequal init_link_count, HL_expected
+        Assert.areequal final_link_count, 0
+        Assert.areequal second_run_count, 0
+        Assert.areequal init_link_count_fn, HL_expected
+        Assert.areequal final_link_count_fn, 0
+        Assert.areequal init_link_count_en, HL_expected
+        Assert.areequal final_link_count_en, 0
 TestExit:
     Exit Sub
 TestFail:
