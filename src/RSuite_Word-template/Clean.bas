@@ -4,8 +4,8 @@ Sub Ellipses(MyStoryNo)
 
         Application.ScreenUpdating = False
                 
-        thisStatus = "Fixing ellipses "
-        Clean_helpers.updateStatus (thisStatus)
+        thisstatus = "Fixing ellipses "
+        Clean_helpers.updateStatus (thisstatus)
 
         'replace anythign that's already fixed, in case it's run again
         Clean_helpers.FindReplaceSimple ELLIPSIS, "<doneellipsis>", MyStoryNo
@@ -104,15 +104,15 @@ Sub Ellipses(MyStoryNo)
     'replace anything that's already fixed, in case it's run again
     Clean_helpers.FindReplaceComplex "<doneellipsis>", ELLIPSIS, True, False, , , MyStoryNo
     
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     Clean_helpers.updateStatus ("")
         
 End Sub
 
 Sub Spaces(MyStoryNo)
 
-    thisStatus = "Fixing spaces "
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing spaces "
+    Clean_helpers.updateStatus (thisstatus)
 
     'temporarily change finished ellipses and delete nonbreaking spaces
     Clean_helpers.FindReplaceSimple EMDASH_ELLIPSIS, "<doneemdashellipsis>", MyStoryNo
@@ -155,7 +155,7 @@ Sub Spaces(MyStoryNo)
     'space after dollar sign to no space
     Clean_helpers.FindReplaceSimple_WithExclude "$ ", "$", MyStoryNo
     
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     Clean_helpers.updateStatus ("")
     
     
@@ -163,8 +163,8 @@ End Sub
 
 Sub Punctuation(MyStoryNo)
 
-    thisStatus = "Fixing punctuation "
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing punctuation "
+    Clean_helpers.updateStatus (thisstatus)
 
     'multiple periods to single period
     Clean_helpers.FindReplaceComplex ".{2,}", ".", False, True, , , MyStoryNo
@@ -177,7 +177,7 @@ Sub Punctuation(MyStoryNo)
     Clean_helpers.FindReplaceSimple NBHYPH, "-", MyStoryNo
     Clean_helpers.FindReplaceSimple NBHYPH2, "-", MyStoryNo
     
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     Clean_helpers.updateStatus ("")
 End Sub
 
@@ -192,8 +192,8 @@ Sub DoubleQuotes(MyStoryNo)
     totalPages = ActiveDocument.Range.Information(wdNumberOfPagesInDocument)
     currPercentage = 0
     
-    thisStatus = "Fixing double quotes"
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing double quotes"
+    Clean_helpers.updateStatus (thisstatus)
 
     ' Combine double single-primes into Double-prime, also double-backticks
     FindReplaceSimple "``", DP, MyStoryNo
@@ -209,8 +209,8 @@ Sub DoubleQuotes(MyStoryNo)
 
             newPercentage = Selection.Range.Information(wdActiveEndPageNumber) / totalPages * 100
             If newPercentage > currPercentage Then
-                thisStatus = "Fixing double quotes: " & CStr(newPercentage) & "%"
-                Clean_helpers.updateStatus (thisStatus)
+                thisstatus = "Fixing double quotes: " & CStr(newPercentage) & "%"
+                Clean_helpers.updateStatus (thisstatus)
                 currPercentage = newPercentage
             End If
             
@@ -316,8 +316,8 @@ Sub SingleQuotes(MyStoryNo)
     Dim nextPercentage As Integer
     nextPercentage = 30
     
-    thisStatus = "Fixing single quotes "
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing single quotes "
+    Clean_helpers.updateStatus (thisstatus)
 
     Dim ChangeQ As Boolean
     ChangeQ = False
@@ -353,8 +353,8 @@ Sub SingleQuotes(MyStoryNo)
     ActiveDocument.StoryRanges(MyStoryNo).Select
     For Each QuoStr In SearchString
         
-        thisStatus = "Fixing single quotes: " & CStr(nextPercentage) & "%"
-        Clean_helpers.updateStatus (thisStatus)
+        thisstatus = "Fixing single quotes: " & CStr(nextPercentage) & "%"
+        Clean_helpers.updateStatus (thisstatus)
         nextPercentage = nextPercentage + 30
     
         Selection.Find.Execute findText:=QuoStr
@@ -581,25 +581,27 @@ Function IsYear(theNumber) As Boolean
 End Function
 
 Sub Dashes(MyStoryNo)
-
-    thisStatus = "Fixing dashes "
-    Clean_helpers.updateStatus (thisStatus)
+    
+    thisstatus = "Fixing dashes "
+    Clean_helpers.updateStatus (thisstatus)
 
     Application.ScreenUpdating = False
     
-     'phone number pattern
-     Call HighlightNumber("[0-9]{3}-[0-9]{3}-[0-9]{4}", MyStoryNo)
-     Call HighlightNumber("\([0-9]{3}\) [0-9]{3}-[0-9]{4}", MyStoryNo)
+    ' Word wildcards isn't as flexible as regex, cannot use ? or | in the normal ways
+    '   So we have to run multiple queries
+    Call HighlightNumber("1-[0-9]{3}-[0-9]{3}-[0-9]{4}", 1)
+    Call HighlightNumber("\([0-9]{3}\) [0-9]{3}-[0-9]{4}", 1)
+    Call HighlightNumber("[0-9]{3}-[0-9]{3}-[0-9]{4}", 1)
     
 '    FOLLOWING CAN BE USED TO FIND ISBN PATTERN AND FLAG FOR NO CHANGE
      Call HighlightNumber("97[89]-[0-9]{10,14}", MyStoryNo)
      Call HighlightNumber("97[89]-[0-9]-[0-9]{3}-[0-9]{5}-[0-9]", MyStoryNo)
      
-    thisStatus = "Fixing dashes: 10%"
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing dashes: 10%"
+    Clean_helpers.updateStatus (thisstatus)
      
     For i = 0 To 9
-        For J = 0 To 9
+        For j = 0 To 9
             ActiveDocument.StoryRanges(MyStoryNo).Select
             Selection.Collapse Direction:=wdCollapseStart
             
@@ -607,14 +609,14 @@ Sub Dashes(MyStoryNo)
                  .ClearFormatting
                  .Forward = True
                  .Wrap = wdFindStop
-                 .Text = LTrim(i) & "-" & LTrim(J)
+                 .Text = LTrim(i) & "-" & LTrim(j)
                  .MatchWildcards = False
                  .Execute
              End With
              
              While Selection.Find.Found
                  If Not (Selection.FormattedText.HighlightColorIndex = wdPink) Then
-                     Selection.TypeText LTrim(i) & ENDASH & LTrim(J)
+                     Selection.TypeText LTrim(i) & ENDASH & LTrim(j)
                  End If
                  
                  Selection.MoveRight
@@ -623,16 +625,16 @@ Sub Dashes(MyStoryNo)
         Next
     Next
     
-    thisStatus = "Fixing dashes: 20%"
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing dashes: 20%"
+    Clean_helpers.updateStatus (thisstatus)
 
     'weird-character = emdash
     FindReplaceSimple ChrW(-3906), EMDASH, MyStoryNo
     'bar character = emdash
     FindReplaceSimple ChrW(8213), EMDASH, MyStoryNo
     
-    thisStatus = "Fixing dashes: 30%"
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing dashes: 30%"
+    Clean_helpers.updateStatus (thisstatus)
     
     'figure dash=endash
     FindReplaceSimple ChrW(8210), ENDASH, MyStoryNo
@@ -641,45 +643,45 @@ Sub Dashes(MyStoryNo)
     'space.hyphen.space=emdash
     FindReplaceSimple_WithExclude " - ", "-", MyStoryNo
     
-    thisStatus = "Fixing dashes: 40%"
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing dashes: 40%"
+    Clean_helpers.updateStatus (thisstatus)
     
     'space.hyphen.hyphen.space=emdash
     FindReplaceSimple_WithExclude " -- ", EMDASH, MyStoryNo
     'hyphen.hyphen=emdash
     FindReplaceSimple_WithExclude "--", EMDASH, MyStoryNo
     
-    thisStatus = "Fixing dashes: 50%"
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing dashes: 50%"
+    Clean_helpers.updateStatus (thisstatus)
     
    'dash.space=dash
     FindReplaceSimple_WithExclude "-" & aSPACE, "-", MyStoryNo
     'space.dash=dash
     FindReplaceSimple_WithExclude aSPACE & "-", "-", MyStoryNo
     
-    thisStatus = "Fixing dashes: 60%"
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing dashes: 60%"
+    Clean_helpers.updateStatus (thisstatus)
     
     'space.endash=emdash
     FindReplaceSimple_WithExclude aSPACE & ENDASH, EMDASH, MyStoryNo
     'endash.space=emdash
     FindReplaceSimple_WithExclude ENDASH & aSPACE, ENDASH, MyStoryNo
     
-    thisStatus = "Fixing dashes: 70%"
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing dashes: 70%"
+    Clean_helpers.updateStatus (thisstatus)
     
     'emdash.space=emdash
     FindReplaceSimple_WithExclude EMDASH & aSPACE, EMDASH, MyStoryNo
     'space.emdash=emdash
     FindReplaceSimple_WithExclude aSPACE & EMDASH, EMDASH, MyStoryNo
     
-    thisStatus = "Fixing dashes: 80%"
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing dashes: 80%"
+    Clean_helpers.updateStatus (thisstatus)
     
     Call removeHighlight(MyStoryNo)
     
-    thisStatus = "Fixing dashes: 90%"
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Fixing dashes: 90%"
+    Clean_helpers.updateStatus (thisstatus)
     
     completeStatus = completeStatus + vbNewLine + "Fixing Dashes: 100%"
     Clean_helpers.updateStatus ("")
@@ -733,15 +735,15 @@ End Function
 
 Function MakeTitleCase(MyStoryNo)
 
-    thisStatus = "Converting headings to title case "
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Converting headings to title case "
+    Clean_helpers.updateStatus (thisstatus)
 
     If MyStoryNo = 0 Then MyStoryNo = 1
     
     Dim tcStyles() As Variant
     tcStyles = Array("Title (Ttl)", "Number (Num)", "Main-Head (MHead)")
     
-    For Each TC In tcStyles
+    For Each tc In tcStyles
         Clean_helpers.ClearSearch
         
         ActiveDocument.StoryRanges(MyStoryNo).Select
@@ -749,7 +751,7 @@ Function MakeTitleCase(MyStoryNo)
     
         With Selection.Find
             .Wrap = wdFindStop
-            .Style = TC
+            .Style = tc
             .Execute
         End With
         
@@ -761,7 +763,7 @@ Function MakeTitleCase(MyStoryNo)
         Loop
     Next
     
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     Clean_helpers.updateStatus ("")
 
 End Function
@@ -769,8 +771,8 @@ End Function
 
 Function CleanBreaks(MyStoryNo)
 
-    thisStatus = "Cleaning breaks "
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Cleaning breaks "
+    Clean_helpers.updateStatus (thisstatus)
 
     FindReplaceSimple_WithExclude "^l", vbNewLine, MyStoryNo
     ' ^ replacing with ^p with WithExclude function must be done with vbnewline instead
@@ -812,14 +814,14 @@ Function CleanBreaks(MyStoryNo)
         End If
     Loop
     
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     Clean_helpers.updateStatus ("")
     
 End Function
 
 Function RemoveTrackChanges()
 
-    thisStatus = "Removing Track Changes "
+    thisstatus = "Removing Track Changes "
    ' Clean_helpers.updateStatus (thisStatus)
     
     Dim StoryNo As Variant
@@ -865,8 +867,8 @@ End Function
 
 Function RemoveComments()
 
-    thisStatus = "Removing Comments "
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Removing Comments "
+    Clean_helpers.updateStatus (thisstatus)
     
     Dim c As Comment
     If ActiveDocument.Comments.Count > 0 Then
@@ -877,7 +879,7 @@ Function RemoveComments()
         End If
     End If
     
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     Clean_helpers.updateStatus ("")
     
     
@@ -885,15 +887,15 @@ End Function
 
 Function DeleteBookmarks()
 
-    thisStatus = "Deleting Bookmarks "
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Deleting Bookmarks "
+    Clean_helpers.updateStatus (thisstatus)
     
-    Dim b As Bookmark
-    For Each b In ActiveDocument.Bookmarks
-        b.Delete
+    Dim B As Bookmark
+    For Each B In ActiveDocument.Bookmarks
+        B.Delete
     Next
     
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     Clean_helpers.updateStatus ("")
     
 End Function
@@ -901,8 +903,8 @@ End Function
 
 Function DeleteObjects(MyStoryNo)
 
-    thisStatus = "Deleting Objects "
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Deleting Objects "
+    Clean_helpers.updateStatus (thisstatus)
 
     Dim s As Shape
     Dim i As InlineShape
@@ -948,18 +950,18 @@ Function DeleteObjects(MyStoryNo)
         F.Delete
     Next
     
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     Clean_helpers.updateStatus ("")
     
 End Function
 
 Function RemoveHyperlinks(Optional MyStoryNo As Variant = 1)
 
-    thisStatus = "Removing hyperlinks "
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Removing hyperlinks "
+    Clean_helpers.updateStatus (thisstatus)
     
     Dim link_count As Integer
-    Dim H As hyperlink
+    Dim h As hyperlink
     link_count = 0
 
     ' since in testing, one pass of the for loop did not catch all hyperlinks:
@@ -968,21 +970,21 @@ Function RemoveHyperlinks(Optional MyStoryNo As Variant = 1)
     '   for whatever reason, so exit to avoid a crash.
     Do While ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks.Count > 0 And link_count <> ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks.Count
         link_count = ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks.Count
-        For Each H In ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks
-            H.Range.Style = "Hyperlink"
-            H.Delete
+        For Each h In ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks
+            h.Range.Style = "Hyperlink"
+            h.Delete
         Next
     Loop
     
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     Clean_helpers.updateStatus ("")
 
 End Function
 
 Sub LocalFormatting(MyStoryNo)
 
-    thisStatus = "Replacing Local Formatting with Character Styles "
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Replacing Local Formatting with Character Styles "
+    Clean_helpers.updateStatus (thisstatus)
 
     Application.ScreenUpdating = False
     
@@ -1025,7 +1027,7 @@ Sub LocalFormatting(MyStoryNo)
 '    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
 '    Clean_helpers.updateStatus ("")
     
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     Clean_helpers.updateStatus ("")
     
     Application.ScreenUpdating = True
@@ -1034,14 +1036,14 @@ End Sub
 
 Sub CheckAppliedCharStyles(MyStoryNo)
 
-    thisStatus = "Checking Applied Character Styles "
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Checking Applied Character Styles "
+    Clean_helpers.updateStatus (thisstatus)
 
         Application.ScreenUpdating = False
 
         Dim styleList() As Variant
         Dim defaultStyle As Variant
-        Dim b, i, sc, subs, sup, strk, u As Boolean
+        Dim B, i, sc, subs, sup, strk, u As Boolean
         Dim numChars As Integer
         Dim selectedChar As Range
 
@@ -1055,12 +1057,12 @@ Sub CheckAppliedCharStyles(MyStoryNo)
 
         Clean_helpers.ClearSearch
 
-        For Each MyStyle In styleList
+        For Each myStyle In styleList
             ActiveDocument.StoryRanges(MyStoryNo).Select
             Selection.Collapse Direction:=wdCollapseStart
 
             With Selection.Find
-                .Style = ActiveDocument.Styles(MyStyle)
+                .Style = ActiveDocument.styles(myStyle)
                 .Execute
                 
             End With
@@ -1071,7 +1073,7 @@ Sub CheckAppliedCharStyles(MyStoryNo)
                 For k = 1 To numChars
                     Set selectedChar = Selection.Characters(k)
 
-                    b = selectedChar.Font.Bold
+                    B = selectedChar.Font.Bold
                     i = selectedChar.Font.Italic
                     sc = selectedChar.Font.SmallCaps
                     subs = selectedChar.Font.Subscript
@@ -1079,10 +1081,10 @@ Sub CheckAppliedCharStyles(MyStoryNo)
                     strk = selectedChar.Font.StrikeThrough
                     u = selectedChar.Font.Underline
 
-                    Select Case MyStyle
+                    Select Case myStyle
 
                         Case "bold (b)"
-                            If Not b Then selectedChar.Style = defaultStyle
+                            If Not B Then selectedChar.Style = defaultStyle
 
                         Case "ital (i)"
                            If Not i Then selectedChar.Style = defaultStyle
@@ -1100,9 +1102,9 @@ Sub CheckAppliedCharStyles(MyStoryNo)
                             If Not subs Then selectedChar.Style = defaultStyle
 
                         Case "bold-ital (bi)"
-                            If Not b And Not i Then
+                            If Not B And Not i Then
                                 selectedChar.Style = defaultStyle
-                            ElseIf Not b Then
+                            ElseIf Not B Then
                                 selectedChar.Style = "ital (i)"
                             ElseIf Not i Then
                                 selectedChar.Style = "bold (b)"
@@ -1118,26 +1120,26 @@ Sub CheckAppliedCharStyles(MyStoryNo)
                             End If
 
                         Case "smallcaps-bold (scb)"
-                            If Not sc And Not b Then
+                            If Not sc And Not B Then
                                 selectedChar.Style = defaultStyle
                             ElseIf Not sc Then
                                 selectedChar.Style = "bold (b)"
-                            ElseIf Not b Then
+                            ElseIf Not B Then
                                 selectedChar.Style = "smallcaps (sc)"
                             End If
 
                         Case "smallcaps-bold-ital (scbi)"
-                            If Not sc And Not b And Not i Then
+                            If Not sc And Not B And Not i Then
                                 selectedChar.Style = defaultStyle
                             ElseIf Not sc And Not i Then
                                 selectedChar.Style = "bold (b)"
-                            ElseIf Not sc And Not b Then
+                            ElseIf Not sc And Not B Then
                                 selectedChar.Style = "ital (i)"
-                            ElseIf Not b And Not i Then
+                            ElseIf Not B And Not i Then
                                 selectedChar.Style = "smallcaps (sc)"
                             ElseIf Not sc Then
                                 selectedChar.Style = "bold-ital (bi)"
-                            ElseIf Not b Then
+                            ElseIf Not B Then
                                 selectedChar.Style = "smallcaps-ital (sci)"
                             ElseIf Not i Then
                                 selectedChar.Style = "smallcaps-bold (scb)"
@@ -1170,7 +1172,7 @@ Sub CheckAppliedCharStyles(MyStoryNo)
             Loop
         Next
 
-    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     Clean_helpers.updateStatus ("")
 
 End Sub
@@ -1178,13 +1180,13 @@ End Sub
 
 Sub CheckSpecialCharactersPC(MyStoryNo)
 
-    thisStatus = "Checking for Special Characters "
-    Clean_helpers.updateStatus (thisStatus)
+    thisstatus = "Checking for Special Characters "
+    Clean_helpers.updateStatus (thisstatus)
 
         Dim MyUpdate, FoundSomething As Boolean
         Dim myValue As Integer
         Dim R As Range
-        Dim b() As Byte, i As Long, a As Long
+        Dim B() As Byte, i As Long, A As Long
         
         Application.ScreenRefresh
         MyUpdate = Application.ScreenUpdating
@@ -1194,11 +1196,11 @@ Sub CheckSpecialCharactersPC(MyStoryNo)
         Clean_helpers.ClearSearch
         
         For Each R In ActiveDocument.StoryRanges(MyStoryNo).Characters
-            b = R.Text ' converts the string to byte array (2 or 4 bytes per character)
-            For i = 1 To UBound(b) Step 2            ' 2 bytes per Unicode codepoint
-                If b(i) > 0 Then                     ' if AscW > 255
-                    a = b(i): a = a * 256 + b(i - 1) ' AscW
-                    Select Case a
+            B = R.Text ' converts the string to byte array (2 or 4 bytes per character)
+            For i = 1 To UBound(B) Step 2            ' 2 bytes per Unicode codepoint
+                If B(i) > 0 Then                     ' if AscW > 255
+                    A = B(i): A = A * 256 + B(i - 1) ' AscW
+                    Select Case A
                         Case &H1FFE To &H2022, &H120 To &H17D, &H2BD To &H2C0, &H2DA: ' Curly Quotes, Dashes, Apostrophes
                             'do nothing
                         Case Else:
@@ -1213,7 +1215,7 @@ Sub CheckSpecialCharactersPC(MyStoryNo)
             
         Next
         
-        completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
+        completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
         Clean_helpers.updateStatus ("")
     
         Application.ScreenUpdating = MyUpdate
@@ -1263,7 +1265,7 @@ Sub ValidateCharStyles()
     Dim badStyles() As Variant
     Dim i As Integer
     
-    On Error GoTo errHandler
+    On Error GoTo ErrHandler
     
     Application.ScreenUpdating = False
     
@@ -1287,7 +1289,7 @@ Sub ValidateCharStyles()
         End If
     Next
     
-    For Each styleLoop In ActiveDocument.Styles
+    For Each styleLoop In ActiveDocument.styles
         If styleLoop.InUse = True And styleLoop.Type = wdStyleTypeCharacter Then
             If GetIndex(styleLoop.NameLocal, charStyles, False) = -1 Then
                 Dim rng As Integer
@@ -1360,7 +1362,7 @@ EndEarly:
     
     Exit Sub
     
-errHandler:
+ErrHandler:
     If Err.Number = 5941 Then Resume NextIteration
     
 End Sub
