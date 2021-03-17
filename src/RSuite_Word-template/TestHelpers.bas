@@ -30,9 +30,41 @@ Function stringCountInDoc(myDoc As Document, targetStr As String) As Long
     newTxt = Replace(docTxt, targetStr, "")
     stringCountInDoc = ((Len(docTxt) - Len(newTxt)) / Len(targetStr))
 End Function
+Function lastTablecellText(storyRangeIndex As Long, tableIndex As Long, _
+    Optional rowCount As Long = 0, Optional colCount As Long = 0) As String
+Dim myTable As Table
+Dim cellRange As Range
+Set myTable = ActiveDocument.StoryRanges(storyRangeIndex).Tables(tableIndex)
+If colCount = 0 Then colCount = myTable.Columns.Count
+If rowCount = 0 Then rowCount = myTable.Rows.Count
+Set cellRange = myTable.Cell(rowCount, colCount).Range
+cellRange.End = cellRange.End - 1
+lastTablecellText = cellRange.Text
+End Function
+Function compareParaStylesInRange(testRange As Range, expectedRange As Range) As String
+    Dim i As Long
+    Dim resultstr As String
+    resultstr = ""
+    If testRange.Paragraphs.Count <> expectedRange.Paragraphs.Count Then
+        compareParaStylesInRange = "Mismatch: testRange has " & testRange.Paragraphs.Count & _
+            " paragraphs and expectedRange has " & expectedRange.Paragraphs.Count
+        Exit Function
+    End If
+    For i = 1 To testRange.Paragraphs.Count
+        If testRange.Paragraphs(i).Style <> expectedRange.Paragraphs(i).Style Then
+            If resultstr = "" Then
+                resultstr = "Mismatched parastyles found; para number(s): " & i
+            Else
+                resultstr = resultstr & ", " & i
+            End If
+        End If
+    Next i
+    compareParaStylesInRange = resultstr
+End Function
 
 Sub testsub()
-Debug.Print """" & strFromLocation(ActiveDocument, 25, 0, 4) & """"
+Debug.Print lastTablecellText(3, 1)
+'Debug.Print """" & strFromLocation(ActiveDocument, 25, 0, 4) & """"
 End Sub
 
 Function compareRanges(actualRange As Range, expectedRange As Range) As String
@@ -278,75 +310,6 @@ End With
 Set returnTestResultRange = resultRng
 
 End Function
-
-
-
-
-
-
-'
-'Sub clearOtherTestContent(testProcName, MyStoryNo)
-'Dim testProcNameStart As String
-'testProcNameStart = "__" + testProcName + "__"
-'Const testProcNameNext = "__"
-'
-'Dim Pre_DelRange As Range, Post_DelRange As Range
-'Dim Post_DelStartRange As Range, Pre_DelEndRange As Range
-'Dim Find_PostStartRange As Range, Find_PreEndRange As Range
-'
-'Set Find_PreEndRange = ActiveDocument.StoryRanges(MyStoryNo)
-'Set Find_PostStartRange = ActiveDocument.StoryRanges(MyStoryNo)
-'Set Pre_DelRange = ActiveDocument.Range
-'Set Post_DelRange = ActiveDocument.Range
-'
-'Pre_DelRange.Start = ActiveDocument.StoryRanges(MyStoryNo).Start
-'Post_DelRange.End = ActiveDocument.StoryRanges(MyStoryNo).End
-'
-'' RM content preceding stuff for our test
-'With Find_PreEndRange.Find
-'    .Text = testProcNameStart + "^p"
-'    .Replacement.Text = ""
-'    .Forward = True
-'    .Wrap = wdFindAsk
-'    .Format = False
-'    .MatchCase = True
-'    .MatchWholeWord = True
-'    .MatchWildcards = False
-'    .MatchSoundsLike = False
-'    .MatchAllWordForms = False
-'    .Execute
-'    If .Found = True Then
-'        Set Pre_DelEndRange = Find_PreEndRange
-'        Pre_DelEndRange.Select
-'    End If
-'End With
-'
-'Pre_DelRange.End = Pre_DelEndRange.End
-'Pre_DelRange.Delete
-'
-'' RM content following stuff for our test
-'With Find_PostStartRange.Find
-'    .Text = testProcNameNext
-'    .Replacement.Text = ""
-'    .Forward = True
-'    .Wrap = wdFindAsk
-'    .Format = False
-'    .MatchCase = True
-'    .MatchWholeWord = True
-'    .MatchWildcards = False
-'    .MatchSoundsLike = False
-'    .MatchAllWordForms = False
-'    .Execute
-'    If .Found = True Then
-'        Set Post_DelStartRange = Find_PostStartRange
-'        Post_DelStartRange.Select
-'    End If
-'End With
-'
-'Post_DelRange.Start = Post_DelStartRange.Start
-'Post_DelRange.Delete
-'
-'End Sub
 
 Function getRepoPath() As String
 Dim vbProj As VBIDE.VBProject

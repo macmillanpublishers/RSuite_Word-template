@@ -423,10 +423,10 @@ End Function
 Public Function IsStyleInDoc(styleName As String) As Boolean
   On Error GoTo IsStyleInDocError
   Dim blnResult As Boolean: blnResult = True
-  Dim TestStyle As Style
+  Dim testStyle As Style
   
 ' Try to access this style. If not present in doc, will error
-  Set TestStyle = activeDoc.styles.item(styleName)
+  Set testStyle = activeDoc.styles.item(styleName)
   IsStyleInDoc = blnResult
   Exit Function
   
@@ -776,17 +776,20 @@ Public Sub CreateTextFile(strText As String, suffix As String, Optional thisDoc 
     activeDocPath = Replace(activeDoc.Path, activeDoc.Name, "")
     
     'create text file
-    reqReportDoc = activeDocPath & activeDocName & "_" & suffix & ".txt"
+    'reqReportDoc = activeDocPath & activeDocName & "_" & suffix & ".txt" '< this appears to be missing the slash on newer Mac OS. redefining per OS below
     
     ''''for 32 char Mc OS bug- could check if this is Mac OS too < PART 1
     If Not TheOS Like "*Mac*" Then                      'If Len(activeDocName) > 18 Then        (legacy, does not take path into account)
         reqReportDoc = activeDocPath & "\" & activeDocName & "_" & suffix & ".txt"
     Else
-        Dim placeholdDocName As String
-        placeholdDocName = "filenamePlacehold_Report.txt"
-        reqReportDocAlt = reqReportDoc
-        strMacTmp = MacScript("path to temporary items as string")
-        reqReportDoc = strMacTmp & placeholdDocName
+    reqReportDoc = activeDocPath & "/" & activeDocName & "_" & suffix & ".txt"
+'        reqReportDoc = activeDocPath & activeDocName & "_" & suffix & ".txt"
+'        Dim placeholdDocName As String
+'        placeholdDocName = "filenamePlacehold_Report.txt"
+'        reqReportDocAlt = reqReportDoc
+      Debug.Print reqReportDoc
+'        strMacTmp = MacScript("path to temporary items as string")
+'        reqReportDoc = strMacTmp & placeholdDocName
     End If
     '''end ''''for 32 char Mc OS bug part 1
     
@@ -799,11 +802,11 @@ Public Sub CreateTextFile(strText As String, suffix As String, Optional thisDoc 
 
     Close #fnum
     
-    ''''for 32 char Mc OS bug-<PART 2
-    If reqReportDocAlt <> "" Then
-    Name reqReportDoc As reqReportDocAlt
-    End If
-    ''''END for 32 char Mac OS bug-<PART 2
+'    ''''for 32 char Mc OS bug-<PART 2
+'    If reqReportDocAlt <> "" Then
+'    Name reqReportDoc As reqReportDocAlt
+'    End If
+'    ''''END for 32 char Mac OS bug-<PART 2
     
     '----------------open Report for user once it is complete--------------------------.
     Dim Shex As Object
@@ -812,10 +815,14 @@ Public Sub CreateTextFile(strText As String, suffix As String, Optional thisDoc 
        Set Shex = CreateObject("Shell.Application")
        Shex.Open (reqReportDoc)
     Else
-        MacScript ("tell application ""TextEdit"" " & vbCr & _
-        "open " & """" & reqReportDocAlt & """" & " as alias" & vbCr & _
-        "activate" & vbCr & _
-        "end tell" & vbCr)
+        Application.Documents.Open reqReportDoc, ConfirmConversions:=False, Encoding:=MsoEncoding.msoEncodingWestern
+   '     Application.ScreenUpdating = True
+        Application.ScreenRefresh
+'        Application.ScreenUpdating = False
+'        MacScript ("tell application ""TextEdit"" " & vbCr & _
+'        "open " & """" & reqReportDocAlt & """" & " as alias" & vbCr & _
+'        "activate" & vbCr & _
+'        "end tell" & vbCr)
     End If
 End Sub
 
@@ -993,7 +1000,7 @@ Function StartupSettings(Optional AcceptAll As Boolean = False) As Boolean
     ' Store current story, so we can return to it before selecting bookmark in Cleanup
     System.ProfileString(strSection, "Current_Story") = Selection.StoryType
     ' next line required for Mac to prevent problem where original selection blinked repeatedly when reselected at end
-    Selection.Collapse direction:=wdCollapseStart
+    Selection.Collapse Direction:=wdCollapseStart
     activeDoc.Bookmarks.Add Name:="OriginalInsertionPoint", Range:=Selection.Range
   End If
     

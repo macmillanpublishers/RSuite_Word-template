@@ -1,4 +1,5 @@
 Attribute VB_Name = "TagUnstyledParas"
+Option Private Module
 Option Explicit
 
 Sub TagUnstyledText()
@@ -27,6 +28,7 @@ Sub TagUnstyledText()
     End If
   End If
   
+Call tagText(activeDoc)
 '  #If Not Mac Then
 ' --------Progress Bar---------------------------------------------------------
 ' Percent complete and status for progress bar (PC) and status bar (Mac)
@@ -71,16 +73,17 @@ Sub TagUnstyledText()
 '    Status:=strStatus)
 '
 ' #End If
-
+End Sub
+Sub tagText(myDoc As Document)
 ' Make sure we're always working with the right document
   Dim thisDoc As Document
-  Set thisDoc = activeDoc
+  Set thisDoc = myDoc
 
   ' Rename built-in style that has parens
-  thisDoc.Styles("Normal (Web)").NameLocal = "_"
+  thisDoc.styles("Normal (Web)").NameLocal = "_"
 
   Dim lngParaCount As Long
-  Dim a As Long
+  Dim A As Long
   Dim strCurrentStyle As String
   Dim strTX As String
   Dim strTX1 As String
@@ -101,7 +104,7 @@ Sub TagUnstyledText()
 
   lngParaCount = thisDoc.Paragraphs.Count
 
-  Dim MyStyle As Style ' For error handlers
+  Dim myStyle As Style ' For error handlers
 '  Dim sglTotalPercentSoFar As Single
 '  sglTotalPercentSoFar = sglStartingPercent + sglTotalCharStylesPercent
   
@@ -110,8 +113,7 @@ Sub TagUnstyledText()
 
 ' Loop through all paras, tag any w/o close parens as TX or TX1
 ' (or COTX1 if following chap opener)
-  For a = 1 To lngParaCount
-
+  For A = 1 To lngParaCount
 '    If a Mod 10 = 0 Then
 '      ' Increment progress bar
 '      sglPercentComplete = (((a / lngParaCount) * sglTotalPercentRemaining) + sglTotalPercentSoFar)
@@ -119,25 +121,25 @@ Sub TagUnstyledText()
 '      Call ClassHelpers.UpdateBarAndWait(Bar:=objTagProgress, Status:=strParaStatus, _
 '          Percent:=sglPercentComplete)
 '    End If
-
-    strCurrentStyle = thisDoc.Paragraphs(a).Style
+    
+    strCurrentStyle = thisDoc.Paragraphs(A).Style
     
 '    DebugPrint strCurrentStyle
 
   ' tag all non-Macmillan-style paragraphs with standard Macmillan styles
   ' Macmillan styles all end in close parens
-    If Right(strCurrentStyle, 1) <> ")" Then    ' it's not a Macmillan style
-    ' If flush left, make No-Indent
-      'If thisDoc.Paragraphs(A).FirstLineIndent = 0 Then
-          'strNewStyle = strTX1
-      'Else
-          strNewStyle = strTX
-      'End If
+    If Right(strCurrentStyle, 1) <> ")" Then                    ' indicates non-Macmillan style
+        If thisDoc.Paragraphs(A).Range.Tables.Count = 0 Then    ' skipping table paragraphs
+            ' If flush left, make No-Indent
+            'If thisDoc.Paragraphs(A).FirstLineIndent = 0 Then
+                'strNewStyle = strTX1
+            'Else
+                strNewStyle = strTX
+            'End If
   
     ' Change the style of the paragraph in question
     ' This is where it will error if no style present
-      thisDoc.Paragraphs(a).Style = strNewStyle
-    
+        thisDoc.Paragraphs(A).Style = strNewStyle
 '    ElseIf a < lngParaCount Then ' it is already a Macmillan style
 '    ' but can't check next para if it's the last para
 '
@@ -171,12 +173,12 @@ Sub TagUnstyledText()
 '            End If
 '          End If
 '        End If
-'      End If
+      End If
     End If
-  Next a
+  Next A
 
   ' Change Normal (Web) back
-  thisDoc.Styles("Normal (Web),_").NameLocal = "Normal (Web)"
+  thisDoc.styles("Normal (Web),_").NameLocal = "Normal (Web)"
   
 '    Call MacroHelpers.Cleanup
 '    Unload objTagProgress

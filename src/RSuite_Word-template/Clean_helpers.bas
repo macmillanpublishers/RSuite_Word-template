@@ -15,6 +15,7 @@ End Function
 
 
 Public Function FindReplaceSimple(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
+    
     ActiveDocument.StoryRanges(storyNumber).Select
     Selection.Collapse Direction:=wdCollapseStart
     Call ClearSearch
@@ -254,7 +255,17 @@ Sub TitleCase()
     
     HeadingSoFar = ""
     If Selection.Type <> wdSelectionIP Then Selection.Collapse
+    
     Selection.Paragraphs(1).Range.Select
+    ' check if we are in a table
+    If Selection.Tables.Count <> 0 Then
+        ' check if we are at the last para of a table
+        If Selection.End = Selection.Cells(1).Range.End Then
+            ' if we are move selection-end, to exclude cell-end character
+            Selection.MoveEnd Unit:=wdCharacter, Count:=-1
+        End If
+    End If
+
     NumWords = Selection.Words.Count
     
     For i = 1 To NumWords

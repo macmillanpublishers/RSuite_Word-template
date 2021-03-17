@@ -81,8 +81,8 @@ Private Sub ModuleInitialize()
     SetCharacters
     SetResultStrings
     Application.ScreenUpdating = False
-    Set pBar = New Progress_Bar
-    pBarCounter = 0
+    'Set pBar = New Progress_Bar
+    'pBarCounter = 0
 End Sub
 
 '@ModuleCleanup
@@ -95,14 +95,17 @@ Private Sub ModuleCleanup()
     DestroyCharacters
     DestroyResultStrings
     Application.ScreenUpdating = True
-    MsgBox ("Cleanup Macro tests complete")
+    'MsgBox ("Cleanup Macro tests complete")
 End Sub
 
 '@TestInitialize
 Private Sub TestInitialize()
     'This method runs before every test in the module..
     ' Create new test docx from template
-    Set testDocx = Application.Documents.Add(testdotx_filepath)
+    ' (visible version for debug):
+    'Set testDocx = Application.Documents.Add(testdotx_filepath)
+    Set testDocx = Application.Documents.Add(testdotx_filepath, visible:=False)
+    testDocx.Activate
     MyStoryNo = 1 '1 = Main Body, 2 = Footnotes, 3 = Endnotes. Can override this value per test as needed
     
 End Sub
@@ -110,24 +113,25 @@ End Sub
 '@TestCleanup
 Private Sub TestCleanup()
     'this method runs after every test in the module.
-    Unload pBar
-    Application.Documents(testDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Unload pBar
+    Application.Documents(testDocx).Close savechanges:=wdDoNotSaveChanges
+    Set testDocx = Nothing
 End Sub
 '@TestMethod("CleanupMacro_special")
 Private Sub TestBookmarks() 'TODO Rename test
     Dim init_bm_count As Integer, final_bm_count As Integer, second_run_count As Integer
     On Error GoTo TestFail
     'Act:
-        init_bm_count = ActiveDocument.Bookmarks.Count
+        init_bm_count = testDocx.Bookmarks.Count
         Call Clean.DeleteBookmarks
-        final_bm_count = ActiveDocument.Bookmarks.Count
+        final_bm_count = testDocx.Bookmarks.Count
         Call Clean.DeleteBookmarks
-        second_run_count = ActiveDocument.Bookmarks.Count
+        second_run_count = testDocx.Bookmarks.Count
     'Assert:
         Assert.Succeed
-        Assert.AreEqual init_bm_count, BM_expected
-        Assert.AreEqual final_bm_count, 0
-        Assert.AreEqual second_run_count, 0
+        Assert.areequal init_bm_count, BM_expected
+        Assert.areequal final_bm_count, 0
+        Assert.areequal second_run_count, 0
 TestExit:
     Exit Sub
 TestFail:
@@ -141,26 +145,26 @@ Private Sub TestTrackchanges_msgbox_y_and_secondrun() 'TODO Rename test
     'Arrange
         Fakes.MsgBox.Returns vbYes
     'Act:
-        init_tc_count = ActiveDocument.StoryRanges(1).Revisions.Count + _
-            ActiveDocument.StoryRanges(2).Revisions.Count + _
-            ActiveDocument.StoryRanges(3).Revisions.Count
+        init_tc_count = testDocx.StoryRanges(1).Revisions.Count + _
+            testDocx.StoryRanges(2).Revisions.Count + _
+            testDocx.StoryRanges(3).Revisions.Count
         Call Clean.RemoveTrackChanges
-        With Fakes.MsgBox.Verify
+        With Fakes.MsgBox.verify
             .Parameter "title", "ACCEPT TRACK CHANGES"
             .Parameter "buttons", vbYesNo
         End With
-        final_tc_count = ActiveDocument.StoryRanges(1).Revisions.Count + _
-            ActiveDocument.StoryRanges(2).Revisions.Count + _
-            ActiveDocument.StoryRanges(3).Revisions.Count
+        final_tc_count = testDocx.StoryRanges(1).Revisions.Count + _
+            testDocx.StoryRanges(2).Revisions.Count + _
+            testDocx.StoryRanges(3).Revisions.Count
         Call Clean.RemoveTrackChanges
-        second_run_count = ActiveDocument.StoryRanges(1).Revisions.Count + _
-            ActiveDocument.StoryRanges(2).Revisions.Count + _
-            ActiveDocument.StoryRanges(3).Revisions.Count
+        second_run_count = testDocx.StoryRanges(1).Revisions.Count + _
+            testDocx.StoryRanges(2).Revisions.Count + _
+            testDocx.StoryRanges(3).Revisions.Count
     'Assert:
         Assert.Succeed
-        Assert.AreEqual init_tc_count, TC_main_expected + TC_fn_expected + TC_en_expected
-        Assert.AreEqual final_tc_count, 0
-        Assert.AreEqual second_run_count, 0
+        Assert.areequal init_tc_count, TC_main_expected + TC_fn_expected + TC_en_expected
+        Assert.areequal final_tc_count, 0
+        Assert.areequal second_run_count, 0
 TestExit:
     Exit Sub
 TestFail:
@@ -172,21 +176,21 @@ Private Sub TestTrackchanges_none() 'TODO Rename test
     Dim init_tc_count As Integer, final_tc_count As Integer
     On Error GoTo TestFail
     'Arrange
-        ActiveDocument.StoryRanges(1).Revisions.AcceptAll
-        ActiveDocument.StoryRanges(2).Revisions.AcceptAll
-        ActiveDocument.StoryRanges(3).Revisions.AcceptAll
+        testDocx.StoryRanges(1).Revisions.AcceptAll
+        testDocx.StoryRanges(2).Revisions.AcceptAll
+        testDocx.StoryRanges(3).Revisions.AcceptAll
     'Act:
-        init_tc_count = ActiveDocument.StoryRanges(1).Revisions.Count + _
-            ActiveDocument.StoryRanges(2).Revisions.Count + _
-            ActiveDocument.StoryRanges(3).Revisions.Count
+        init_tc_count = testDocx.StoryRanges(1).Revisions.Count + _
+            testDocx.StoryRanges(2).Revisions.Count + _
+            testDocx.StoryRanges(3).Revisions.Count
         Call Clean.RemoveTrackChanges
-        final_tc_count = ActiveDocument.StoryRanges(1).Revisions.Count + _
-            ActiveDocument.StoryRanges(2).Revisions.Count + _
-            ActiveDocument.StoryRanges(3).Revisions.Count
+        final_tc_count = testDocx.StoryRanges(1).Revisions.Count + _
+            testDocx.StoryRanges(2).Revisions.Count + _
+            testDocx.StoryRanges(3).Revisions.Count
       'Assert:
         Assert.Succeed
-        Assert.AreEqual init_tc_count, 0
-        Assert.AreEqual final_tc_count, 0
+        Assert.areequal init_tc_count, 0
+        Assert.areequal final_tc_count, 0
         
 TestExit:
     Exit Sub
@@ -201,21 +205,21 @@ Private Sub TestTrackchanges_msgbox_n() 'TODO Rename test
     'Arrange
         Fakes.MsgBox.Returns vbNo
     'Act:
-        init_tc_count = ActiveDocument.StoryRanges(1).Revisions.Count + _
-            ActiveDocument.StoryRanges(2).Revisions.Count + _
-            ActiveDocument.StoryRanges(3).Revisions.Count
+        init_tc_count = testDocx.StoryRanges(1).Revisions.Count + _
+            testDocx.StoryRanges(2).Revisions.Count + _
+            testDocx.StoryRanges(3).Revisions.Count
         Call Clean.RemoveTrackChanges
-        With Fakes.MsgBox.Verify
+        With Fakes.MsgBox.verify
             .Parameter "title", "ACCEPT TRACK CHANGES"
             .Parameter "buttons", vbYesNo
         End With
-        final_tc_count = ActiveDocument.StoryRanges(1).Revisions.Count + _
-            ActiveDocument.StoryRanges(2).Revisions.Count + _
-            ActiveDocument.StoryRanges(3).Revisions.Count
+        final_tc_count = testDocx.StoryRanges(1).Revisions.Count + _
+            testDocx.StoryRanges(2).Revisions.Count + _
+            testDocx.StoryRanges(3).Revisions.Count
       'Assert:
         Assert.Succeed
-        Assert.AreEqual init_tc_count, TC_main_expected + TC_fn_expected + TC_en_expected
-        Assert.AreEqual final_tc_count, init_tc_count
+        Assert.areequal init_tc_count, TC_main_expected + TC_fn_expected + TC_en_expected
+        Assert.areequal final_tc_count, init_tc_count
         
 TestExit:
     Exit Sub
@@ -230,17 +234,17 @@ Private Sub TestComments_msgbox_no() 'TODO Rename test
     'Arrange
         Fakes.MsgBox.Returns vbNo
     'Act:
-        init_c_count = ActiveDocument.Comments.Count
+        init_c_count = testDocx.Comments.Count
         Call Clean.RemoveComments
-        With Fakes.MsgBox.Verify
+        With Fakes.MsgBox.verify
             .Parameter "title", "DELETE COMMENTS"
             .Parameter "buttons", vbYesNo
         End With
-        final_c_count = ActiveDocument.Comments.Count
+        final_c_count = testDocx.Comments.Count
     'Assert:
         Assert.Succeed
-        Assert.AreEqual init_c_count, CM_expected
-        Assert.AreEqual final_c_count, CM_expected
+        Assert.areequal init_c_count, CM_expected
+        Assert.areequal final_c_count, CM_expected
 TestExit:
     Exit Sub
 TestFail:
@@ -252,15 +256,15 @@ Private Sub TestComments_none() 'TODO Rename test
     Dim init_c_count As Integer, final_c_count As Integer
     On Error GoTo TestFail
     'Arrange
-        ActiveDocument.DeleteAllComments
+        testDocx.DeleteAllComments
     'Act:
-        init_c_count = ActiveDocument.Comments.Count
+        init_c_count = testDocx.Comments.Count
         Call Clean.RemoveComments
-        final_c_count = ActiveDocument.Comments.Count
+        final_c_count = testDocx.Comments.Count
     'Assert:
         Assert.Succeed
-        Assert.AreEqual init_c_count, 0
-        Assert.AreEqual final_c_count, 0
+        Assert.areequal init_c_count, 0
+        Assert.areequal final_c_count, 0
 TestExit:
     Exit Sub
 TestFail:
@@ -274,20 +278,20 @@ Private Sub TestComments_msgbox_y_and_secondrun() 'TODO Rename test
     'Arrange
         Fakes.MsgBox.Returns vbYes
     'Act
-        init_c_count = ActiveDocument.Comments.Count
+        init_c_count = testDocx.Comments.Count
         Call Clean.RemoveComments
-        With Fakes.MsgBox.Verify
+        With Fakes.MsgBox.verify
             .Parameter "title", "DELETE COMMENTS"
             .Parameter "buttons", vbYesNo
         End With
-        final_c_count = ActiveDocument.Comments.Count
+        final_c_count = testDocx.Comments.Count
         Call Clean.RemoveComments
-        second_run_count = ActiveDocument.Comments.Count
+        second_run_count = testDocx.Comments.Count
     'Assert:
         Assert.Succeed
-        Assert.AreEqual init_c_count, CM_expected
-        Assert.AreEqual final_c_count, 0
-        Assert.AreEqual second_run_count, 0
+        Assert.areequal init_c_count, CM_expected
+        Assert.areequal final_c_count, 0
+        Assert.areequal second_run_count, 0
 TestExit:
     Exit Sub
 TestFail:
@@ -306,7 +310,7 @@ Private Sub TestBreaks_sectionbreaks() 'TODO Rename test
         results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual BR_sbreaks_expected, results
+        Assert.areequal BR_sbreaks_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -316,25 +320,31 @@ End Sub
 '@TestMethod("CleanupMacro_special")
 Private Sub TestSpaces_note_trim() 'TODO Rename test
     Dim results_fn_c As String, results_fn_p As String, results_en_c As String, results_en_p As String
+    Dim testDocx_local As Document
     On Error GoTo TestFail
     'Arrange:
         MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        ' this test requires document be opened with visibility, else it loses track of activedoc.
+        '   so we open our own just for this test
+        Set testDocx_local = Application.Documents.Add(testdotx_filepath)
     'Act:
         Call Clean.Spaces(MyStoryNo)
-        results_fn_c = ActiveDocument.Footnotes(SP_fn_num_c).Range
-        results_fn_p = ActiveDocument.Footnotes(SP_fn_num_p).Range
+        results_fn_c = testDocx_local.Footnotes(SP_fn_num_c).Range
+        results_fn_p = testDocx_local.Footnotes(SP_fn_num_p).Range
     'Arrange:
         MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
     'Act:
         Call Clean.Spaces(MyStoryNo)
-        results_en_c = ActiveDocument.Endnotes(SP_en_num_c).Range
-        results_en_p = ActiveDocument.Endnotes(SP_en_num_p).Range
+        results_en_c = testDocx_local.Endnotes(SP_en_num_c).Range
+        results_en_p = testDocx_local.Endnotes(SP_en_num_p).Range
     'Assert:
         Assert.Succeed
-        Assert.AreEqual SP_fn_control_expected, results_fn_c
-        Assert.AreEqual SP_fn_problem_expected, results_fn_p
-        Assert.AreEqual SP_en_control_expected, results_en_c
-        Assert.AreEqual SP_en_problem_expected, results_en_p
+        Assert.areequal SP_fn_control_expected, results_fn_c
+        Assert.areequal SP_fn_problem_expected, results_fn_p
+        Assert.areequal SP_en_control_expected, results_en_c
+        Assert.areequal SP_en_problem_expected, results_en_p
+    'Cleanup:
+        testDocx_local.Close savechanges:=wdDoNotSaveChanges
 TestExit:
     Exit Sub
 TestFail:
@@ -348,22 +358,22 @@ Private Sub TestObjects_secondrun() 'TODO Rename test
     On Error GoTo TestFail
     'Arrange:
     'Act:
-        init_shape_count = ActiveDocument.Shapes.Count
-        init_frame_count = ActiveDocument.StoryRanges(1).Frames.Count
-        init_ishape_count = ActiveDocument.StoryRanges(1).InlineShapes.Count
+        init_shape_count = testDocx.Shapes.Count
+        init_frame_count = testDocx.StoryRanges(1).Frames.Count
+        init_ishape_count = testDocx.StoryRanges(1).InlineShapes.Count
         Call Clean.DeleteObjects(1)
         Call Clean.DeleteObjects(1)
-        final_shape_count = ActiveDocument.Shapes.Count
-        final_frame_count = ActiveDocument.StoryRanges(1).Frames.Count
-        final_ishape_count = ActiveDocument.StoryRanges(1).InlineShapes.Count
+        final_shape_count = testDocx.Shapes.Count
+        final_frame_count = testDocx.StoryRanges(1).Frames.Count
+        final_ishape_count = testDocx.StoryRanges(1).InlineShapes.Count
     'Assert:
         Assert.Succeed
-        Assert.AreEqual OB_shapes_expected, init_shape_count
-        Assert.AreEqual OB_frames_expected, init_frame_count
-        Assert.AreEqual OB_ishapes_expected, init_ishape_count
-        Assert.AreEqual 0, final_shape_count
-        Assert.AreEqual 0, final_frame_count
-        Assert.AreEqual 0, final_ishape_count
+        Assert.areequal OB_shapes_expected, init_shape_count
+        Assert.areequal OB_frames_expected, init_frame_count
+        Assert.areequal OB_ishapes_expected, init_ishape_count
+        Assert.areequal 0, final_shape_count
+        Assert.areequal 0, final_frame_count
+        Assert.areequal 0, final_ishape_count
 TestExit:
     Exit Sub
 TestFail:
@@ -377,26 +387,26 @@ Private Sub TestObjects_notes() 'TODO Rename test
     On Error GoTo TestFail
     'Arrange:
     'Act:
-        init_shape_count = ActiveDocument.Shapes.Count
-        init_frame_count = ActiveDocument.StoryRanges(2).Frames.Count _
-            + ActiveDocument.StoryRanges(3).Frames.Count
-        init_ishape_count = ActiveDocument.StoryRanges(2).InlineShapes.Count _
-            + ActiveDocument.StoryRanges(3).InlineShapes.Count
+        init_shape_count = testDocx.Shapes.Count
+        init_frame_count = testDocx.StoryRanges(2).Frames.Count _
+            + testDocx.StoryRanges(3).Frames.Count
+        init_ishape_count = testDocx.StoryRanges(2).InlineShapes.Count _
+            + testDocx.StoryRanges(3).InlineShapes.Count
         Call Clean.DeleteObjects(2)
         Call Clean.DeleteObjects(3)
-        final_shape_count = ActiveDocument.Shapes.Count
-        final_frame_count = ActiveDocument.StoryRanges(2).Frames.Count _
-            + ActiveDocument.StoryRanges(3).Frames.Count
-        final_ishape_count = ActiveDocument.StoryRanges(2).InlineShapes.Count _
-            + ActiveDocument.StoryRanges(3).InlineShapes.Count
+        final_shape_count = testDocx.Shapes.Count
+        final_frame_count = testDocx.StoryRanges(2).Frames.Count _
+            + testDocx.StoryRanges(3).Frames.Count
+        final_ishape_count = testDocx.StoryRanges(2).InlineShapes.Count _
+            + testDocx.StoryRanges(3).InlineShapes.Count
     'Assert:
         Assert.Succeed
-        Assert.AreEqual OB_shapes_expected, init_shape_count
-        Assert.AreEqual 0, init_frame_count 'Was unable to create Frame in notes.
-        Assert.AreEqual OB_en_ishapes_expected + OB_fn_ishapes_expected, init_ishape_count
-        Assert.AreEqual 0, final_shape_count
-        Assert.AreEqual 0, final_frame_count
-        Assert.AreEqual 0, final_ishape_count
+        Assert.areequal OB_shapes_expected, init_shape_count
+        Assert.areequal 0, init_frame_count 'Was unable to create Frame in notes.
+        Assert.areequal OB_en_ishapes_expected + OB_fn_ishapes_expected, init_ishape_count
+        Assert.areequal 0, final_shape_count
+        Assert.areequal 0, final_frame_count
+        Assert.areequal 0, final_ishape_count
 TestExit:
     Exit Sub
 TestFail:
@@ -410,21 +420,21 @@ Private Sub TestObjects() 'TODO Rename test
     On Error GoTo TestFail
     'Arrange:
     'Act:
-        init_shape_count = ActiveDocument.Shapes.Count
-        init_frame_count = ActiveDocument.StoryRanges(1).Frames.Count
-        init_ishape_count = ActiveDocument.StoryRanges(1).InlineShapes.Count
+        init_shape_count = testDocx.Shapes.Count
+        init_frame_count = testDocx.StoryRanges(1).Frames.Count
+        init_ishape_count = testDocx.StoryRanges(1).InlineShapes.Count
         Call Clean.DeleteObjects(1)
-        final_shape_count = ActiveDocument.Shapes.Count
-        final_frame_count = ActiveDocument.StoryRanges(1).Frames.Count
-        final_ishape_count = ActiveDocument.StoryRanges(1).InlineShapes.Count
+        final_shape_count = testDocx.Shapes.Count
+        final_frame_count = testDocx.StoryRanges(1).Frames.Count
+        final_ishape_count = testDocx.StoryRanges(1).InlineShapes.Count
     'Assert:
         Assert.Succeed
-        Assert.AreEqual OB_shapes_expected, init_shape_count
-        Assert.AreEqual OB_frames_expected, init_frame_count
-        Assert.AreEqual OB_ishapes_expected, init_ishape_count
-        Assert.AreEqual 0, final_shape_count
-        Assert.AreEqual 0, final_frame_count
-        Assert.AreEqual 0, final_ishape_count
+        Assert.areequal OB_shapes_expected, init_shape_count
+        Assert.areequal OB_frames_expected, init_frame_count
+        Assert.areequal OB_ishapes_expected, init_ishape_count
+        Assert.areequal 0, final_shape_count
+        Assert.areequal 0, final_frame_count
+        Assert.areequal 0, final_ishape_count
 TestExit:
     Exit Sub
 TestFail:
