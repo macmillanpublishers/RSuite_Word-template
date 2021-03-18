@@ -866,7 +866,7 @@ End Function
 Function RemoveComments()
 
     thisstatus = "Removing Comments "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     Dim c As Comment
     If ActiveDocument.Comments.Count > 0 Then
@@ -878,7 +878,7 @@ Function RemoveComments()
     End If
     
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
     
 End Function
@@ -886,7 +886,7 @@ End Function
 Function DeleteBookmarks()
 
     thisstatus = "Deleting Bookmarks "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     Dim B As Bookmark
     For Each B In ActiveDocument.Bookmarks
@@ -894,7 +894,7 @@ Function DeleteBookmarks()
     Next
     
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
 End Function
 
@@ -902,7 +902,7 @@ End Function
 Function DeleteObjects(MyStoryNo)
 
     thisstatus = "Deleting Objects "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
     Dim s As Shape
     Dim i As InlineShape
@@ -949,7 +949,7 @@ Function DeleteObjects(MyStoryNo)
     Next
     
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
 End Function
 

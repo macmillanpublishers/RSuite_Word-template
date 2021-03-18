@@ -462,7 +462,7 @@ Function updateStatus(ByVal update As String)
     If pBarCounter > 40 And lastUpdate <> update And InStr(update, "%") = 0 And update <> "" Then
         completeStatus = Split(completeStatus, vbNewLine, 2)(1)
     End If
-
+    
     pBar.Status.Caption = completeStatus & vbNewLine & update
     
     'increment for loop / counter above
@@ -470,6 +470,7 @@ Function updateStatus(ByVal update As String)
     lastUpdate = update
     
     pBar.Repaint
-    Application.ScreenRefresh
+    'Application.ScreenRefresh
+    DoEvents    ' ^ Application refresh and pbar repaint alone are not as effective as Doevents
 End Function
 
