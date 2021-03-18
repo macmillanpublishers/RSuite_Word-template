@@ -15,6 +15,7 @@ End Function
 
 
 Public Function FindReplaceSimple(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
+    
     ActiveDocument.StoryRanges(storyNumber).Select
     Selection.Collapse Direction:=wdCollapseStart
     Call ClearSearch
@@ -254,7 +255,17 @@ Sub TitleCase()
     
     HeadingSoFar = ""
     If Selection.Type <> wdSelectionIP Then Selection.Collapse
+    
     Selection.Paragraphs(1).Range.Select
+    ' check if we are in a table
+    If Selection.Tables.Count <> 0 Then
+        ' check if we are at the last para of a table
+        If Selection.End = Selection.Cells(1).Range.End Then
+            ' if we are move selection-end, to exclude cell-end character
+            Selection.MoveEnd Unit:=wdCharacter, Count:=-1
+        End If
+    End If
+
     NumWords = Selection.Words.Count
     
     For i = 1 To NumWords
@@ -451,7 +462,7 @@ Function updateStatus(ByVal update As String)
     If pBarCounter > 40 And lastUpdate <> update And InStr(update, "%") = 0 And update <> "" Then
         completeStatus = Split(completeStatus, vbNewLine, 2)(1)
     End If
-
+    
     pBar.Status.Caption = completeStatus & vbNewLine & update
     
     'increment for loop / counter above
@@ -459,6 +470,7 @@ Function updateStatus(ByVal update As String)
     lastUpdate = update
     
     pBar.Repaint
-    Application.ScreenRefresh
+    'Application.ScreenRefresh
+    DoEvents    ' ^ Application refresh and pbar repaint alone are not as effective as Doevents
 End Function
 

@@ -41,8 +41,8 @@ Private Sub ModuleInitialize()
     SetCharacters
     SetResultStrings
     Application.ScreenUpdating = False
-    Set pBar = New Progress_Bar
-    pBarCounter = 0
+    'Set pBar = New Progress_Bar
+    'pBarCounter = 0
 End Sub
 
 '@ModuleCleanup
@@ -51,27 +51,30 @@ Private Sub ModuleCleanup()
     Set Assert = Nothing
     Set Fakes = Nothing
     'reset loaded public vars
-     'Unload pBar
     DestroyCharacters
     DestroyResultStrings
     Application.ScreenUpdating = True
-    MsgBox ("Charstyle Macro tests complete")
+    'MsgBox ("Charstyle Macro tests complete")
 End Sub
 
 '@TestInitialize
 Private Sub TestInitialize()
     'This method runs before every test in the module..
    ' Create new test docx from template
-    Set testDocx = Application.Documents.Add(testdotx_filepath)
-    MyStoryNo = 1 '1 = Main Body, 2 = Footnotes, 3 = Endnotes. Can override this value per test as needed
+   Set testDocx = Application.Documents.Add(testdotx_filepath, visible:=False)
+   ' or create doc visibly, for debug:
+   'Set testDocx = Application.Documents.Add(testdotx_filepath)
+   testDocx.Activate
+   MyStoryNo = 1 '1 = Main Body, 2 = Footnotes, 3 = Endnotes. Can override this value per test as needed
     
 End Sub
 
 '@TestCleanup
 Private Sub TestCleanup()
     'this method runs after every test in the module.
-    Unload pBar
-    Application.Documents(testDocx).Close SaveChanges:=wdDoNotSaveChanges
+    'Unload pBar
+    Application.Documents(testDocx).Close savechanges:=wdDoNotSaveChanges
+    Set testDocx = Nothing
 End Sub
 
 '@TestMethod("CharStylesMacro")
@@ -86,7 +89,7 @@ Private Sub TestPCSpecialCharacters_symbol() 'TODO Rename test
         results = TestHelpers.returnTestResultStyle(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual Sym_symbol_expected, results
+        Assert.areequal Sym_symbol_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -105,7 +108,7 @@ Private Sub TestPCSpecialCharacters_italsymbol() 'TODO Rename test
         results = TestHelpers.returnTestResultStyle(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual Sym_italsym_expected, results
+        Assert.areequal Sym_italsym_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -124,7 +127,7 @@ Private Sub TestPCSpecialCharacters_validsymbol() 'TODO Rename test
         results = TestHelpers.returnTestResultStyle(C_PROC_NAME, MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual Sym_validsym_expected, results
+        Assert.areequal Sym_validsym_expected, results
 TestExit:
     Exit Sub
 TestFail:
@@ -145,9 +148,9 @@ Private Sub TestPCSpecialCharacters_secondrun() 'TODO Rename test
         results_validsymbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_validsymbol", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual Sym_symbol_expected, results_symbol
-        Assert.AreEqual Sym_italsym_expected, results_italsymbol
-        Assert.AreEqual Sym_validsym_expected, results_validsymbol
+        Assert.areequal Sym_symbol_expected, results_symbol
+        Assert.areequal Sym_italsym_expected, results_italsymbol
+        Assert.areequal Sym_validsym_expected, results_validsymbol
 TestExit:
     Exit Sub
 TestFail:
@@ -168,9 +171,9 @@ Private Sub TestPCSpecialCharacters_footnotes() 'TODO Rename test
         results_validsymbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_validsymbol", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual Sym_symbol_expected, results_symbol
-        Assert.AreEqual Sym_italsym_expected, results_italsymbol
-        Assert.AreEqual Sym_validsym_expected, results_validsymbol
+        Assert.areequal Sym_symbol_expected, results_symbol
+        Assert.areequal Sym_italsym_expected, results_italsymbol
+        Assert.areequal Sym_validsym_expected, results_validsymbol
 TestExit:
     Exit Sub
 TestFail:
@@ -191,9 +194,9 @@ Private Sub TestPCSpecialCharacters_endnotes() 'TODO Rename test
         results_validsymbol = TestHelpers.returnTestResultStyle("TestPCSpecialCharacters_validsymbol", MyStoryNo)
     'Assert:
         Assert.Succeed
-        Assert.AreEqual Sym_symbol_expected, results_symbol
-        Assert.AreEqual Sym_italsym_expected, results_italsymbol
-        Assert.AreEqual Sym_validsym_expected, results_validsymbol
+        Assert.areequal Sym_symbol_expected, results_symbol
+        Assert.areequal Sym_italsym_expected, results_italsymbol
+        Assert.areequal Sym_validsym_expected, results_validsymbol
 TestExit:
     Exit Sub
 TestFail:
@@ -213,15 +216,15 @@ Private Sub TestCheckAppliedStyles_basic() 'TODO Rename test
         Call Clean.CheckAppliedCharStyles(MyStoryNo)
         Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
         ' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
         Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
         ' Compare known good output and output from just now
         result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
         ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", result_compareStr
+        Assert.areequal "Same", result_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -241,15 +244,15 @@ Private Sub TestCheckAppliedStyles_multistyle() 'TODO Rename test
         Call Clean.CheckAppliedCharStyles(MyStoryNo)
         Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
         ' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
         Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
         ' Compare known good output and output from just now
         result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
         ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", result_compareStr
+        Assert.areequal "Same", result_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -269,15 +272,15 @@ Private Sub TestCheckAppliedStyles_allstyles() 'TODO Rename test
         Call Clean.CheckAppliedCharStyles(MyStoryNo)
         Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
         ' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
         Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
         ' Compare known good output and output from just now
         result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
         ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", result_compareStr
+        Assert.areequal "Same", result_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -302,15 +305,15 @@ Private Sub TestWdv321_basic() 'TODO Rename test
         Call Clean.CheckAppliedCharStyles(MyStoryNo)
         Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
         ' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
         Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
         ' Compare known good output and output from just now
         result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
         ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", result_compareStr
+        Assert.areequal "Same", result_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -332,15 +335,15 @@ Private Sub TestWdv321_multistyle() 'TODO Rename test
         Call Clean.CheckAppliedCharStyles(MyStoryNo)
         Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
         ' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
         Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
         ' Compare known good output and output from just now
         result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
         ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", result_compareStr
+        Assert.areequal "Same", result_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -362,15 +365,15 @@ Private Sub TestWdv321_allstyles() 'TODO Rename test
         Call Clean.CheckAppliedCharStyles(MyStoryNo)
         Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
         ' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
         Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
         ' Compare known good output and output from just now
         result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
         ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", result_compareStr
+        Assert.areequal "Same", result_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -394,7 +397,7 @@ Private Sub TestCheckAppliedStyles_footnotes() 'TODO Rename test
         Set results_multistyle = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_multistyle", MyStoryNo, testDocx)
         Set results_allstyle = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_allstyles", MyStoryNo, testDocx)
         ''' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
         ' Get known good results
         Set basic_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_basic", 1, testResultsDocx)
         Set multi_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_multistyle", 1, testResultsDocx)
@@ -404,12 +407,12 @@ Private Sub TestCheckAppliedStyles_footnotes() 'TODO Rename test
         compareStr_multi = TestHelpers.compareRanges(results_multistyle, multi_expected)
         compareStr_all = TestHelpers.compareRanges(results_allstyle, allstyle_expected)
         ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", compareStr_basic
-        Assert.AreEqual "Same", compareStr_multi
-        Assert.AreEqual "Same", compareStr_all
+        Assert.areequal "Same", compareStr_basic
+        Assert.areequal "Same", compareStr_multi
+        Assert.areequal "Same", compareStr_all
 TestExit:
     Exit Sub
 TestFail:
@@ -433,7 +436,7 @@ Private Sub TestCheckAppliedStyles_endnotes() 'TODO Rename test
         Set results_multistyle = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_multistyle", MyStoryNo, testDocx)
         Set results_allstyle = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_allstyles", MyStoryNo, testDocx)
         ''' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
         ' Get known good results
         Set basic_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_basic", 1, testResultsDocx)
         Set multi_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_multistyle", 1, testResultsDocx)
@@ -443,12 +446,12 @@ Private Sub TestCheckAppliedStyles_endnotes() 'TODO Rename test
         compareStr_multi = TestHelpers.compareRanges(results_multistyle, multi_expected)
         compareStr_all = TestHelpers.compareRanges(results_allstyle, allstyle_expected)
         ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", compareStr_basic
-        Assert.AreEqual "Same", compareStr_multi
-        Assert.AreEqual "Same", compareStr_all
+        Assert.areequal "Same", compareStr_basic
+        Assert.areequal "Same", compareStr_multi
+        Assert.areequal "Same", compareStr_all
 TestExit:
     Exit Sub
 TestFail:
@@ -472,7 +475,7 @@ Private Sub TestCheckAppliedStyles_secondrun() 'TODO Rename test
         Set results_multistyle = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_multistyle", MyStoryNo, testDocx)
         Set results_allstyle = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_allstyles", MyStoryNo, testDocx)
         ''' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
         ' Get known good results
         Set basic_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_basic", 1, testResultsDocx)
         Set multi_expected = TestHelpers.returnTestResultRange("TestCheckAppliedStyles_multistyle", 1, testResultsDocx)
@@ -482,12 +485,12 @@ Private Sub TestCheckAppliedStyles_secondrun() 'TODO Rename test
         compareStr_multi = TestHelpers.compareRanges(results_multistyle, multi_expected)
         compareStr_all = TestHelpers.compareRanges(results_allstyle, allstyle_expected)
         ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", compareStr_basic
-        Assert.AreEqual "Same", compareStr_multi
-        Assert.AreEqual "Same", compareStr_all
+        Assert.areequal "Same", compareStr_basic
+        Assert.areequal "Same", compareStr_multi
+        Assert.areequal "Same", compareStr_all
 TestExit:
     Exit Sub
 TestFail:
@@ -507,15 +510,15 @@ Private Sub TestLocalFormatting() 'TODO Rename test
         Call Clean.LocalFormatting(MyStoryNo)
         Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
         ' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
         Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
         ' Compare known good output and output from just now
         result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
         ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", result_compareStr
+        Assert.areequal "Same", result_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -535,15 +538,15 @@ Private Sub TestLocalFormatting_tables() 'TODO Rename test
         Call Clean.LocalFormatting(MyStoryNo)
         Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
         ' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
         Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
         ' Compare known good output and output from just now
         result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
         ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", result_compareStr
+        Assert.areequal "Same", result_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -562,7 +565,7 @@ Private Sub TestLocalFormatting_footnotes() 'TODO Rename test
     'Act:
         Call Clean.LocalFormatting(MyStoryNo)
         ' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
     'Compare function 1
         Set results_actual = TestHelpers.returnTestResultRange("TestLocalFormatting", MyStoryNo, testDocx)
         Set results_expected = TestHelpers.returnTestResultRange("TestLocalFormatting", 1, testResultsDocx)
@@ -574,11 +577,11 @@ Private Sub TestLocalFormatting_footnotes() 'TODO Rename test
         ' Compare known good output and output from just now
         results_tables_compareStr = TestHelpers.compareRanges(results_tables_actual, results_tables_expected)
     ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", result_compareStr
-        Assert.AreEqual "Same", results_tables_compareStr
+        Assert.areequal "Same", result_compareStr
+        Assert.areequal "Same", results_tables_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -597,7 +600,7 @@ Private Sub TestLocalFormatting_endnotes() 'TODO Rename test
     'Act:
         Call Clean.LocalFormatting(MyStoryNo)
         ' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
     'Compare function 1
         Set results_actual = TestHelpers.returnTestResultRange("TestLocalFormatting", MyStoryNo, testDocx)
         Set results_expected = TestHelpers.returnTestResultRange("TestLocalFormatting", 1, testResultsDocx)
@@ -609,11 +612,11 @@ Private Sub TestLocalFormatting_endnotes() 'TODO Rename test
         ' Compare known good output and output from just now
         results_tables_compareStr = TestHelpers.compareRanges(results_tables_actual, results_tables_expected)
     ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", result_compareStr
-        Assert.AreEqual "Same", results_tables_compareStr
+        Assert.areequal "Same", result_compareStr
+        Assert.areequal "Same", results_tables_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -630,7 +633,7 @@ Private Sub TestLocalFormatting_secondrun() 'TODO Rename test
         Call Clean.LocalFormatting(MyStoryNo)
         Call Clean.LocalFormatting(MyStoryNo)
         ' Create new results docx from template
-        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath)
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
     'Compare function 1
         Set results_actual = TestHelpers.returnTestResultRange("TestLocalFormatting", MyStoryNo, testDocx)
         Set results_expected = TestHelpers.returnTestResultRange("TestLocalFormatting", 1, testResultsDocx)
@@ -642,11 +645,11 @@ Private Sub TestLocalFormatting_secondrun() 'TODO Rename test
         ' Compare known good output and output from just now
         results_tables_compareStr = TestHelpers.compareRanges(results_tables_actual, results_tables_expected)
     ' Close results doc
-        Application.Documents(testResultsDocx).Close SaveChanges:=wdDoNotSaveChanges
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
-        Assert.AreEqual "Same", result_compareStr
-        Assert.AreEqual "Same", results_tables_compareStr
+        Assert.areequal "Same", result_compareStr
+        Assert.areequal "Same", results_tables_compareStr
 TestExit:
     Exit Sub
 TestFail:

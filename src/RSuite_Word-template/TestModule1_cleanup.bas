@@ -85,7 +85,6 @@ MTC_expected = "Testing All of the Lowercase" + vbCr _
 HL_expected = 3
 BR_expected = "Line" + vbCr + "break. Now excluded Line" + vbVerticalTab + "break. Now page" + vbCr + "break. Now double new" + vbCr + "paras. Now five new" + vbCr + "paras."
 
-
 End Function
 
 Private Function DestroyResultStrings()
@@ -128,8 +127,8 @@ Private Sub ModuleInitialize()
     SetCharacters
     SetResultStrings
     Application.ScreenUpdating = False
-    Set pBar = New Progress_Bar
-    pBarCounter = 0
+    'Set pBar = New Progress_Bar
+    'pBarCounter = 0
 End Sub
 
 '@ModuleCleanup
@@ -138,18 +137,20 @@ Private Sub ModuleCleanup()
     Set Assert = Nothing
     Set Fakes = Nothing
     'reset loaded public vars
-    'Unload pBar
     DestroyCharacters
     DestroyResultStrings
     Application.ScreenUpdating = True
-    MsgBox ("Cleanup Macro tests complete")
+    'MsgBox ("Cleanup Macro tests complete")
 End Sub
 
 '@TestInitialize
 Private Sub TestInitialize()
     'This method runs before every test in the module..
     ' Create new test docx from template
-    Set testDocx = Application.Documents.Add(testdotx_filepath)
+    Set testDocx = Application.Documents.Add(testdotx_filepath, visible:=False)
+    ' for debug, make the doc visible:
+    'Set testDocx = Application.Documents.Add(testdotx_filepath)
+    testDocx.Activate
     MyStoryNo = 1 '1 = Main Body, 2 = Footnotes, 3 = Endnotes. Can override this value per test as needed
     
 End Sub
@@ -157,8 +158,9 @@ End Sub
 '@TestCleanup
 Private Sub TestCleanup()
     'this method runs after every test in the module.
-    Unload pBar
+    'Unload pBar
     Application.Documents(testDocx).Close savechanges:=wdDoNotSaveChanges
+    Set testDocx = Nothing
 End Sub
 
 '@TestMethod("CleanupMacro")
@@ -776,6 +778,7 @@ TestExit:
 TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
+
 '@TestMethod("CleanupMacro")
 Private Sub TestPunctuation() 'TODO Rename test
     Dim results As String
@@ -954,8 +957,12 @@ End Sub
 '@TestMethod("CleanupMacro")
 Private Sub TestBreaks_notes_and_secondrun() 'TODO Rename test
     Dim results_fnotes As String, results_enotes As String, results_secondrun As String
+    Dim testDocx_local As Document
     On Error GoTo TestFail
     'Arrange:
+        ' this test requires document be opened with visibility, else it loses track of activedoc.
+        '   so we open our own just for this test
+        Set testDocx_local = Application.Documents.Add(testdotx_filepath)
         MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
         copyBodyContentsToFootNotes
     'Act:
@@ -971,12 +978,13 @@ Private Sub TestBreaks_notes_and_secondrun() 'TODO Rename test
         Call Clean.CleanBreaks(MyStoryNo)
         Call Clean.CleanBreaks(MyStoryNo)
         results_secondrun = TestHelpers.returnTestResultString("TestBreaks", MyStoryNo)
-         
      'Assert:
         Assert.Succeed
         Assert.areequal BR_expected, results_fnotes
         Assert.areequal BR_expected, results_enotes
         Assert.areequal BR_expected, results_secondrun
+     'Cleanup:
+        testDocx_local.Close savechanges:=wdDoNotSaveChanges
 TestExit:
     Exit Sub
 TestFail:

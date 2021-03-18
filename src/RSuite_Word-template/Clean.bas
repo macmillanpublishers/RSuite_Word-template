@@ -5,7 +5,7 @@ Sub Ellipses(MyStoryNo)
         Application.ScreenUpdating = False
                 
         thisstatus = "Fixing ellipses "
-        Clean_helpers.updateStatus (thisstatus)
+        If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
         'replace anythign that's already fixed, in case it's run again
         Clean_helpers.FindReplaceSimple ELLIPSIS, "<doneellipsis>", MyStoryNo
@@ -105,14 +105,14 @@ Sub Ellipses(MyStoryNo)
     Clean_helpers.FindReplaceComplex "<doneellipsis>", ELLIPSIS, True, False, , , MyStoryNo
     
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
         
 End Sub
 
 Sub Spaces(MyStoryNo)
 
     thisstatus = "Fixing spaces "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
     'temporarily change finished ellipses and delete nonbreaking spaces
     Clean_helpers.FindReplaceSimple EMDASH_ELLIPSIS, "<doneemdashellipsis>", MyStoryNo
@@ -154,9 +154,9 @@ Sub Spaces(MyStoryNo)
     Clean_helpers.FindReplaceSimple_WithExclude " }", "}", MyStoryNo
     'space after dollar sign to no space
     Clean_helpers.FindReplaceSimple_WithExclude "$ ", "$", MyStoryNo
-    
+
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
     
 End Sub
@@ -164,7 +164,7 @@ End Sub
 Sub Punctuation(MyStoryNo)
 
     thisstatus = "Fixing punctuation "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
     'multiple periods to single period
     Clean_helpers.FindReplaceComplex ".{2,}", ".", False, True, , , MyStoryNo
@@ -178,7 +178,7 @@ Sub Punctuation(MyStoryNo)
     Clean_helpers.FindReplaceSimple NBHYPH2, "-", MyStoryNo
     
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
 End Sub
 
 Sub DoubleQuotes(MyStoryNo)
@@ -193,7 +193,7 @@ Sub DoubleQuotes(MyStoryNo)
     currPercentage = 0
     
     thisstatus = "Fixing double quotes"
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
     ' Combine double single-primes into Double-prime, also double-backticks
     FindReplaceSimple "``", DP, MyStoryNo
@@ -210,7 +210,7 @@ Sub DoubleQuotes(MyStoryNo)
             newPercentage = Selection.Range.Information(wdActiveEndPageNumber) / totalPages * 100
             If newPercentage > currPercentage Then
                 thisstatus = "Fixing double quotes: " & CStr(newPercentage) & "%"
-                Clean_helpers.updateStatus (thisstatus)
+                If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
                 currPercentage = newPercentage
             End If
             
@@ -305,7 +305,7 @@ Sub DoubleQuotes(MyStoryNo)
     Loop
 
     completeStatus = completeStatus + vbNewLine + "Fixing double quotes: 100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
 
 End Sub
 
@@ -317,7 +317,7 @@ Sub SingleQuotes(MyStoryNo)
     nextPercentage = 30
     
     thisstatus = "Fixing single quotes "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
     Dim ChangeQ As Boolean
     ChangeQ = False
@@ -354,7 +354,7 @@ Sub SingleQuotes(MyStoryNo)
     For Each QuoStr In SearchString
         
         thisstatus = "Fixing single quotes: " & CStr(nextPercentage) & "%"
-        Clean_helpers.updateStatus (thisstatus)
+        If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
         nextPercentage = nextPercentage + 30
     
         Selection.Find.Execute findText:=QuoStr
@@ -536,7 +536,7 @@ FindReplaceSimple DCQ & aSPACE & SCQ, DCQ & SCQ, MyStoryNo
 'FindReplaceSimple SOQ & aSPACE & DCQ, SOQ & DCQ
 
 completeStatus = completeStatus + vbNewLine + "Fixing Single Quotes: 100%"
-Clean_helpers.updateStatus ("")
+If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
 
 End Sub
 
@@ -583,22 +583,22 @@ End Function
 Sub Dashes(MyStoryNo)
     
     thisstatus = "Fixing dashes "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
     Application.ScreenUpdating = False
     
     ' Word wildcards isn't as flexible as regex, cannot use ? or | in the normal ways
     '   So we have to run multiple queries
-    Call HighlightNumber("1-[0-9]{3}-[0-9]{3}-[0-9]{4}", 1)
-    Call HighlightNumber("\([0-9]{3}\) [0-9]{3}-[0-9]{4}", 1)
-    Call HighlightNumber("[0-9]{3}-[0-9]{3}-[0-9]{4}", 1)
+    Call HighlightNumber("1-[0-9]{3}-[0-9]{3}-[0-9]{4}", MyStoryNo)
+    Call HighlightNumber("\([0-9]{3}\) [0-9]{3}-[0-9]{4}", MyStoryNo)
+    Call HighlightNumber("[0-9]{3}-[0-9]{3}-[0-9]{4}", MyStoryNo)
     
 '    FOLLOWING CAN BE USED TO FIND ISBN PATTERN AND FLAG FOR NO CHANGE
      Call HighlightNumber("97[89]-[0-9]{10,14}", MyStoryNo)
      Call HighlightNumber("97[89]-[0-9]-[0-9]{3}-[0-9]{5}-[0-9]", MyStoryNo)
      
     thisstatus = "Fixing dashes: 10%"
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
      
     For i = 0 To 9
         For j = 0 To 9
@@ -626,7 +626,7 @@ Sub Dashes(MyStoryNo)
     Next
     
     thisstatus = "Fixing dashes: 20%"
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
     'weird-character = emdash
     FindReplaceSimple ChrW(-3906), EMDASH, MyStoryNo
@@ -634,7 +634,7 @@ Sub Dashes(MyStoryNo)
     FindReplaceSimple ChrW(8213), EMDASH, MyStoryNo
     
     thisstatus = "Fixing dashes: 30%"
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     'figure dash=endash
     FindReplaceSimple ChrW(8210), ENDASH, MyStoryNo
@@ -644,7 +644,7 @@ Sub Dashes(MyStoryNo)
     FindReplaceSimple_WithExclude " - ", "-", MyStoryNo
     
     thisstatus = "Fixing dashes: 40%"
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     'space.hyphen.hyphen.space=emdash
     FindReplaceSimple_WithExclude " -- ", EMDASH, MyStoryNo
@@ -652,7 +652,7 @@ Sub Dashes(MyStoryNo)
     FindReplaceSimple_WithExclude "--", EMDASH, MyStoryNo
     
     thisstatus = "Fixing dashes: 50%"
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
    'dash.space=dash
     FindReplaceSimple_WithExclude "-" & aSPACE, "-", MyStoryNo
@@ -660,7 +660,7 @@ Sub Dashes(MyStoryNo)
     FindReplaceSimple_WithExclude aSPACE & "-", "-", MyStoryNo
     
     thisstatus = "Fixing dashes: 60%"
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     'space.endash=emdash
     FindReplaceSimple_WithExclude aSPACE & ENDASH, EMDASH, MyStoryNo
@@ -668,7 +668,7 @@ Sub Dashes(MyStoryNo)
     FindReplaceSimple_WithExclude ENDASH & aSPACE, ENDASH, MyStoryNo
     
     thisstatus = "Fixing dashes: 70%"
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     'emdash.space=emdash
     FindReplaceSimple_WithExclude EMDASH & aSPACE, EMDASH, MyStoryNo
@@ -676,15 +676,15 @@ Sub Dashes(MyStoryNo)
     FindReplaceSimple_WithExclude aSPACE & EMDASH, EMDASH, MyStoryNo
     
     thisstatus = "Fixing dashes: 80%"
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     Call removeHighlight(MyStoryNo)
     
     thisstatus = "Fixing dashes: 90%"
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     completeStatus = completeStatus + vbNewLine + "Fixing Dashes: 100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
 End Sub
 
@@ -736,7 +736,7 @@ End Function
 Function MakeTitleCase(MyStoryNo)
 
     thisstatus = "Converting headings to title case "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
     If MyStoryNo = 0 Then MyStoryNo = 1
     
@@ -764,15 +764,13 @@ Function MakeTitleCase(MyStoryNo)
     Next
     
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
 
 End Function
-
-
 Function CleanBreaks(MyStoryNo)
 
     thisstatus = "Cleaning breaks "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
     FindReplaceSimple_WithExclude "^l", vbNewLine, MyStoryNo
     ' ^ replacing with ^p with WithExclude function must be done with vbnewline instead
@@ -815,7 +813,7 @@ Function CleanBreaks(MyStoryNo)
     Loop
     
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
 End Function
 
@@ -868,7 +866,7 @@ End Function
 Function RemoveComments()
 
     thisstatus = "Removing Comments "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     Dim c As Comment
     If ActiveDocument.Comments.Count > 0 Then
@@ -880,7 +878,7 @@ Function RemoveComments()
     End If
     
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
     
 End Function
@@ -888,7 +886,7 @@ End Function
 Function DeleteBookmarks()
 
     thisstatus = "Deleting Bookmarks "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     Dim B As Bookmark
     For Each B In ActiveDocument.Bookmarks
@@ -896,7 +894,7 @@ Function DeleteBookmarks()
     Next
     
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
 End Function
 
@@ -904,7 +902,7 @@ End Function
 Function DeleteObjects(MyStoryNo)
 
     thisstatus = "Deleting Objects "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
     Dim s As Shape
     Dim i As InlineShape
@@ -951,14 +949,14 @@ Function DeleteObjects(MyStoryNo)
     Next
     
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
 End Function
 
 Function RemoveHyperlinks(Optional MyStoryNo As Variant = 1)
 
     thisstatus = "Removing hyperlinks "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
     Dim link_count As Integer
     Dim h As hyperlink
@@ -977,16 +975,16 @@ Function RemoveHyperlinks(Optional MyStoryNo As Variant = 1)
     Loop
     
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
 
 End Function
 
 Sub LocalFormatting(MyStoryNo)
 
     thisstatus = "Replacing Local Formatting with Character Styles "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
-    Application.ScreenUpdating = False
+    'Application.ScreenUpdating = False '< should already be off unless we are running standalone
     
     'small caps bold italic
     Call ConvertLocalFormatting(MyStoryNo, SmallCapsTF:=True, ItalTF:=True, BoldTF:=True, NewStyle:="smallcaps-bold-ital (scbi)")
@@ -1024,20 +1022,17 @@ Sub LocalFormatting(MyStoryNo)
     'underline
     Call ConvertLocalFormatting(MyStoryNo, UnderlineTF:=True, NewStyle:="underline (u)")
     
-'    completeStatus = completeStatus + vbNewLine + thisStatus + "100%"
-'    Clean_helpers.updateStatus ("")
-    
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
-    Application.ScreenUpdating = True
+    'Application.ScreenUpdating = True '<for debug only
 
 End Sub
 
 Sub CheckAppliedCharStyles(MyStoryNo)
 
     thisstatus = "Checking Applied Character Styles "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
         Application.ScreenUpdating = False
 
@@ -1173,7 +1168,7 @@ Sub CheckAppliedCharStyles(MyStoryNo)
         Next
 
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    Clean_helpers.updateStatus ("")
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
 
 End Sub
 
@@ -1181,7 +1176,7 @@ End Sub
 Sub CheckSpecialCharactersPC(MyStoryNo)
 
     thisstatus = "Checking for Special Characters "
-    Clean_helpers.updateStatus (thisstatus)
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
         Dim MyUpdate, FoundSomething As Boolean
         Dim myValue As Integer
@@ -1216,7 +1211,7 @@ Sub CheckSpecialCharactersPC(MyStoryNo)
         Next
         
         completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-        Clean_helpers.updateStatus ("")
+        If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
         Application.ScreenUpdating = MyUpdate
         Selection.HomeKey Unit:=wdStory
