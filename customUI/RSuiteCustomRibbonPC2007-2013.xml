@@ -98,8 +98,8 @@
         </group>
 
         <group id="CustGrp4" label="Help" >
-          <button id="VersionCheck.CheckMacmillanGT" label="RSuite Tools Version" image="info" size="normal" onAction="RibbonControl.LaunchMacros" />
-          <button id="VersionCheck.CheckMacmillan" label="RSuite Styles Version" image="info" size="normal" onAction="RibbonControl.LaunchMacros" />
+          <button id="VersionCheck.AttachedVersion" label="Document Styles Version" image="info" size="normal" onAction="RibbonControl.LaunchMacros" />
+          <button id="VersionCheck.InstalledVersion" label="Installed Template Version" image="info" size="normal" onAction="RibbonControl.LaunchMacros" />
           <button id="EasterEggs.Triceratops" image="pizza" size="normal" onAction="RibbonControl.LaunchMacros" />
         </group>
 

@@ -1,7 +1,8 @@
 Attribute VB_Name = "ImportExport"
 Option Base 0
 Option Explicit
-Sub Export_or_Import_VBA_Components()
+
+Sub z_Export_or_Import_VBA_Components()
 Dim oFrm As frmPortVBObjects
     Set oFrm = New frmPortVBObjects
     oFrm.Show
@@ -10,6 +11,18 @@ Dim oFrm As frmPortVBObjects
 
 lbl_Exit:
     Exit Sub
+End Sub
+Sub Open_All_Defined_VBA_Projects()
+Dim dotm As Variant
+    Call config.defineVBAProjectParams
+    For Each dotm In dotms
+        Documents.Open filename:=dotm.installedPath
+    Next dotm
+End Sub
+
+Sub z_copyInstalledRSWTtoRepo()
+Call config.Copy_Installed_Binary_Back_to_Repo("RSuite_Word-template.dotm")
+
 End Sub
 
 Function makeExportDir(exportDirPath As String, fso As Object) As String
@@ -57,7 +70,7 @@ For Each vbProj In Application.VBE.VBProjects   'Loop through each project
     For Each strDoc In Documents              'Find the document name that matches
         If strDoc.VBProject Is vbProj Then
             ReDim Preserve arrProjectList(i)
-            arrProjectList(i) = vbProj.name + " (" + strDoc + ")"
+            arrProjectList(i) = vbProj.Name + " (" + strDoc + ")"
             i = i + 1
         End If
     Next strDoc
@@ -98,14 +111,14 @@ Function FolderWithVBAProjectFiles(srcDoc As Word.Document, boolImport As Boolea
     Set fso = CreateObject("scripting.filesystemobject")
     
     ' in future, check for module in file to look for preferred export/import locale for doc
-    cfgExportDirPath = config.configPathCheck(srcDoc.name)
+    cfgExportDirPath = config.configPathCheck(srcDoc.Name)
     If boolImport = True Then
         cfgExportDirPath = cfgExportDirPath + "_BACKUP_"
     End If
     
     ' default to rel folder in same dir as source doc
     docPath = srcDoc.Path
-    docBasename = fso.GetBaseName(srcDoc.name)
+    docBasename = fso.GetBaseName(srcDoc.Name)
     stdExportDirPath = docPath + "\src-" + docBasename
     If boolImport = True Then
         stdExportDirPath = stdExportDirPath + "_BACKUP_"
@@ -150,7 +163,7 @@ End Function
     Dim fname As String
     Extension = GetFileExtension(VBComp:=VBComp)
     If Trim(filename) = vbNullString Then
-        fname = VBComp.name & Extension
+        fname = VBComp.Name & Extension
     Else
         fname = filename
         If InStr(1, fname, ".", vbBinaryCompare) = 0 Then
@@ -189,7 +202,7 @@ Public Sub ExportModules(szSourceDocument As Variant, boolImport As Boolean)
 
     ' Remnanat of orig version. LEaving in case we ever want a standalone version with no arg passed
     If IsMissing(szSourceDocument) Then
-        szSourceDocument = ActiveDocument.name
+        szSourceDocument = ActiveDocument.Name
     End If
     Set docSource = Application.Documents(szSourceDocument)
     
@@ -215,7 +228,7 @@ Public Sub ExportModules(szSourceDocument As Variant, boolImport As Boolean)
     For Each cmpComponent In docSource.VBProject.VBComponents
         
         bExport = True
-        szFileName = cmpComponent.name
+        szFileName = cmpComponent.Name
 
         ''' Concatenate the correct filename for export.
         Select Case cmpComponent.Type
@@ -251,14 +264,14 @@ End Sub
 
 Public Sub ImportModules(szTargetDoc As Variant)
     Dim docTarget As Word.Document
-    Dim objFSO As Scripting.FileSystemObject
-    Dim objFile As Scripting.File
+    Dim objFSO As scripting.FileSystemObject
+    Dim objFile As scripting.File
     'Dim szTargetDoc As String
     Dim szImportPath As String
     Dim szFileName As String
     Dim cmpComponents As VBIDE.VBComponents
 
-    If szTargetDoc = ThisDocument.name Then
+    If szTargetDoc = ThisDocument.Name Then
         MsgBox "Select another destination document" & _
         "Not possible to import into: " + szTargetDoc
         Exit Sub
@@ -281,7 +294,7 @@ Public Sub ImportModules(szTargetDoc As Variant)
     ''' NOTE: Path where the code modules are located.
     szImportPath = FolderWithVBAProjectFiles(docTarget, False) & "\"
         
-    Set objFSO = New Scripting.FileSystemObject
+    Set objFSO = New scripting.FileSystemObject
     If objFSO.GetFolder(szImportPath).Files.Count = 0 Then
        MsgBox "There are no files to import"
        Exit Sub
@@ -296,9 +309,9 @@ Public Sub ImportModules(szTargetDoc As Variant)
     ''' to the target Document.
     For Each objFile In objFSO.GetFolder(szImportPath).Files
     
-        If (objFSO.GetExtensionName(objFile.name) = "cls") Or _
-            (objFSO.GetExtensionName(objFile.name) = "frm") Or _
-            (objFSO.GetExtensionName(objFile.name) = "bas") Then
+        If (objFSO.GetExtensionName(objFile.Name) = "cls") Or _
+            (objFSO.GetExtensionName(objFile.Name) = "frm") Or _
+            (objFSO.GetExtensionName(objFile.Name) = "bas") Then
             cmpComponents.import objFile.Path
         End If
         

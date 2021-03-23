@@ -1,10 +1,10 @@
 Attribute VB_Name = "config"
-Dim rswt As New clsDotm 'RSuiteWordTemplate.dotm
-Dim tsw As New clsDotm 'Template_switcher.dotm
-Dim dev As New clsDotm 'devSetup.dotm
-Dim dotms As Collection
+Public rswt As New clsDotm 'RSuiteWordTemplate.dotm
+Public tsw As New clsDotm 'Template_switcher.dotm
+Public dev As New clsDotm 'devSetup.dotm
+Public dotms As Collection
 
-Private Sub defineVBAProjectParams()
+Function defineVBAProjectParams()
 Dim currentUser As String
 Dim gitBasePath As String
 Dim fso As Object
@@ -39,17 +39,11 @@ Dim fso As Object
     ' add it to file collection
     dotms.Add dev
     
-End Sub
+End Function
 Public Function GetGitBasepath() As String
 GetGitBasepath = ThisDocument.Path
 
 End Function
-
-
-Private Sub testcopy()
-Copy_Installed_Binary_Back_to_Repo ("template_switcher.dotm")
-
-End Sub
 
 Sub Copy_Installed_Binary_Back_to_Repo(fname As String)
 Dim dotm As Variant
@@ -101,14 +95,6 @@ Opendotms:
     Documents.Open filename:=dotm.installedPath
     'Word.Documents(dotm.filename).Save
     Resume SaveFile
-End Sub
-
-Public Sub Open_All_Defined_VBA_Projects()
-Dim dotm As Variant
-    Call defineVBAProjectParams
-    For Each dotm In dotms
-        Documents.Open filename:=dotm.installedPath
-    Next dotm
 End Sub
 
 Function configPathCheck(curr_filename As String)
