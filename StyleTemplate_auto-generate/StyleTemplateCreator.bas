@@ -1,6 +1,7 @@
 Attribute VB_Name = "StyleTemplateCreator"
 Option Explicit
 Option Base 1
+Const versionFilename As String = "version.txt"
 
 ' Subs and Functions in this module require:
 ' - JsonConverter module be loaded in the same project
@@ -881,6 +882,14 @@ docTemplate.UndoClear
 
 End Sub
 
+Function getParentPath(myDoc As Document)
+    Dim fso As Object
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    With fso
+            getParentPath = .GetParentFolderName(myDoc.Path)
+    End With
+End Function
+
 ' ===== AddVersionNumber ======================================================
 ' Reads version number from text file, adds to template as doc property.
 ' Objects passed By Ref by default so will update same object as is passed.
@@ -889,8 +898,9 @@ Private Sub AddVersionNumber(docNewTemplate As Document)
   Dim strVersionFileFullPath As String
   Dim strVersionNumber As String
   
-  ' version file is same name, same directory, different extension.
-  strVersionFileFullPath = VBA.Replace(docNewTemplate.FullName, ".dotx", ".txt")
+  ' version file moved to parent directory
+  strVersionFileFullPath = getParentPath(docNewTemplate)
+  strVersionFileFullPath = strVersionFileFullPath & "\" & versionFilename
   strVersionNumber = localReadTextFile(Path:=strVersionFileFullPath)
   docNewTemplate.CustomDocumentProperties.Add Name:="Version", LinkToContent:=False, _
     Type:=msoPropertyTypeString, Value:=strVersionNumber
