@@ -1,100 +1,177 @@
 Attribute VB_Name = "VersionCheck"
+Option Private Module
 Option Explicit
-Sub CheckMacmillanGT()
-' can't change name to Word-template because "CheckMacmillanGT" is in customUI.xml
-' and I don't want to muck with it right now.
-'----------------------------------
-    'created by Erica Warren 2014-04-08     erica.warren@macmillan.com
-    'Creates a toolbar button that tells the user the current version of the installed template when pressed.
-    '----------------------------------
+Sub AttachedVersion()
+    ' declare valid style template files
+    Dim templateFile As String, templateFileNoColor As String
+    Dim templateNameStr As String
+    Dim strTemplatePath As String
+    Dim installVersion As String, cdpVersion As String, attachVersion As String
+    Dim msgstr As String
+    
+    templateFile = "RSuite.dotx"  'the template file you are checking
+    templateFileNoColor = "RSuite_NoColor.dotx"
+    strTemplatePath = WT_Settings.StyleDir(FileType:="styles")
+    
+    ' see if valid template files attached, if so get version & report.
+    If ActiveDocument.AttachedTemplate = templateFile Then
+        attachVersion = GetVersion(strTemplatePath, templateFile)
+        templateNameStr = templateFile
+        GoTo ShowMsgbox
+    ElseIf ActiveDocument.AttachedTemplate = templateFileNoColor Then
+        attachVersion = GetVersion(strTemplatePath, templateFileNoColor)
+        templateNameStr = templateFileNoColor
+        GoTo ShowMsgbox
+    End If
+    
+    ' if valid template files not attached, check version from DocProps
+    If attachVersion = "" Then
+        cdpVersion = customDocPropValue("Version")
+        templateNameStr = customDocPropValue("TemplateName")
+        ' nothing currently attached, nothing ever attached:
+        If cdpVersion = "" Then
+            msgstr = "Unable to determine this document's RSuite-styles version:" + vbCr + vbCr + _
+                "Please click 'Activate Template' in the RSuite Tools toolbar and check again."
+            GoTo ShowMsgbox
+        ' let's see if installed version matches
+        Else
+            If templateNameStr = "" Then templateNameStr = templateFile
+            installVersion = GetVersion(strTemplatePath, templateNameStr)
+            ' if no installversion, versions match, or comparison fails, use cdpversion:
+            If installVersion = "none" Or _
+                versionCompare(cdpVersion, installVersion) = "same" Or _
+                versionCompare(cdpVersion, installVersion) = "unable to compare" Then
+                attachVersion = cdpVersion
+                GoTo ShowMsgbox
+            ' warn if local style-template is older
+            ElseIf versionCompare(cdpVersion, installVersion) = ">" Then
+                msgstr = "The version of RSuite styles in this document (v" & cdpVersion & _
+                    ") is newer than the version of RSuite styles in your installed RSuite style-template (v" & installVersion & _
+                    ")" & vbCr & vbCr & _
+                    "Please contact workflows@macmillan.com for assistance in getting your installed template updated!"
+                GoTo ShowMsgbox
+            ' warn if docstyles are older
+            ElseIf versionCompare(cdpVersion, installVersion) = "<" And cdpVersion >= 6 Then
+                msgstr = "The version of RSuite styles in this document (v" & cdpVersion & _
+                    ") is older than the version of RSuite styles in your installed RSuite style-template (v" & installVersion & _
+                    ")" & vbCr & vbCr & _
+                    "Please click 'Activate Template' in the RSuite Tools toolbar to update this document to the latest RSuite styles!"
+                GoTo ShowMsgbox
+            ' warn if pre-rsuite styles as per older version cdp declaration
+            ElseIf cdpVersion < 6 Then
+                 msgstr = "This document may be styled with Macmillan's legacy, pre-RSuite style-set." & vbCr & vbCr & _
+                    "You may want to update/edit styles using the old Macmillan template, or you can click 'Activate Template'" & _
+                    " in the RSuite Tools toolbar to add RSuite styles." & vbCr & vbCr & _
+                    "If you're not sure what to do, please reach out to workflows@macmillan.com for assistance!"
+                GoTo ShowMsgbox
+            End If
+        End If
+    End If
+    Exit Sub
+    
+ShowMsgbox:
+    ' if we haven't already set a problem msgstr, then we set up a success-one
+    If msgstr = "" Then
+        msgstr = "This document is using the RSuite style-set, version v" + attachVersion + "."
+        If templateNameStr <> "" Then
+            msgstr = msgstr + vbCr + vbCr + "(from template file: '" + templateNameStr + "')"
+        End If
+    End If
+    MsgBox prompt:=msgstr, Title:="Document Styles Version Check"
+    
+End Sub
+Sub installedVersion()
     
     Dim templateFile As String
     Dim strMacDocs As String
     Dim strTemplatePath As String
+    Dim installedVersion As String
     
     templateFile = "RSuite_Word-template.dotm"  'the template file you are checking
     strTemplatePath = WT_Settings.StyleDir(FileType:="RS_wt")
 
-    Call VersionCheck(strTemplatePath, templateFile)
-
-End Sub
-Sub CheckMacmillan()
-
-    '----------------------------------
-    'created by Erica Warren 2014-04-08     erica.warren@macmillan.com
-    'Creates a toolbar button that tells the user the current version of the installed template when pressed.
-    '----------------------------------
+    'Call VersionCheck(strTemplatePath, templateFile)
+    installedVersion = GetVersion(strTemplatePath, templateFile)
     
-    Dim templateFile As String
-    Dim strTemplatePath As String
-    
-    templateFile = "RSuite.dotx"  'the template file you are checking
-    strTemplatePath = WT_Settings.StyleDir(FileType:="styles")
-    
-    Call VersionCheck(strTemplatePath, templateFile)
-
-End Sub
-Private Sub VersionCheck(fullPath As String, FileName As String)
-
-    '------------------------------
-    'created by Erica Warren 2014-04-08         erica.warren@macmillan.com
-    'Alerts user to the version number of the template file
-    Dim installedVersion As String
-    
-    installedVersion = "v" + GetVersion(fullPath, FileName)
-
-    'Now we tell the user what version they have
     If installedVersion <> "none" Then
-        MsgBox "You currently have version " & installedVersion & " of the file " & FileName & " installed."
+        MsgBox Title:="Installed Template Version", _
+            prompt:="You currently have version v" & installedVersion & " of the Macmillan template & tools installed."
     Else
-        MsgBox "You do not have " & FileName & " installed on your computer."
+        MsgBox Title:="Warning", _
+            prompt:="You do not have " & templateFile & " installed on your computer."
     End If
 
+
 End Sub
 
-Public Function GetVersion(ByVal fullPath As String, ByVal FileName As String)
+
+Public Function GetVersion(ByVal fullPath As String, ByVal fileName As String)
     Dim installedVersion As String
     Dim fullFilePath As String
-    'DebugPrint fullPath
     
-    fullFilePath = fullPath & Application.PathSeparator & FileName
+    fullFilePath = fullPath & Application.PathSeparator & fileName
     
     If IsItThere(fullFilePath) = False Then            ' the template file is not installed, or is not in the correct place
         installedVersion = "none"
     Else                                                                'the template file is installed in the correct place
-        Documents.Open FileName:=fullFilePath, ReadOnly:=True                   ' Note can't set Visible:=False because that's not an argument in Word Mac VBA :(
+        Documents.Open fileName:=fullFilePath, visible:=False                   ' Note can't set Visible:=False because that's not an argument in Word Mac VBA :(
         installedVersion = Documents(fullFilePath).CustomDocumentProperties("version")
         Documents(fullFilePath).Close
     End If
     
-    If Left(installedVersion, 1) = "v" Then
-        GetVersion = Right(installedVersion, Len(installedVersion) - 1)
-    Else
-        GetVersion = installedVersion
-    End If
+    GetVersion = numericVersionStr(installedVersion)
 
 End Function
+Function numericVersionStr(vStr) As String
+    If Left(vStr, 1) = "v" Then
+        numericVersionStr = Right(vStr, Len(vStr) - 1)
+    Else
+        numericVersionStr = vStr
+    End If
+End Function
 
-Private Sub SetVersion()
-    Dim d As Variant
-    Dim Prop As Variant
-    
-    ActiveDocument.CustomDocumentProperties.Add Name:="repo", LinkToContent:=False, value:="RSuite_Word-template", Type:=msoPropertyTypeString
-    ActiveDocument.Save
-    
-'    For Each d In Documents
-'        If d.Name = "RSuite_Word-template.dotm" Then
-'            d.CustomDocumentProperties("version").Value = "v1.0"
-'            d.CustomDocumentProperties.Add Name:="repo", LinkToContent:=False, Value:="RSuite_Word-template"
-'            MsgBox d.CustomDocumentProperties("version")
-'            MsgBox d.CustomDocumentProperties("repo")
-'        End If
-'
-'    Next
+Function cleanVersionStr(ByVal versionStr As String) As String
+    If Len(versionStr) - Len(Replace(versionStr, ".", "")) > 1 Then
+        Dim splitArray() As String, versionStrArray(1) As String
+        splitArray() = Split(versionStr, ".")
+        versionStrArray(0) = splitArray(0)
+        versionStrArray(1) = splitArray(1)
+        versionStr = Join(versionStrArray, ".")
+    End If
+    cleanVersionStr = versionStr
+End Function
 
-End Sub
+Function versionCompare(ByVal versionA, ByVal versionB) As String
+    Dim vA As Double, vB As Double
+    Dim countA As Long, countB As Long
+    ' get rid of last 'x' in 'x.x.x'
+    versionA = cleanVersionStr(versionA)
+    versionB = cleanVersionStr(versionB)
+    ' try convert to double
+    On Error GoTo returnErr
+    vA = VBA.CDbl(versionA)
+    vB = VBA.CDbl(versionB)
+    On Error GoTo 0
+    If vA > vB Then
+        versionCompare = ">"
+    ElseIf vA < vB Then
+        versionCompare = "<"
+    ElseIf vA = vB Then
+        versionCompare = "same"
+    Else
+        versionCompare = "unable to compare"
+    End If
+    Exit Function
+returnErr:
+    versionCompare = "unable to compare"
+End Function
 
-Private Sub seeVersion()
-    MsgBox ActiveDocument.CustomDocumentProperties("repo").value
-    MsgBox ActiveDocument.CustomDocumentProperties("version").value
-End Sub
+Function customDocPropValue(cdpName As String) As String
+    If Utils.DocPropExists(ActiveDocument, cdpName) Then
+        customDocPropValue = numericVersionStr(ActiveDocument.CustomDocumentProperties(cdpName).value)
+    Else
+        customDocPropValue = ""
+    End If
+End Function
+
+

@@ -23,12 +23,12 @@ Sub zz_AttachCoverTemplate()
     Call AttachMe("RSuite_CoverCopy.dotm")
 End Sub
 
-Sub AttachMe(templateName As String)
+Sub AttachMe(TemplateName As String)
 'Attaches a style template from the RSuiteStyleTemplate directory
 
 ' Get path to actual template
   Dim dictTemplateInfo As Dictionary
-  Set dictTemplateInfo = SharedFileInstaller.FileInfo(templateName)
+  Set dictTemplateInfo = SharedFileInstaller.FileInfo(TemplateName)
 
   Dim strTemplatePath As String
   strTemplatePath = dictTemplateInfo("Final")
@@ -45,9 +45,9 @@ Sub AttachMe(templateName As String)
       End With
       
       Dim templatePath, strVersionNumber As String
-      templatePath = Left(strTemplatePath, (Len(strTemplatePath) - (Len(templateName) + 1)))
-      strVersionNumber = VersionCheck.GetVersion(templatePath, templateName)
-      SetStyleVersion VersionNumber:=strVersionNumber
+      templatePath = Left(strTemplatePath, (Len(strTemplatePath) - (Len(TemplateName) + 1)))
+      strVersionNumber = VersionCheck.GetVersion(templatePath, TemplateName)
+      SetStyleVersion VersionNumber:=strVersionNumber, templateNameStr:=TemplateName
       
     Else
       MsgBox "That style template doesn't seem to exist." & vbNewLine & vbNewLine & _
@@ -58,11 +58,13 @@ Sub AttachMe(templateName As String)
 
 End Sub
 
-Private Sub SetStyleVersion(ByRef VersionNumber As String)
+Private Sub SetStyleVersion(ByRef VersionNumber As String, ByRef templateNameStr As String)
   Dim strProps(), Prop As Variant
-  strProps = Array(Array("Version", VersionNumber), Array("Template", "2"))
+  strProps = Array(Array("Version", VersionNumber), Array("TemplateName", templateNameStr))
   
   For Each Prop In strProps
+    
+    
     If Utils.DocPropExists(objDoc:=ActiveDocument, PropName:=Prop(0)) Then
         ActiveDocument.CustomDocumentProperties(Prop(0)).value = Prop(1)
     Else
@@ -83,7 +85,7 @@ Private Sub listProps()
 End Sub
 
 Private Function IsTemplate(ByVal objDoc As Document) As Boolean
-  Select Case objDoc.SaveFormat
+  Select Case objDoc.saveFormat
     Case wdFormatTemplate, _
          wdFormatXMLTemplate, wdFormatXMLTemplateMacroEnabled, _
          wdFormatFlatXMLTemplate, wdFormatFlatXMLTemplateMacroEnabled
