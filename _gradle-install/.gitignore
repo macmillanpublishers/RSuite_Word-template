@@ -4,5 +4,9 @@
 # Ignore Gradle build output directory
 build
 
-# Ignore MAc os cache files
+# Ignore Mac os cache files
 .DS_Store
+
+# Ignore project output directory and contents
+target
+target/*
