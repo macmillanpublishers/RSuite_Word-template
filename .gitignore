@@ -4,3 +4,7 @@
 *_CIPtagReport.txt
 # ignore template creator log
 createTemplate_logfile.txt
+# ignore target folder
+target
+# ignore setVersions.log
+gradleAddVersions_logfile.txt

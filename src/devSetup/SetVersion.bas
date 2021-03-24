@@ -5,34 +5,56 @@ Const docPropNameStr As String = "Version"
 ' Const versionTxtDir ' currently same path as this file
 Private versionTxtDir As String
 
-Sub setRswtVersionNumber()
+Sub zz_updateVersionsForRepoTemplates_silent()
   Dim versionStr As String
   Dim versionTxtPath As String
-  Dim templatePath As String
-  Dim myDoc As Document
-  
-  ' set vars
+  ' get version str
   versionTxtDir = ThisDocument.Path
   versionTxtPath = versionTxtDir & "\" & versionFilename
-  Call config.defineVBAProjectParams
-  templatePath = rswt.installedPath
-  
-  ' get version str
   versionStr = localReadTextFile(versionTxtPath)
+  ' get doc paths
+  Call config.defineVBAProjectParams
+  ' set versions:
+  Call setTemplateVersionNumber(rswt.dotmRepoPath, versionStr, True)
+  Call setTemplateVersionNumber(st.installedPath, versionStr, True)
+  Call setTemplateVersionNumber(stnc.installedPath, versionStr, True)
+End Sub
+
+Sub updateVersionsForRepoTemplates()
+  Dim versionStr As String
+  Dim versionTxtPath As String
+  ' get version str
+  versionTxtDir = ThisDocument.Path
+  versionTxtPath = versionTxtDir & "\" & versionFilename
+  versionStr = localReadTextFile(versionTxtPath)
+  ' get doc paths
+  Call config.defineVBAProjectParams
+  ' set versions:
+  Call setTemplateVersionNumber(rswt.dotmRepoPath, versionStr)
+  Call setTemplateVersionNumber(st.installedPath, versionStr)
+  Call setTemplateVersionNumber(stnc.installedPath, versionStr)
+End Sub
+
+Sub setTemplateVersionNumber(templatePath As String, versionStr As String, Optional silentBool As Boolean = False)
+  Dim myDoc As Document
   
   ' Open template, set docprop, close document
   Set myDoc = Documents.Open(filename:=templatePath, Visible:=False)
   Call SetTemplateDocProp(myDoc, versionStr)
+  myDoc.Saved = False   'Without this, just a change to custom docprops is not consistently saved!
   myDoc.Close SaveChanges:=True
   
   ' notify
-  MsgBox "'" & docPropNameStr & "' custom Doc Property set, to: '" & _
-    versionStr & "', for file:" & vbCr & vbCr & templatePath
+  If silentBool = False Then
+    MsgBox "'" & docPropNameStr & "' custom Doc Property set, to: '" & _
+      versionStr & "', for file:" & vbCr & vbCr & templatePath
+  End If
   
 End Sub
 
+
 Private Sub SetTemplateDocProp(myDoc As Document, dpValStr As String)
-   
+
     If DocPropExists(myDoc, docPropNameStr) Then
         myDoc.CustomDocumentProperties(docPropNameStr).value = dpValStr
     Else

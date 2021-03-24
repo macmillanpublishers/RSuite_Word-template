@@ -164,12 +164,6 @@ task install(dependsOn: ['copyRSfiles', 'copyOldfiles', 'copyTS', 'macfix_b']) {
   }
 }
 
-task build(dependsOn: ['oscheck', 'force_build']) {
-  doFirst {
-    println "Running build tasks..."
-  }
-}
-
 task oscheck {
   doFirst {
     if(hostOS == 'windows') {
@@ -183,14 +177,20 @@ task oscheck {
   }
 }
 
+task build(dependsOn: ['oscheck', 'wordcheck', 'force_build']) {
+  doFirst {
+    println "Running build tasks..."
+  }
+}
+
 task force_build {
   /*def standardOutput = new ByteArrayOutputStream()
   def errorOutput = new ByteArrayOutputStream()*/
   doFirst {
     if(hostOS == 'windows') {
-      println "did I make it here?"
+      println "attempting to set template versions .."
       exec {
-        commandLine './checkWord.sh'
+        commandLine './setVersions.bat'
       }
       /* println "version-set stdOut: " + standardOutput.toString().trim()
       println "version-set stdErr: " + errorOutput.toString().trim() */
@@ -226,3 +226,5 @@ task force_build {
     }
   }
 }
+force_build.mustRunAfter wordcheck
+force_build.mustRunAfter oscheck
