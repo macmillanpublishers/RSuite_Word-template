@@ -1,6 +1,6 @@
 # RSuite_Word-template
 
-This repo is for storing and maintaining assets related to the Macmillan RSuite Word template.
+This repo is for developing & maintaining assets related to the Macmillan RSuite Word template.
 
 Instructions for manually installing &/or packaging the RSuite Word-template are below: for Word for PC (2010/2013/2019) or Word for Mac (2016/2019).
 
@@ -16,16 +16,16 @@ After that are notes for development, testing, and maintenance.
 * Folder:  RSuiteStyleTemplate
 * Folder:  MacmillanStyleTemplate
 
-See below _PC install_ and _Mac install_ sections for installation target directories and other details.
+Please read sections: _PC install_ and _Mac install_, for installation target directories and other details.
 
 ## PC Install
 
 #### PC Installation Targets:
 * folders: MacmillanStyleTemplate and RSuiteStyleTemplate
-Both folders and their contents should be installed here:  *C:\Users\username\AppData\Roaming*
+Both folders (with all of their contents) should be installed here: `C:\Users\username\AppData\Roaming`
 * file: template_switcher.dotm
-This file should be installed here:
-_C:\Users\username\AppData\Roaming\Microsoft\Word\STARTUP_
+This file should be installed here: 
+`C:\Users\username\AppData\Roaming\Microsoft\Word\STARTUP`
 
 #### PC Installation Requirements
 * Word will need to be quit
