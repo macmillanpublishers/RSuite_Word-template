@@ -4,19 +4,19 @@ This repo is for storing and maintaining assets related to the Macmillan RSuite 
 
 Instructions for manually installing &/or packaging the RSuite Word-template are below: for Word for PC (2010/2013/2019) or Word for Mac (2016/2019).
 
-Below that are notes for vba development with this repo.
+After that are notes for development, testing, and maintenance.
 
 # Installation
 
 ## Assets required for installation
 
-###### Files for Installation should be pulled from the 'files_for_install.zip' attachment to the [latest release](https://github.com/macmillanpublishers/RSuite_Word-template/releases/latest).
+ **Files for Installation should be pulled from the 'files_for_install.zip' attachment to the [latest release](https://github.com/macmillanpublishers/RSuite_Word-template/releases/latest).**
 
 * File:  template_switcher.dotm
 * Folder:  RSuiteStyleTemplate
 * Folder:  MacmillanStyleTemplate
 
-See below _PC install_ and _Mac install_ sections for installation targets and other details.
+See below _PC install_ and _Mac install_ sections for installation target directories and other details.
 
 ## PC Install
 
@@ -115,23 +115,23 @@ The custom ribbon is implemented via custom ribbon xml, stored as part of the bi
 No straightforward way to auto-export/import this xml presents itself, so a copy of the xml is separately maintained in the "*custom_ui*" directory, for versioning.
 
 ## gradle Tools
-#### * Install via gradle
+### Install via gradle
 A quick installation method for development & testing.
 
 Note: Gradle install uses assets from the repo, not 'built' assets from the 'files_for_install' folder (more on that below):
 As a result, if installing from source-code between releases, version numbers for the templates may not match each other, or the release.
 
-###### Steps for install:
+##### Steps for install:
 1. clone repo to your Mac/PC
 2. via commandline/Terminal, cd to directory: *_gradle-install*
 3. * on a Mac (or PC bash emulator):
     * type `./gradlew install`
- * on a PC:
+   * on a PC:
     * type `.\gradle.bat install`
 4. If Word is running, the install task will fail and suggest that you quit Word.
 5. For some reason, on Windows sometimes this installation fails the first time; if you get a Java.io error re: deleting, run installer again.
 
-#### * Build via gradle
+### Build via gradle
 The 'gradlew build' command does the following:
 
 * _If run on a PC_ (with cmd _build_)
@@ -144,7 +144,7 @@ This 'files_for_install' folder should then be zipped and uploaded to the corres
 
 (The _force_build_ command bypasses the version doc-prop step).
 
-###### Steps for build:
+##### Steps for build:
 Same as gradle _Steps for install_, above, except use cmd _build_ or _force_build_ instead of _install_
 
 ## devSetup tools
@@ -158,9 +158,7 @@ This is a very useful way to access code from installed templates quickly in the
 Once you're ready to commit some code, there's a tool to export a .dotm/.docm binary and all of its vba-components to the local git repo repository (*all components except custom ribbon).
 
   1. run macro: *z_Export_or_Import_VBA_Components*
-
   2. in the pop-up window, select any/all docs with updated code, and click either _'Export'_ option:
-
     * "_Export file(s) and modules to git repo_"
 
       Modules are exported to dir: _'src/(file_basename)'_. The .dotm/.docm binary file is copied from its 'installed path' its home in the local git repo. An alert will notify if there is no defined path for the binary (*see 'Export locations' below for more).
@@ -202,10 +200,10 @@ Each module has corresponding .dotx/.docx test file(s) in ./test_files
 4. Run tests!
 
 #### Creating tests
-Each testfile.dotx is a Word template, so to edit the file itself (instead of spawning a new file based on template) you must open via 'File >Open' in Word.
-In each testfile, initial content for each test is denoted by a heading matching the test's name, plus preceding and trailing double-underscores.  This format is important, b/c this is how the test finds result-strings for assertions.
+Many of the testfiles are Word template (.dotx) files, so to edit the file itself (instead of spawning a new file based on template) you must open via 'File>Open' in Word.
 
-(Example: If the test sub name is: *TestPCSpecialCharacters_symbol*, then heading for content for that test in Word will be: *__TestPCSpecialCharacters_symbol__*)
+In testfiles for the Cleanup macro & Charstyle macro, initial content for each test is denoted by a heading matching the test's name, plus preceding and trailing double-underscores.  This format is important, b/c this is how the test finds result-strings for assertions.
+(Example: If the test sub name is: *TestPCSpecialCharacters_symbol*, then heading for content for that test in Word will be: \_\_TestPCSpecialCharacters_symbol__)
 
 To create new tests, just follow the format of existing tests in detail. Result strings are defined at the top of the module, for reuse with 'multiple runs' test-scenarios.
 
