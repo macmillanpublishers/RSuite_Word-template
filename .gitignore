@@ -5,6 +5,6 @@
 # ignore template creator log
 createTemplate_logfile.txt
 # ignore target folder
-target
+files_for_install
 # ignore setVersions.log
 gradleAddVersions_logfile.txt

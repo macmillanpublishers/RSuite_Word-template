@@ -5,7 +5,7 @@ def homePath = System.properties['user.home']
 def rsfolderName = 'RSuiteStyleTemplate'
 def oldstylesFolderName = 'MacmillanStyleTemplate'
 def rstemplateFolderName = 'StyleTemplate_auto-generate'
-def targetDir = '../target'
+def targetDir = '../files_for_install'
 def rstargetDir = targetDir + '/' + rsfolderName
 def mactargetDir = targetDir + '/' + oldstylesFolderName
 
@@ -183,7 +183,7 @@ task build(dependsOn: ['oscheck', 'wordcheck', 'force_build']) {
   }
 }
 
-task force_build {
+task force_build(dependsOn: ['wordcheck']) {
   /*def standardOutput = new ByteArrayOutputStream()
   def errorOutput = new ByteArrayOutputStream()*/
   doFirst {
