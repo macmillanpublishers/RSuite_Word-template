@@ -2,6 +2,8 @@ Attribute VB_Name = "config"
 Public rswt As New clsDotm 'RSuiteWordTemplate.dotm
 Public tsw As New clsDotm 'Template_switcher.dotm
 Public dev As New clsDotm 'devSetup.dotm
+Public st As New clsDotm  'RSuite.dotx
+Public stnc As New clsDotm 'RSuite-NoColor.dotx
 Public dotms As Collection
 
 Function defineVBAProjectParams()
@@ -38,6 +40,16 @@ Dim fso As Object
     dev.modulesRepoPath = gitBasePath & "\src\" & fso.GetBaseName(dev.filename)
     ' add it to file collection
     dotms.Add dev
+    
+    ' define styletemplate 1 (Color, std)
+    st.filename = "RSuite.dotx"
+    st.dotmRepoPath = gitBasePath & "\StyleTemplate_auto-generate\" & st.filename
+    st.installedPath = st.dotmRepoPath
+   
+    ' define styletemplate 2 (Color, std)
+    stnc.filename = "RSuite_NoColor.dotx"
+    stnc.dotmRepoPath = gitBasePath & "\StyleTemplate_auto-generate\" & stnc.filename
+    stnc.installedPath = stnc.dotmRepoPath
     
 End Function
 Public Function GetGitBasepath() As String

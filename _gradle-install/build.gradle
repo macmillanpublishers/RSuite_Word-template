@@ -4,6 +4,19 @@
 def homePath = System.properties['user.home']
 def rsfolderName = 'RSuiteStyleTemplate'
 def oldstylesFolderName = 'MacmillanStyleTemplate'
+def rstemplateFolderName = 'StyleTemplate_auto-generate'
+def targetDir = '../files_for_install'
+def rstargetDir = targetDir + '/' + rsfolderName
+def mactargetDir = targetDir + '/' + oldstylesFolderName
+
+def rsTemplateFiles = [
+  'RSuite_styles.txt',
+  'RSuite_NoColor.dotx',
+  'RSuite.dotx',
+  'sections.txt',
+  'breaks.txt',
+  'containers.txt'
+  ]
 
 /* these definitions are for MacOS, re-setting below if Windows OS detected */
 def hostOS = 'macOS'
@@ -150,3 +163,68 @@ task install(dependsOn: ['copyRSfiles', 'copyOldfiles', 'copyTS', 'macfix_b']) {
     println "Running all installation tasks..."
   }
 }
+
+task oscheck {
+  doFirst {
+    if(hostOS == 'windows') {
+      println "we're running windows, proceeding"
+    } else {
+      def errstring = 'ERROR:\nRunning _build_ on MacOS will not update .dot version strings.' +
+        '\nTry on a PC, or run again like this: ./gradlew force_build'
+      println errstring
+      throw new InvalidUserDataException(errstring)
+    }
+  }
+}
+
+task build(dependsOn: ['oscheck', 'wordcheck', 'force_build']) {
+  doFirst {
+    println "Running build tasks..."
+  }
+}
+
+task force_build(dependsOn: ['wordcheck']) {
+  /*def standardOutput = new ByteArrayOutputStream()
+  def errorOutput = new ByteArrayOutputStream()*/
+  doFirst {
+    if(hostOS == 'windows') {
+      println "attempting to set template versions .."
+      exec {
+        commandLine './setVersions.bat'
+      }
+      /* println "version-set stdOut: " + standardOutput.toString().trim()
+      println "version-set stdErr: " + errorOutput.toString().trim() */
+    } else {
+      println '* WARNING:\n* Running _build_ on MacOS will not update .dot version strings.' +
+        '\n* Use a Windows machine to properly build your project.'
+    }
+    println "Deleting existing target dir"
+    delete targetDir
+  }
+  doLast {
+    copy {
+      from "../oldStyleTemplate/MacmillanStyleTemplate"
+      into mactargetDir
+      println "populated old Macmillan templates dir .. "
+    }
+    copy {
+      from "../RSuite_Word-template.dotm"
+      into rstargetDir
+      println "moved RS_Wordtemplate into place .. "
+    }
+    copy {
+      from "../template_switcher.dotm"
+      into targetDir
+      println "moved template_switcher into place .. "
+    }
+    rsTemplateFiles.each { rstFile ->
+      copy {
+        from "../" + rstemplateFolderName + "/" + rstFile
+        into rstargetDir + "/" + rstemplateFolderName
+        println "moved " + rstFile + " into place .. "
+      }
+    }
+  }
+}
+force_build.mustRunAfter wordcheck
+force_build.mustRunAfter oscheck
