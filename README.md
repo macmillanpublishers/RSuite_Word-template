@@ -49,17 +49,17 @@ This file should be installed here:
 4. Run this command to re-set Word doctype for .dotm files:
     ```find ./ -type f -name "*.dotm" | xargs xattr -wx com.apple.FinderInfo "57 58 54 4D 4D 53 57 44 00 10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"```
 5. Copy or move the file _template_switcher.dotm_ to this location on your Mac:
-_/Users/username/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word/_
+`_/Users/username/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word/_`
 6. Copy or move both folders, _MacmillanStyleTemplate_ and _RSuiteStyleTemplate_ to this location on your Mac:
-_/Users/username/Library/Containers/com.microsoft.Word/Data/Documents_
+`_/Users/username/Library/Containers/com.microsoft.Word/Data/Documents_`
 7. Launch Word. Make sure you see the 'RSuite' & 'Inspect' buttons, and or the 'RSuite Tools' tab in the ribbon, and try some RSuite Tools items out to make sure they work.
 
 
 #### Mac Installation requirements
 * Word should be quit for the installation.
 * Pre-existing contents of the following folders (files & folders) should be removed as a pre-install step:
-/Users/username/Library/Containers/com.microsoft.Word/Data/Documents
-/Users/username/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word/
+`/Users/username/Library/Containers/com.microsoft.Word/Data/Documents` and
+`/Users/username/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word/`
 * Package name / Self-Service Display name (example): **RSuiteStyleTemplatev6.0**
 (The version number should match the version number from the [latest release](https://github.com/macmillanpublishers/RSuite_Word-template/releases/latest) that you downloaded assets from.
 
@@ -124,10 +124,8 @@ As a result, if installing from source-code between releases, version numbers fo
 1. clone repo to your Mac/PC
 2. via commandline/Terminal, cd to directory: *_gradle-install*
 3. type command for gradle task (varies by OS)
-  * on a Mac (or PC bash emulator):
-        * type `./gradlew install`
-   * on a PC:
-        * type `.\gradle.bat install`
+   * on a Mac (or PC bash emulator): `./gradlew install`
+   * on a PC: `.\gradle.bat install`
 4. If Word is running, the install task will fail and suggest that you quit Word.
 5. For some reason, on Windows sometimes this installation fails the first time; if you get a Java.io error re: deleting, run installer again.
 
@@ -157,14 +155,13 @@ This is a very useful way to access code from installed templates quickly in the
 ##### * Export Modules and Binaries
 Once you're ready to commit some code, there's a tool to export a .dotm/.docm binary and all of its vba-components to the local git repo repository (*all components except custom ribbon).
 
-  1. run macro: *z_Export_or_Import_VBA_Components*
-  2. in the pop-up window, select any/all docs with updated code, and click either _'Export'_ option:
-
-    * "_Export file(s) and modules to git repo_"
+   1. run macro: *z_Export_or_Import_VBA_Components*
+   2. in the pop-up window, select any/all docs with updated code, and click either _'Export'_ option:
+      * "_Export file(s) and modules to git repo_"
 
       Modules are exported to dir: _'src/(file_basename)'_. The .dotm/.docm binary file is copied from its 'installed path' its home in the local git repo. An alert will notify if there is no defined path for the binary (*see 'Setting Import/Export locations' below for more).
 
-    * "_Export modules ONLY_"
+      * "_Export modules ONLY_"
 
       This does the same as above re: modules, but does not write installed .docm .dotm files back to their default locations in the local repo.
 
