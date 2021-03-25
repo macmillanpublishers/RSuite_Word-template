@@ -24,7 +24,7 @@ Please read sections: _PC install_ and _Mac install_, for installation target di
 * folders: MacmillanStyleTemplate and RSuiteStyleTemplate
 Both folders (with all of their contents) should be installed here: `C:\Users\username\AppData\Roaming`
 * file: template_switcher.dotm
-This file should be installed here: 
+This file should be installed here:
 `C:\Users\username\AppData\Roaming\Microsoft\Word\STARTUP`
 
 #### PC Installation Requirements
@@ -80,13 +80,13 @@ _/Users/username/Library/Containers/com.microsoft.Word/Data/Documents_
 
 #### Overview
 Development documentation below is broken into 5 main topics:
-* Notes on project maintenance, releases & versioning
-* Notes on developing the custom Ribbon
+* Project maintenance, releases & versioning
+* Working with the custom Ribbon
 * gradle tools: to install files to local env for testing, to collect and version-tag files for release.
 * devSetup tools: macros to facilitate working in the VBA editor
 * Unit testing
 
-Additionally, detailed documentation regarding auto-creation of Style Templates using "WordTemplateStyles.xlsm" and "StyleTemplateCreator.docm" can be found in Confluence, [here](https://confluence.macmillan.com/display/PWG/Maintaining+Word+Style+Templates).
+Additionally, detailed documentation regarding auto-creation of Style Templates using "WordTemplateStyles.xlsm" and "StyleTemplateCreator.docm" can be found in Macmillan Confluence, [here](https://confluence.macmillan.com/display/PWG/Maintaining+Word+Style+Templates).
 
 ## Project Maintenance & Releases
 Currently work is done on feature branches per feature/bug, and merged into master once tested/verified on Word 2013(PC), Word 2019(PC) and Word 2019(Mac).
@@ -95,17 +95,16 @@ Once ready for UAT, Pre-Releases are created in git, named based on a version nu
 
 Following UAT and approval by the business, a 'pre-release' is transitioned to regular release in git. They are deployed to production and staging servers via manual checkout by release-tag, in coordination with Desktop Support (to match their deployment to user workstations).
 
-#### Versions
-###### Numbering
+##### Version Numbering
 Versions for this product are named like 'x.y.z', where x y and z are whole numbers (ex: '6.3.1'). The 'x' indicates a new major version, the 'y' indicates a feature release indicating changes in Style-templates, and the 'z' indicates a release with changes to macros/back-end only
 
-###### Maintenance
+##### Version Maintenance
 The version is set via file _./version.txt_.
 
 It is manually added as 'Version' custom document property to 'RSuite_Word-template.dotm', 'RSuite.dotx' and 'RSuite_NoColor.dotx' via gradle 'build'.
 From there, every time a user attaches the RSuite template to a file, the same 'Version' custom document property is set on that file, making it easy to track attached styles.
 
-###### Version checking by other products
+##### Version checking by other products
 Bookmaker and egalleymaker tools check the major ('x') Version of a styled file to verify style compatibility.
 RSuite_Validate tool and 'Document Styles Version' check in the RSuite Tools ribbon (in Word) verify that 'x.y' matches, or surface a warning to user about mismatched templates.
 
@@ -124,10 +123,11 @@ As a result, if installing from source-code between releases, version numbers fo
 ##### Steps for install:
 1. clone repo to your Mac/PC
 2. via commandline/Terminal, cd to directory: *_gradle-install*
-3. * on a Mac (or PC bash emulator):
-    * type `./gradlew install`
+3. type command for gradle task (varies by OS)
+  * on a Mac (or PC bash emulator):
+        * type `./gradlew install`
    * on a PC:
-    * type `.\gradle.bat install`
+        * type `.\gradle.bat install`
 4. If Word is running, the install task will fail and suggest that you quit Word.
 5. For some reason, on Windows sometimes this installation fails the first time; if you get a Java.io error re: deleting, run installer again.
 
@@ -145,7 +145,7 @@ This 'files_for_install' folder should then be zipped and uploaded to the corres
 (The _force_build_ command bypasses the version doc-prop step).
 
 ##### Steps for build:
-Same as gradle _Steps for install_, above, except use cmd _build_ or _force_build_ instead of _install_
+Same as gradle '_Steps for install_', above, except use cmd '_build_' or '_force_build_' instead of '_install_'.
 
 ## devSetup tools
 In an effort to facilitate simpler vba code versioning in GitHub, there are some macros in "devSetup.docm" file to enable easy export/import of modules. There are also macros to apply version numbers to templates and copy installed, 'working' template files back to the repo. Macros detailed below:
@@ -159,31 +159,30 @@ Once you're ready to commit some code, there's a tool to export a .dotm/.docm bi
 
   1. run macro: *z_Export_or_Import_VBA_Components*
   2. in the pop-up window, select any/all docs with updated code, and click either _'Export'_ option:
+
     * "_Export file(s) and modules to git repo_"
 
-      Modules are exported to dir: _'src/(file_basename)'_. The .dotm/.docm binary file is copied from its 'installed path' its home in the local git repo. An alert will notify if there is no defined path for the binary (*see 'Export locations' below for more).
+      Modules are exported to dir: _'src/(file_basename)'_. The .dotm/.docm binary file is copied from its 'installed path' its home in the local git repo. An alert will notify if there is no defined path for the binary (*see 'Setting Import/Export locations' below for more).
 
     * "_Export modules ONLY_"
 
       This does the same as above re: modules, but does not write installed .docm .dotm files back to their default locations in the local repo.
-
-###### Setting Export locations for files
-
-Any *new* .dotm/docm that you export via this macro will export to the same location as the file by default, in a dir called 'src_*(file_basename)*'. To pre-configure a different export path for a given file, add it to devSetup procedure: 'config.defineVBAProjectParams'.
-
 
 ##### * Import modules
 You may wish at some point to start fresh with a clean set of modules from the repo.  To do this:
 1. run macro: **z_Export_or_Import_VBA_Components**
 2. in the pop-up window, select any/all docs with updated code, and click _'Import'_.
 3. First, for each selected document/project, backups  will be exported for all current vba components, to a default folder appended with suffix '\_BACKUP\_'.
-Then table the Import feature imports modules from the same paths as detailed in 'Setting Export Locations', above.
+Then table the Import feature imports modules from the same paths as detailed in 'Setting Import/Export locations', below.
 
 ##### * Export RSuite_Word-template binary to repo
 To just send the working (installed) version of the RSuite_Word-template.dotm to the repo, run macro: "z_copyInstalledRSWTtoRepo".
 
 ##### * Set Versions
 To update 'Version' custom document property for all 3 key binaries, you can run macro: "updateVersionsForRepoTemplates" (this is the same macro that gradle 'build' uses).
+
+##### Setting Import/Export locations for files
+Any *new* .dotm/docm that you export via this macro will export to the same location as the file by default, in a dir called 'src_*(file_basename)*'. To pre-configure a different export path for a given file, add it to devSetup procedure: 'config.defineVBAProjectParams'.
 
 ## Unit testing
 Unit tests are done using the integrated Rubberduck tool. The testing modules are housed the *RSuite_WordTemplate.dotm* file. (They may also require that devSetup.docm be open for access to config modules.)
