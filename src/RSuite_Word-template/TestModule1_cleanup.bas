@@ -12,7 +12,7 @@ Private DQ_simplefinds_expected As String, DQ_emdash_expected As String, DQ_spac
     SQ_fandr_expected As String, EL_frbasic_expected As String, EL_fr4dots_expected As String, EL_spaces_expected As String, _
     EL_emdashes_expected As String, SP_nbsps_expected As String, SP_brackets_expected As String, SP_breaks_expected As String, _
     SP_exclude_expected As String, PN_expected As String, DSH_numbers_expected As String, DSH_expected As String, _
-    DSH_exclude_expected As String, MTC_expected As String, BR_expected As String
+    DSH_exclude_expected As String, DSH_links_expected As String, MTC_expected As String, BR_expected As String
 Private HL_expected As Integer
 
 Private testDocx As Document
@@ -73,16 +73,18 @@ DSH_expected = "Bar" + EMDASH + "character, figure" + ENDASH + "dash, triple" + 
             + "Space" + EMDASH + "endash, endash" + ENDASH + "space, emdash" + EMDASH + "space, space" + EMDASH + "emdash"
 DSH_exclude_expected = "triple---dash, double--dash, double -- andspaces" + vbCr + "Space - space, dash- space, space -dash" + vbCr _
             + "Space " + ENDASH + "endash, endash" + ENDASH + " space, emdash" + EMDASH + " space, space " + EMDASH + "emdash" + vbCr _
-            + "7" + ENDASH + "8, from 94" + ENDASH + "112, space emdash" + EMDASH + "space"
+            + "7-8, from 94-112, space emdash" + EMDASH + "space"
 DSH_numbers_expected = "Leave alone phone: 703-536-4247, (987) 654-3211, 1-800-123-4567" + vbCr _
             + "Leave alone Isbns: 978-5-426-01234-8, 979-022-2323212" + vbCr _
             + "Now endash: 7" + ENDASH + "8, from 94" + ENDASH + "112, also 15" + ENDASH + "34" + ENDASH + "41, 6.0" + ENDASH + "6.125"
+DSH_links_expected = "https://www.who.int/news--room/detail/27-04-2020-who-timeline---covid-19?gclid=CjwKCAjwsO_4BRBBEiwAyagRTVODU8NvQx1-" _
+            + "WU5HDxxaBYyrq16w4fIUIx7QdeWDHC3f60RJR3XmARoCxmwQAvD_BwE"
 MTC_expected = "Testing All of the Lowercase" + vbCr _
             + "Testing If They Use All Caps" + vbCr _
             + "Tragically the Caps Are Bad" + vbCr _
             + "keywords:" + vbCr _
             + "The the HBO HTML V past the Down"
-HL_expected = 3
+HL_expected = 4  ' < 3 in links test, +1 in dashes_links test
 BR_expected = "Line" + vbCr + "break. Now excluded Line" + vbVerticalTab + "break. Now page" + vbCr + "break. Now double new" + vbCr + "paras. Now five new" + vbCr + "paras."
 
 End Function
@@ -110,6 +112,7 @@ PN_expected = vbNullString
 DSH_expected = vbNullString
 DSH_exclude_expected = vbNullString
 DSH_numbers_expected = vbNullString
+DSH_links_expected = vbNullString
 MTC_expected = vbNullString
 HL_expected = 0
 BR_expected = vbNullString
@@ -149,7 +152,7 @@ Private Sub TestInitialize()
     ' Create new test docx from template
     Set testDocx = Application.Documents.Add(testdotx_filepath, visible:=False)
     ' for debug, make the doc visible:
-    'Set testDocx = Application.Documents.Add(testdotx_filepath)
+    ' Set testDocx = Application.Documents.Add(testdotx_filepath)
     testDocx.Activate
     MyStoryNo = 1 '1 = Main Body, 2 = Footnotes, 3 = Endnotes. Can override this value per test as needed
     
@@ -882,8 +885,26 @@ TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
 '@TestMethod("CleanupMacro")
+Private Sub TestDashes_links_wdv357() 'TODO Rename test
+    Dim results As String
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestDashes_links_wdv357"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.Dashes(MyStoryNo)
+        results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
+    'Assert:
+        Assert.Succeed
+        Assert.areequal DSH_links_expected, results
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+'@TestMethod("CleanupMacro")
 Private Sub TestDashes_secondrun() 'TODO Rename test
-    Dim results_dashes As String, results_numbers As String, results_exclude As String
+    Dim results_dashes As String, results_numbers As String, results_exclude As String, results_links As String
     On Error GoTo TestFail
     'Act:
         Call Clean.Dashes(MyStoryNo)
@@ -891,11 +912,13 @@ Private Sub TestDashes_secondrun() 'TODO Rename test
         results_dashes = TestHelpers.returnTestResultString("TestDashes", MyStoryNo)
         results_numbers = TestHelpers.returnTestResultString("TestDashes_numbers", MyStoryNo)
         results_exclude = TestHelpers.returnTestResultString("TestDashes_exclude", MyStoryNo)
+        results_links = TestHelpers.returnTestResultString("TestDashes_links_wdv357", MyStoryNo)
      'Assert:
         Assert.Succeed
         Assert.areequal DSH_expected, results_dashes
         Assert.areequal DSH_numbers_expected, results_numbers
         Assert.areequal DSH_exclude_expected, results_exclude
+        Assert.areequal DSH_links_expected, results_links
 TestExit:
     Exit Sub
 TestFail:
@@ -904,7 +927,8 @@ End Sub
 '@TestMethod("CleanupMacro")
 Private Sub TestDashes_notes() 'TODO Rename test
     Dim results_fnotes As String, results_enotes As String, results_fnotes_numbers As String, results_enotes_numbers As String, _
-        results_fnotes_exclude As String, results_enotes_exclude As String
+        results_fnotes_exclude As String, results_enotes_exclude As String, results_fnotes_links As String, _
+        results_enotes_links
     On Error GoTo TestFail
     'Arrange:
         MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
@@ -914,6 +938,7 @@ Private Sub TestDashes_notes() 'TODO Rename test
         results_fnotes = TestHelpers.returnTestResultString("TestDashes", MyStoryNo)
         results_fnotes_numbers = TestHelpers.returnTestResultString("TestDashes_numbers", MyStoryNo)
         results_fnotes_exclude = TestHelpers.returnTestResultString("TestDashes_exclude", MyStoryNo)
+        results_fnotes_links = TestHelpers.returnTestResultString("TestDashes_links_wdv357", MyStoryNo)
     'Arrange:
         MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
         copyBodyContentsToEndNotes
@@ -922,14 +947,17 @@ Private Sub TestDashes_notes() 'TODO Rename test
         results_enotes = TestHelpers.returnTestResultString("TestDashes", MyStoryNo)
         results_enotes_numbers = TestHelpers.returnTestResultString("TestDashes_numbers", MyStoryNo)
         results_enotes_exclude = TestHelpers.returnTestResultString("TestDashes_exclude", MyStoryNo)
+        results_enotes_links = TestHelpers.returnTestResultString("TestDashes_links_wdv357", MyStoryNo)
      'Assert:
         Assert.Succeed
         Assert.areequal DSH_expected, results_fnotes
         Assert.areequal DSH_numbers_expected, results_fnotes_numbers
         Assert.areequal DSH_exclude_expected, results_fnotes_exclude
+        Assert.areequal DSH_links_expected, results_fnotes_links
         Assert.areequal DSH_expected, results_enotes
         Assert.areequal DSH_numbers_expected, results_enotes_numbers
         Assert.areequal DSH_exclude_expected, results_enotes_exclude
+        Assert.areequal DSH_links_expected, results_enotes_links
 TestExit:
     Exit Sub
 TestFail:
