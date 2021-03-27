@@ -1,4 +1,5 @@
 Attribute VB_Name = "Clean"
+Const excludeStyle As String = "cs-cleanup-exclude (cex)"
 
 Sub Ellipses(MyStoryNo)
 
@@ -615,7 +616,9 @@ Sub Dashes(MyStoryNo)
              End With
              
              While Selection.Find.Found
-                 If Not (Selection.FormattedText.HighlightColorIndex = wdPink) Then
+                 If Not (Selection.FormattedText.HighlightColorIndex = wdPink) And _
+                    Not (Selection.Style = "Hyperlink") And _
+                    Not (Selection.Style = excludeStyle) Then
                      Selection.TypeText LTrim(i) & ENDASH & LTrim(j)
                  End If
                  
@@ -639,7 +642,7 @@ Sub Dashes(MyStoryNo)
     'figure dash=endash
     FindReplaceSimple ChrW(8210), ENDASH, MyStoryNo
     'hyphen.hyphen.hyphen=endash
-    FindReplaceSimple_WithExclude "---", EMDASH, MyStoryNo
+    FindReplaceSimple_WithExcludeOrHyperlink "---", EMDASH, MyStoryNo
     'space.hyphen.space=emdash
     FindReplaceSimple_WithExclude " - ", "-", MyStoryNo
     
@@ -649,7 +652,7 @@ Sub Dashes(MyStoryNo)
     'space.hyphen.hyphen.space=emdash
     FindReplaceSimple_WithExclude " -- ", EMDASH, MyStoryNo
     'hyphen.hyphen=emdash
-    FindReplaceSimple_WithExclude "--", EMDASH, MyStoryNo
+    FindReplaceSimple_WithExcludeOrHyperlink "--", EMDASH, MyStoryNo
     
     thisstatus = "Fixing dashes: 50%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)

@@ -3,10 +3,10 @@ Const excludeStyle As String = "cs-cleanup-exclude (cex)"
 
 Public Function CheckTemplate()
 
-    Dim templateName As String
-    templateName = ActiveDocument.AttachedTemplate
+    Dim TemplateName As String
+    TemplateName = ActiveDocument.AttachedTemplate
     
-    If InStr(templateName, "RSuite") < 1 And InStr(templateName, "Macmillan") < 1 Then
+    If InStr(TemplateName, "RSuite") < 1 And InStr(TemplateName, "Macmillan") < 1 Then
         MsgBox "You do not have a style template applied. This will cause errors. Please attach a style template and try again."
         End
     End If
@@ -40,6 +40,25 @@ Public Function FindReplaceSimple_WithExclude(ByVal sFind As String, ByVal sRepl
         .Text = sFind
         While .Execute
             If Rg.Style <> excludeStyle Then
+                Rg.Text = sReplace
+                Rg.Collapse wdCollapseEnd
+            End If
+        Wend
+    End With
+        
+End Function
+
+Public Function FindReplaceSimple_WithExcludeOrHyperlink(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
+    Dim Rg As Range
+    Set Rg = ActiveDocument.StoryRanges(storyNumber)
+
+    Call ClearSearch
+        
+    With Rg.Find
+        .Text = sFind
+        While .Execute
+            If Rg.Style <> excludeStyle And _
+                Rg.Style <> "Hyperlink" Then
                 Rg.Text = sReplace
                 Rg.Collapse wdCollapseEnd
             End If
