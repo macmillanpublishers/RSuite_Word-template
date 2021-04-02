@@ -243,7 +243,26 @@ ElseIf storyNumber = 3 Then 'endnotes
 End If
 
 End Function
-
+Function fnoteRefText()
+Dim fnote As Footnote
+For Each fnote In ActiveDocument.Footnotes
+    If fnote.Reference.Text <> Chr(2) Then
+        fnoteRefText = True
+        Exit Function
+    End If
+Next fnote
+fnoteRefText = False
+End Function
+Function enoteRefText()
+Dim enote As Endnote
+For Each enote In ActiveDocument.Endnotes
+    If enote.Reference.Text <> Chr(2) Then
+        enoteRefText = True
+        Exit Function
+    End If
+Next enote
+enoteRefText = False
+End Function
 
 Sub TitleCase()
             
