@@ -30,6 +30,18 @@ Public Function FindReplaceSimple(ByVal sFind As String, ByVal sReplace As Strin
 
 End Function
 
+Public Function FindReplaceSimpleWthRng(myRng As Range, ByVal sFind As String, ByVal sReplace As String)
+    
+    Call ClearSearch
+    
+    With myRng.Find
+        .Text = sFind
+        .Replacement.Text = sReplace
+        .Execute Replace:=wdReplaceAll, Forward:=True
+      End With
+
+End Function
+
 Public Function FindReplaceSimple_WithExclude(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
     Dim Rg As Range
     Set Rg = ActiveDocument.StoryRanges(storyNumber)
@@ -211,14 +223,17 @@ Public Function AtStartOfDocument() As Boolean
            AtStartOfDocument = False
     End Select
 End Function
+
 Public Function TrimNoteSpaces(storyNumber As Variant)
 Dim oRng As Range
 ' Can optionally fully trim note whitespace with commented whiles & Wends below,
-' But this is not necessary since previous f&r's are trimming multispaces to 1
+'   But this is not necessary since previous f&r's are trimming multispaces to 1
+' 4/2/20 - adding ' ^p' cleanup here, b/c it still creates extra ^ps with blank notes.
+'   Here it's easy to finely tune our replacements since we are handling note ranges already
 
 If storyNumber = 2 Then 'footnotes
-    For Each Note In ActiveDocument.Footnotes
-        Set oRng = Note.Range
+    For Each note In ActiveDocument.Footnotes
+        Set oRng = note.Range
         With oRng
             If .Characters.Last = " " Then    'While
                 .Characters.Last = ""
@@ -227,10 +242,17 @@ If storyNumber = 2 Then 'footnotes
                 .Characters.First = ""
             End If    'Wend
         End With
-    Next Note
+        ' strip trailing space from non-note ending paras:
+        ' we skip empty notes due to false positives, and undeletable note-ending ^p's
+        '   they can result in extra ^p's being inserted.
+        If oRng.Text <> "" Then
+            FindReplaceSimpleWthRng oRng, " " + ChrW(13), "^p"
+            FindReplaceSimpleWthRng oRng, " ^p", "^p"
+        End If
+    Next note
 ElseIf storyNumber = 3 Then 'endnotes
-    For Each Note In ActiveDocument.Endnotes
-        Set oRng = Note.Range
+    For Each note In ActiveDocument.Endnotes
+        Set oRng = note.Range
         With oRng
             If .Characters.Last = " " Then    'While
                 .Characters.Last = ""
@@ -239,7 +261,14 @@ ElseIf storyNumber = 3 Then 'endnotes
                 .Characters.First = ""
             End If    'Wend
         End With
-    Next Note
+        ' strip trailing space from non-note ending paras:
+        ' we skip empty notes due to false positives, and undeletable note-ending ^p's
+        '   they can result in extra ^p's being inserted.
+        If oRng.Text <> "" Then
+            FindReplaceSimpleWthRng oRng, " " + ChrW(13), "^p"
+            FindReplaceSimpleWthRng oRng, " ^p", "^p"
+        End If
+    Next note
 End If
 
 End Function
