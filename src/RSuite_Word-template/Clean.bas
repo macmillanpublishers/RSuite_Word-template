@@ -137,15 +137,18 @@ Sub Spaces(MyStoryNo)
     'soft returns to hard returns
     '  note: replacing with ^p using WithExclude function requires 'vbnewline' instead
     Clean_helpers.FindReplaceSimple_WithExclude "^l", vbNewLine, MyStoryNo
-    'spaces before/after line breaks; run 'trim spaces' beforehand for Note storys:
+    
+    'spaces before/after line breaks; run 'trim spaces' instead/beforehand for Note storys:
     '  as per wdv-354 bug
     If MyStoryNo = 2 Or MyStoryNo = 3 Then
         Clean_helpers.TrimNoteSpaces (MyStoryNo)
+    ElseIf MyStoryNo = 1 Then
+        Clean_helpers.FindReplaceSimple " " + ChrW(13), "^p", MyStoryNo
+        Clean_helpers.FindReplaceSimple " ^p", "^p", MyStoryNo
     End If
     Clean_helpers.FindReplaceSimple_WithExclude ChrW(13) + " ", vbNewLine, MyStoryNo
-    Clean_helpers.FindReplaceSimple " " + ChrW(13), "^p", MyStoryNo
     Clean_helpers.FindReplaceSimple_WithExclude "^p ", vbNewLine, MyStoryNo
-    Clean_helpers.FindReplaceSimple " ^p", "^p", MyStoryNo
+    
     'space before/after brackets to no space
     Clean_helpers.FindReplaceSimple_WithExclude "( ", "(", MyStoryNo
     Clean_helpers.FindReplaceSimple_WithExclude "[ ", "[", MyStoryNo
@@ -1385,4 +1388,90 @@ Handler:
     If Err.Number = 9 Then GetIndex = -1
 End Function
 
+Sub fixCustomFootnotes()
+' borrowed basic framework from: https://answers.microsoft.com/en-us/msoffice/forum
+'   /msoffice_word-mso_win10-mso_2019/converting-custom-mark-footnotes-to-automatic
+'   /5c5b089a-85ec-42f4-8dc4-49eb199ad1dd
 
+thisstatus = "Fixing Custom Footnote marks "
+If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
+
+Dim i As Long
+Dim rng As Range
+Dim newNote As Footnote
+Set DataObj = New MSForms.DataObject
+With ActiveDocument
+    For i = 1 To .Footnotes.Count
+        ' skip notes already set to auto-increment
+        If .Footnotes(i).Reference.Text <> Chr(2) Then
+            ' special handling for notes with no text (under 'Else'),
+            '   otherwise the range doesn't exist to .Copy
+            If .Footnotes(i).Range <> "" Then
+                .Footnotes(i).Range.Copy
+                DataObj.GetFromClipboard
+                Set rng = .Footnotes(i).Reference
+                rng.Collapse wdCollapseStart
+                .Footnotes(i).Reference.Delete
+                ' we add a blank new note so we can paste in
+                '   Range with styles instead of just text
+                Set newNote = .Footnotes.Add(rng)
+                ' has the side effect of changing parastyle to default Note style
+                '   but since all notes should be styled like this, that's ok
+                newNote.Range.PasteAndFormat wdFormatOriginalFormatting
+            Else
+                Set rng = .Footnotes(i).Reference
+                rng.Collapse wdCollapseStart
+                .Footnotes(i).Reference.Delete
+                .Footnotes.Add rng, , " "
+            End If
+        End If
+    Next i
+End With
+
+completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
+If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
+
+End Sub
+Sub fixCustomEndnotes()
+' borrowed basic framework from: https://answers.microsoft.com/en-us/msoffice/forum
+'   /msoffice_word-mso_win10-mso_2019/converting-custom-mark-Endnotes-to-automatic
+'   /5c5b089a-85ec-42f4-8dc4-49eb199ad1dd
+
+thisstatus = "Fixing Custom Endnote marks "
+If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
+
+Dim i As Long
+Dim rng As Range
+Dim newNote As Endnote
+Set DataObj = New MSForms.DataObject
+
+With ActiveDocument
+    For i = 1 To .Endnotes.Count
+        ' skip notes already set to auto-increment
+        If .Endnotes(i).Reference.Text <> Chr(2) Then
+            ' special handling for notes with no text (under 'Else'),
+            '   otherwise the range doesn't exist to .Copy
+            If .Endnotes(i).Range <> "" Then
+                .Endnotes(i).Range.Copy
+                DataObj.GetFromClipboard
+                Set rng = .Endnotes(i).Reference
+                rng.Collapse wdCollapseStart
+                .Endnotes(i).Reference.Delete
+                ' we add a blank new note so we can paste in
+                '   Range with styles instead of just text
+                Set newNote = .Endnotes.Add(rng)
+                newNote.Range.PasteAndFormat wdFormatOriginalFormatting
+            Else
+                Set rng = .Endnotes(i).Reference
+                rng.Collapse wdCollapseStart
+                .Endnotes(i).Reference.Delete
+                .Endnotes.Add rng, , " "
+            End If
+        End If
+    Next i
+End With
+
+completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
+If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
+
+End Sub

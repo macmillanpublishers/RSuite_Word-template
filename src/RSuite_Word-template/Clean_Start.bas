@@ -172,6 +172,17 @@ Sub StartCleanup(opts As tpOptions)
             If opts.RemoveHyperlinks Then
                 Call Clean.RemoveHyperlinks(MyStoryNo)
             End If
+            
+            ' cleanup custom endnotes/footnotes
+            If MyStoryNo = 2 Then
+                If Clean_helpers.fnoteRefText = True Then
+                    Call Clean.fixCustomFootnotes
+                End If
+            ElseIf MyStoryNo = 3 Then
+                If Clean_helpers.enoteRefText = True Then
+                    Call Clean.fixCustomEndnotes
+                End If
+            End If
         End If
     Next
     
