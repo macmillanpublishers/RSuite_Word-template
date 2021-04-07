@@ -22,10 +22,12 @@ Section-Front-Matter-General (SFM), Front Matter General
 Section-Front-Sales (SFS), Front Sales
 Section-Glossary (SGL), Glossary
 Section-Halftitle (SHT), Halftitle Page
+Section-Illustration-Credits (SIC), Illustration Credits
 Section-Index (SIN), Index
 Section-Introduction (SIC), Introduction
 Section-Notes (SNT), Notes
 Section-Part (SPT), Part
+Section-Permissions (SPRM), Permissions
 Section-Preface (SPF), Preface
 Section-Recipe (SREC), Recipe
 Section-Series-Page (SSP), Series Page

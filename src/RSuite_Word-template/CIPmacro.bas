@@ -67,7 +67,9 @@ Sub Main()
         "Bibliography", _
         "Conclusion", _
         "Excerpt Chapter", _
-        "Excerpt Opener")
+        "Excerpt Opener", _
+        "Illustration Credits", _
+        "Permissions")
     
     ' for tp, copyright, series page, TOC ending tags:
     ' none of these special sections should be > 5 paras, with possible exception of TOC
@@ -1096,7 +1098,7 @@ Function SaveAsTextFile(originalDocument) As Boolean
     ' Set different text encoding based on OS
     ' And Mac can't create file with line breaks
     #If Mac Then
-        If Val(Application.Version) > 14 Then
+        If Val(Application.version) > 14 Then
             encodingFmt = msoEncodingMacRoman
             lineBreak = False
         End If
