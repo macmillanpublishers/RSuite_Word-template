@@ -38,6 +38,8 @@
     "Section-Back-Ad (SBA)",
     "Section-Index (SIN)",
     "Section-Back-Matter-General (SBM)",
+    "Section-Illustration-Credits (SIC)",
+    "Section-Permissions (SPRM)",
     "Body-Text (Tx)",
     "Body-Text2 (Tx2)"
   ],
@@ -73,7 +75,9 @@
     "Section-About-Author (SAA)",
     "Section-Back-Ad (SBA)",
     "Section-Index (SIN)",
-    "Section-Back-Matter-General (SBM)"
+    "Section-Back-Matter-General (SBM)",
+    "Section-Illustration-Credits (SIC)",
+    "Section-Permissions (SPRM)"
   ],
   "sectionstarts": [
     "Section-Book (BOOK)",
@@ -107,6 +111,8 @@
     "Section-About-Author (SAA)",
     "Section-Back-Ad (SBA)",
     "Section-Index (SIN)",
-    "Section-Back-Matter-General (SBM)"
+    "Section-Back-Matter-General (SBM)",
+    "Section-Illustration-Credits (SIC)",
+    "Section-Permissions (SPRM)"
   ]
 }
