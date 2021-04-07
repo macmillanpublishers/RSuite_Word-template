@@ -21,13 +21,8 @@ Please read sections: _PC install_ and _Mac install_, for installation target di
 ## PC Install
 
 #### PC Installation Targets:
-* folders: _MacmillanStyleTemplate_ and _RSuiteStyleTemplate_
-
-Both folders (with all of their contents) should be installed here: `C:\Users\username\AppData\Roaming`
-
-* file: _template_switcher.dotm_ 
-
-This file should be installed here: `C:\Users\username\AppData\Roaming\Microsoft\Word\STARTUP`
+1. Folders: _MacmillanStyleTemplate_ and _RSuiteStyleTemplate_ (with all contents) should be installed here: `C:\Users\username\AppData\Roaming`
+2. File: _template_switcher.dotm_ should be installed here: `C:\Users\username\AppData\Roaming\Microsoft\Word\STARTUP`
 
 #### PC Installation Requirements
 * Word will need to be quit
