@@ -19,7 +19,7 @@ End Function
 
 Public Function OnGetItemCount(ctl As IRibbonControl, ByRef Count)
     Call getAllStyles
-    Count = UBound(FullList)
+    Count = UBound(FullList) + 1 'Ubound includes an item '0', so we need +1 for count
 End Function
 
 
@@ -27,17 +27,17 @@ Public Function ApplyTheStyle(ctl As IRibbonControl, Text As String)
 
     On Error GoTo ErrorTrap
 
-    If ActiveDocument.Styles(Text).Type = 1 And ActiveDocument.Styles(Text).Type = 2 Then
+    If ActiveDocument.styles(Text).Type = 1 And ActiveDocument.styles(Text).Type = 2 Then
         ApplyParaStyFromCombo (Text)
-    ElseIf ActiveDocument.Styles(Text).Type = 1 Then
+    ElseIf ActiveDocument.styles(Text).Type = 1 Then
         ApplyParaStyFromCombo (Text)
-    ElseIf ActiveDocument.Styles(Text).Type = 2 Then
+    ElseIf ActiveDocument.styles(Text).Type = 2 Then
         ApplyCharStyFromCombo (Text)
     Else
         ApplyParaStyFromCombo (Text)
     End If
     
-    Selection.Collapse direction:=wdCollapseEnd
+    Selection.Collapse Direction:=wdCollapseEnd
     myRibbon.InvalidateControl ("cboApplyStyles")
     
     Exit Function
@@ -91,7 +91,7 @@ Private Function getAllStylesXXX()
     Dim i As Integer
     i = 0
     
-    For Each sty In ActiveDocument.Styles
+    For Each sty In ActiveDocument.styles
         If Not sty.BuiltIn Then
             ReDim Preserve allStyles(i)
             allStyles(i) = sty.NameLocal
