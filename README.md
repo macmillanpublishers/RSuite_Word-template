@@ -10,7 +10,7 @@ After that are notes for development, testing, and maintenance.
 
 ## Assets required for installation
 
- **Files for Installation should be pulled from the 'files_for_install.zip' attachment to the [latest release](https://github.com/macmillanpublishers/RSuite_Word-template/releases/latest).**
+ **Files for Installation should be pulled from the 'files_for_install.zip' attachment to the [release](https://github.com/macmillanpublishers/RSuite_Word-template/releases) that you are installing.**
 
 * File:  template_switcher.dotm
 * Folder:  RSuiteStyleTemplate
@@ -39,7 +39,7 @@ Please read sections: _PC install_ and _Mac install_, for installation target di
 ## Mac Install
 
 #### Manual install step-by-step
-1. Download 'files_for_install.zip' attached to [latest release](https://github.com/macmillanpublishers/RSuite_Word-template/releases/latest).
+1. Download 'files_for_install.zip' attached to [release](https://github.com/macmillanpublishers/RSuite_Word-template/releases) that you are installing.
 2. Unzip files_for_install.zip, and open Terminal. _cd_ into the newly unzipped folder, to perform the commands in step 3 & 4 (eg: cd _/Users/username/Downloads/files_for_install_)
 3. Run this command to strip apple quarantine from downloaded files:
     ```xattr -dr com.apple.quarantine ./```
