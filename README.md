@@ -10,7 +10,7 @@ After that are notes for development, testing, and maintenance.
 
 ## Assets required for installation
 
- **Files for Installation should be pulled from the 'files_for_install.zip' attachment to the [release](https://github.com/macmillanpublishers/RSuite_Word-template/releases) that you are installing.**
+ **Files for Installation should be pulled from the 'files_for_install.zip' attachment to the [release](https://github.com/macmillanpublishers/RSuite_Word-template/releases) that you want to install.**
 
 * File:  template_switcher.dotm
 * Folder:  RSuiteStyleTemplate
@@ -29,7 +29,7 @@ Please read sections: _PC install_ and _Mac install_, for installation target di
 * The Word Startup folder will need to be wiped clean prior to installation
 * The rest of the files may pre-exist at time of installation, as long as the newer (installing) versions will overwrite existing.
 * Package name / Portal Display name (example): **RSuiteStyleTemplatev6.0**
-(The version number should match the version number from the [latest release](https://github.com/macmillanpublishers/RSuite_Word-template/releases/latest) that you downloaded assets from.
+(The version number should match the version number from the release that you downloaded assets from.
 
 ###### Notes for Macmillan packaging team (PC)
 1. Ideally pushed via deployment, but also available in Windows SelfService portal.
@@ -58,7 +58,7 @@ Please read sections: _PC install_ and _Mac install_, for installation target di
 `/Users/username/Library/Containers/com.microsoft.Word/Data/Documents` and
 `/Users/username/Library/Group Containers/UBF8T346G9.Office/User Content.localized/Startup.localized/Word/`
 * Package name / Self-Service Display name (example): **RSuiteStyleTemplatev6.0**
-(The version number should match the version number from the [latest release](https://github.com/macmillanpublishers/RSuite_Word-template/releases/latest) that you downloaded assets from.
+(The version number should match the version number from the release that you downloaded assets from.
 
 ###### Notes for Macmillan packaging team (Mac):
 
