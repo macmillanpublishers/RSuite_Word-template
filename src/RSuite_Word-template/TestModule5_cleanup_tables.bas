@@ -41,7 +41,9 @@ End Sub
 Private Sub TestInitialize()
     'This method runs before every test in the module..
     ' Create new test docx from template
-    Set testDocx = Application.Documents.Add(testdotx_filepath, visible:=False)
+    '   \/ had set visible:=False but smote tests failed intermittently.
+    '       if we want to set invisible, move this to individ. test level and set per test.
+    Set testDocx = Application.Documents.Add(testdotx_filepath, visible:=True)
     testDocx.Activate
     ' for debug, make the doc visible:
     'Set testDocx = Application.Documents.Add(testdotx_filepath)
