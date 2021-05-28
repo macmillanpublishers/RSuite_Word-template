@@ -41,7 +41,32 @@ Public Function FindReplaceSimpleWthRng(myRng As Range, ByVal sFind As String, B
       End With
 
 End Function
+Public Function TrimTrailingSpace_WithExclude(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
+' When we used straight up f&r for this, if range spanned 2 differently styled paras it would restyle para 1 to match 2.
+'   By just trimming the space, without replacing the ^p, we leave the first para alone entirely.
+    Dim Rg As Range
+    Set Rg = ActiveDocument.StoryRanges(storyNumber)
 
+    Call ClearSearch
+
+    With Rg.Find
+        .Text = sFind
+        While .Execute
+        If Rg.Style Is Nothing Then
+            If Rg.Characters.Last = " " Then
+                Rg.Characters.Last = ""
+                Rg.Collapse wdCollapseEnd
+            End If
+        ElseIf Rg.Style <> excludeStyle Then
+            If Rg.Characters.Last = " " Then
+                Rg.Characters.Last = ""
+                Rg.Collapse wdCollapseEnd
+            End If
+        End If
+        Wend
+    End With
+        
+End Function
 Public Function FindReplaceSimple_WithExclude(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
     Dim Rg As Range
     Set Rg = ActiveDocument.StoryRanges(storyNumber)
@@ -51,7 +76,10 @@ Public Function FindReplaceSimple_WithExclude(ByVal sFind As String, ByVal sRepl
     With Rg.Find
         .Text = sFind
         While .Execute
-            If Rg.Style <> excludeStyle Then
+            If Rg.Style Is Nothing Then
+                Rg.Text = sReplace
+                Rg.Collapse wdCollapseEnd
+            ElseIf Rg.Style <> excludeStyle Then
                 Rg.Text = sReplace
                 Rg.Collapse wdCollapseEnd
             End If
@@ -69,7 +97,10 @@ Public Function FindReplaceSimple_WithExcludeOrHyperlink(ByVal sFind As String, 
     With Rg.Find
         .Text = sFind
         While .Execute
-            If Rg.Style <> excludeStyle And _
+            If Rg.Style Is Nothing Then
+                Rg.Text = sReplace
+                Rg.Collapse wdCollapseEnd
+            ElseIf Rg.Style <> excludeStyle And _
                 Rg.Style <> "Hyperlink" Then
                 Rg.Text = sReplace
                 Rg.Collapse wdCollapseEnd
@@ -108,7 +139,10 @@ Public Function FindReplaceComplex_WithExclude(ByVal sFind As String, _
         End If
         .Font.SmallCaps = bSmallCaps
         While .Execute
-            If Rg.Style <> excludeStyle Then
+            If Rg.Style Is Nothing Then
+                Rg.Text = sReplace
+                Rg.Collapse wdCollapseEnd
+            ElseIf Rg.Style <> excludeStyle Then
                 Rg.Text = sReplace
                 Rg.Collapse wdCollapseEnd
             End If

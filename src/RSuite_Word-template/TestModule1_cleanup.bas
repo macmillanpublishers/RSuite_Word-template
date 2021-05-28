@@ -12,11 +12,12 @@ Private DQ_simplefinds_expected As String, DQ_emdash_expected As String, DQ_spac
     SQ_fandr_expected As String, EL_frbasic_expected As String, EL_fr4dots_expected As String, EL_spaces_expected As String, _
     EL_emdashes_expected As String, SP_nbsps_expected As String, SP_brackets_expected As String, SP_breaks_expected As String, _
     SP_exclude_expected As String, PN_expected As String, DSH_numbers_expected As String, DSH_expected As String, _
-    DSH_exclude_expected As String, DSH_links_expected As String, MTC_expected As String, BR_expected As String
+    DSH_exclude_expected As String, DSH_links_expected As String, MTC_expected As String, BR_expected As String, SP_wdv387_expected As String
 Private HL_expected As Integer
 
 Private testDocx As Document
 Private testdotx_filepath As String
+Private testresults_dotx_filepath As String
 Private testdotx As String
 Private MyStoryNo As Variant
 
@@ -66,6 +67,7 @@ SP_brackets_expected = "Tabs (parens) [brackets] {braces} $dollars spaces again"
 SP_breaks_expected = "Soft" + vbCr + "break; space preceding break" + vbCr + "and space following"
 SP_exclude_expected = "Tabs" + vbTab + vbTab + vbTab + "( parens)  [   brackets   ] {braces } $ dollars         spaces again Soft" _
             + vbVerticalTab + "break;" + vbCr + " and space following break"
+SP_wdv387_expected = "Para 1 with style A." + vbCr + "Para 2 with leading space, style B."
 PN_expected = "Multicomma, multiperiods. Non-breaking-hyphens, optionalhyphens."
 DSH_expected = "Bar" + EMDASH + "character, figure" + ENDASH + "dash, triple" + EMDASH + "dash, double" + EMDASH _
             + "dash, double" + EMDASH + "andspaces" + vbCr _
@@ -108,6 +110,7 @@ SP_nbsps_expected = vbNullString
 SP_brackets_expected = vbNullString
 SP_breaks_expected = vbNullString
 SP_exclude_expected = vbNullString
+SP_wdv387_expected = vbNullString
 PN_expected = vbNullString
 DSH_expected = vbNullString
 DSH_exclude_expected = vbNullString
@@ -126,6 +129,8 @@ Private Sub ModuleInitialize()
     Set Fakes = CreateObject("Rubberduck.FakesProvider")
     ' Get testdot filepath.
     testdotx_filepath = getRepoPath + "test_files\testfile_cleanup.dotx"
+    ' Get results docx filepath
+    testresults_dotx_filepath = getRepoPath + "test_files\testfile_charstyle_results.dotx"
     ' Load public vars:
     SetCharacters
     SetResultStrings
@@ -708,10 +713,42 @@ TestExit:
 TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
+'@TestMethod("CleanupMacro")
+Private Sub TestSpaces_wdv387() 'TODO Rename test
+    Dim testResultsDocx As Document
+    Dim results As String, result_compareStr As String
+    Dim rng_results_expected As Range, rng_results_actual As Range
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestSpaces_wdv387"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.Spaces(MyStoryNo)
+        results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
+        Set rng_results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
+        Set rng_results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(rng_results_actual, rng_results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.areequal SP_wdv387_expected, results
+        Assert.areequal "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
 
 '@TestMethod("CleanupMacro")
 Private Sub TestSpaces_secondrun() 'TODO Rename test
     Dim results_nbsps As String, results_brackets As String, results_breaks As String, results_exclude As String
+    Dim result_compareStr As String
+    Dim testResultsDocx As Document
+    Dim rng_results_actual As Range, rng_results_expected As Range
     On Error GoTo TestFail
     'Arrange:
         'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
@@ -722,12 +759,22 @@ Private Sub TestSpaces_secondrun() 'TODO Rename test
         results_brackets = TestHelpers.returnTestResultString("TestSpaces_brackets_and_whitespace", MyStoryNo)
         results_breaks = TestHelpers.returnTestResultString("TestSpaces_breaks", MyStoryNo)
         results_exclude = TestHelpers.returnTestResultString("TestSpaces_exclude", MyStoryNo)
+        '''' test wdv-387 involves results doc, range compare:
+        Set rng_results_actual = TestHelpers.returnTestResultRange("TestSpaces_wdv387", MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
+        Set rng_results_expected = TestHelpers.returnTestResultRange("TestSpaces_wdv387", MyStoryNo, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(rng_results_actual, rng_results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
         Assert.areequal SP_nbsps_expected, results_nbsps
         Assert.areequal SP_brackets_expected, results_brackets
         Assert.areequal SP_breaks_expected, results_breaks
         Assert.areequal SP_exclude_expected, results_exclude
+        Assert.areequal "Same", result_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -736,6 +783,9 @@ End Sub
 '@TestMethod("CleanupMacro")
 Private Sub TestSpaces_footnotes() 'TODO Rename test
     Dim results_nbsps As String, results_brackets As String, results_breaks As String, results_exclude As String
+    Dim result_compareStr As String
+    Dim testResultsDocx As Document
+    Dim rng_results_actual As Range, rng_results_expected As Range
     On Error GoTo TestFail
     'Arrange:
         MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
@@ -746,12 +796,22 @@ Private Sub TestSpaces_footnotes() 'TODO Rename test
         results_brackets = TestHelpers.returnTestResultString("TestSpaces_brackets_and_whitespace", MyStoryNo)
         results_breaks = TestHelpers.returnTestResultString("TestSpaces_breaks", MyStoryNo)
         results_exclude = TestHelpers.returnTestResultString("TestSpaces_exclude", MyStoryNo)
+        '''' test wdv-387 involves results doc, range compare:
+        Set rng_results_actual = TestHelpers.returnTestResultRange("TestSpaces_wdv387", MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
+        Set rng_results_expected = TestHelpers.returnTestResultRange("TestSpaces_wdv387", 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(rng_results_actual, rng_results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
         Assert.areequal SP_nbsps_expected, results_nbsps
         Assert.areequal SP_brackets_expected, results_brackets
         Assert.areequal SP_breaks_expected, results_breaks
         Assert.areequal SP_exclude_expected, results_exclude
+        Assert.areequal "Same", result_compareStr
 TestExit:
     Exit Sub
 TestFail:
@@ -760,6 +820,9 @@ End Sub
 '@TestMethod("CleanupMacro")
 Private Sub TestSpaces_endnotes() 'TODO Rename test
     Dim results_nbsps As String, results_brackets As String, results_breaks As String, results_exclude As String
+    Dim result_compareStr As String
+    Dim testResultsDocx As Document
+    Dim rng_results_actual As Range, rng_results_expected As Range
     On Error GoTo TestFail
     'Arrange:
         MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
@@ -770,12 +833,22 @@ Private Sub TestSpaces_endnotes() 'TODO Rename test
         results_brackets = TestHelpers.returnTestResultString("TestSpaces_brackets_and_whitespace", MyStoryNo)
         results_breaks = TestHelpers.returnTestResultString("TestSpaces_breaks", MyStoryNo)
         results_exclude = TestHelpers.returnTestResultString("TestSpaces_exclude", MyStoryNo)
+        '''' test wdv-387 involves results doc, range compare:
+        Set rng_results_actual = TestHelpers.returnTestResultRange("TestSpaces_wdv387", MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
+        Set rng_results_expected = TestHelpers.returnTestResultRange("TestSpaces_wdv387", 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(rng_results_actual, rng_results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
     'Assert:
         Assert.Succeed
         Assert.areequal SP_nbsps_expected, results_nbsps
         Assert.areequal SP_brackets_expected, results_brackets
         Assert.areequal SP_breaks_expected, results_breaks
         Assert.areequal SP_exclude_expected, results_exclude
+        Assert.areequal "Same", result_compareStr
 TestExit:
     Exit Sub
 TestFail:

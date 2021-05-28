@@ -27,11 +27,11 @@ Sub ApplyNumberList(myControl As IRibbonControl)
     ApplyNumList (MyTag)
 End Sub
 
-Function ApplyParaSty(MyStyle As String)
+Function ApplyParaSty(myStyle As String)
     On Error GoTo ErrorHandler
 
     Selection.Expand Unit:=wdParagraph
-    Selection.Style = MyStyle
+    Selection.Style = myStyle
     Selection.Collapse Direction:=wdCollapseEnd
     ActiveWindow.SmallScroll Up:=3, down:=2
     Selection.GoTo What:=wdGoToBookmark, Name:="\Sel"
@@ -56,14 +56,16 @@ ErrorHandler:
 
 End Function
 
-Function ApplyCharSty(MyStyle As String)
+Function ApplyCharSty(myStyle As String)
 
     On Error GoTo ErrorHandler
     
-    If Selection.Style = MyStyle Then
+    If Selection.Style Is Nothing Then
+        Selection.Style = myStyle
+    ElseIf Selection.Style = myStyle Then
         Selection.ClearFormatting
     Else
-        Selection.Style = MyStyle
+        Selection.Style = myStyle
     End If
     Application.ScreenRefresh
     
@@ -86,7 +88,7 @@ ErrorHandler:
      
 End Function
 
-Function ApplyNumList(MyStyle As String)
+Function ApplyNumList(myStyle As String)
 
 On Error GoTo ErrorHandler
     
@@ -97,9 +99,9 @@ On Error GoTo ErrorHandler
     ActiveDocument.Bookmarks.Add ("templine")
     Selection.Collapse Direction:=wdCollapseStart
     Selection.Move Unit:=wdParagraph, Count:=-1
-    If Selection.Style <> MyStyle Then StartAt1 = True
+    If Selection.Style <> myStyle Then StartAt1 = True
     ActiveDocument.Bookmarks("templine").Select
-    Selection.Style = MyStyle
+    Selection.Style = myStyle
     If StartAt1 = True Then Selection.Range.ListFormat.ApplyListTemplate ListTemplate:=ListGalleries(wdNumberGallery).ListTemplates(1), _
                 ContinuePreviousList:=False, ApplyTo:=wdListApplyToWholeList
     Selection.Collapse Direction:=wdCollapseEnd
@@ -116,7 +118,7 @@ On Error GoTo ErrorHandler
         .StartAt = 1
         .LinkedStyle = "nl"
     End With
-    ActiveDocument.Styles("nl").LinkToListTemplate ListTemplate:=ListGalleries(wdNumberGallery).ListTemplates(1), ListLevelNumber:=1
+    ActiveDocument.styles("nl").LinkToListTemplate ListTemplate:=ListGalleries(wdNumberGallery).ListTemplates(1), ListLevelNumber:=1
     
     Application.DisplayAlerts = wdAlertsAll
     

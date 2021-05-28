@@ -554,3 +554,37 @@ TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
 
+'@TestMethod("CleanupMacro_tables")
+Private Sub TestTables_wdv387spaces() 'TODO Rename test
+    Dim expected_str As String, results As String, second_results As String, fnotes_results As String, _
+        enotes_results As String
+    Dim testTableIndex As Long
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestTables_trimNoteSpaces"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        expected_str = vbCr + "cat" + vbCr
+        testTableIndex = 16
+        copyBodyContentsToFootNotes
+        copyBodyContentsToEndNotes
+    'Act:
+        Call Clean.Spaces(1)
+        results = TestHelpers.lastTablecellText(1, testTableIndex) ' params: storyrange, table_index, row, column
+        Call Clean.Spaces(1)
+        second_results = TestHelpers.lastTablecellText(1, testTableIndex)
+        Call Clean.Spaces(2)
+        fnotes_results = TestHelpers.lastTablecellText(2, testTableIndex)
+        Call Clean.Spaces(3)
+        enotes_results = TestHelpers.lastTablecellText(3, testTableIndex)
+    'Assert:
+        Assert.Succeed
+        Assert.areequal expected_str, results
+        Assert.areequal expected_str, second_results
+        Assert.areequal expected_str, fnotes_results
+        Assert.areequal expected_str, enotes_results
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
