@@ -114,7 +114,11 @@ Public Function GetVersion(ByVal fullPath As String, ByVal fileName As String)
     If IsItThere(fullFilePath) = False Then            ' the template file is not installed, or is not in the correct place
         installedVersion = "none"
     Else                                                                'the template file is installed in the correct place
-        Documents.Open fileName:=fullFilePath, visible:=False                   ' Note can't set Visible:=False because that's not an argument in Word Mac VBA :(
+        #If Mac Then
+            Documents.Open fileName:=fullFilePath, ReadOnly:=True  ' Note can't set Visible:=False because it behaves inconsistently on Mac
+        #Else
+            Documents.Open fileName:=fullFilePath, visible:=False
+        #End If
         installedVersion = Documents(fullFilePath).CustomDocumentProperties("version")
         Documents(fullFilePath).Close
     End If
