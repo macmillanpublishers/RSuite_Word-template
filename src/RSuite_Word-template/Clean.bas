@@ -146,8 +146,10 @@ Sub Spaces(MyStoryNo)
         Clean_helpers.FindReplaceSimple " " + ChrW(13), "^p", MyStoryNo
         Clean_helpers.FindReplaceSimple " ^p", "^p", MyStoryNo
     End If
-    Clean_helpers.FindReplaceSimple_WithExclude ChrW(13) + " ", vbNewLine, MyStoryNo
-    Clean_helpers.FindReplaceSimple_WithExclude "^p ", vbNewLine, MyStoryNo
+    
+    ' these 2 f-and-r's get special attention because they span 2 paras.
+    Clean_helpers.TrimTrailingSpace_WithExclude ChrW(13) + " ", vbNewLine, MyStoryNo
+    Clean_helpers.TrimTrailingSpace_WithExclude "^p ", vbNewLine, MyStoryNo
     
     'space before/after brackets to no space
     Clean_helpers.FindReplaceSimple_WithExclude "( ", "(", MyStoryNo
