@@ -46,7 +46,7 @@ Private Function SetVariables()
     tagDisplayNameArray = Array(tpDisplayName, cpDisplayName, spDisplayName, tocDisplayName)
     tagRequiredArray = Array(tpRequired, cpRequired, spRequired, tocRequired)
 
-    chNamesArray = Array("Chapter", "Chapter 2")
+    chNamesArray = Array("Chapter", "Alt Chapter")
     chTag = "ch"
     ' these backmatter strings match names in "sectionFile".
     bmSectionArray = Array("About the Author", _
@@ -58,7 +58,9 @@ Private Function SetVariables()
         "Bibliography", _
         "Conclusion", _
         "Excerpt Chapter", _
-        "Excerpt Opener")
+        "Excerpt Opener", _
+        "Illustration Credits", _
+        "Permissions")
 End Function
 
 Private Function DestroyResultStrings()
@@ -385,7 +387,7 @@ End Sub
 
 '@TestMethod("CIPtests")
 Private Sub TestRmParas() 'TODO Rename test
-    Dim tstStyleName As String, resultStr
+    Dim tstStyleName As String, resultstr
     Dim expectedRange As Range, testRange As Range
     Dim beforeDotxPath As String, afterDotxPath As String
     Dim beforeDoc As Document, afterDoc As Document
@@ -404,10 +406,10 @@ Private Sub TestRmParas() 'TODO Rename test
         ' for debug:
         'Set afterDoc = Application.Documents.Add(Template:=afterDotxPath)
         Set expectedRange = afterDoc.Range
-        resultStr = TestHelpers.compareRanges(testRange, expectedRange)
+        resultstr = TestHelpers.compareRanges(testRange, expectedRange)
     'Assert:
         Assert.Succeed
-        Assert.areequal "Same", resultStr
+        Assert.areequal "Same", resultstr
     'Cleanup:
         beforeDoc.Close savechanges:=wdDoNotSaveChanges
         afterDoc.Close savechanges:=wdDoNotSaveChanges
@@ -419,7 +421,7 @@ End Sub
 
 '@TestMethod("CIPtests")
 Private Sub TestChangeBreaks() 'TODO Rename test
-    Dim tstStyleName As String, resultStr
+    Dim tstStyleName As String, resultstr
     Dim expectedRange As Range, testRange As Range
     Dim beforeDotxPath As String, afterDotxPath As String
     Dim beforeDoc As Document, afterDoc As Document
@@ -437,10 +439,10 @@ Private Sub TestChangeBreaks() 'TODO Rename test
         ' for debug:
         'Set afterDoc = Application.Documents.Add(Template:=afterDotxPath)
         Set expectedRange = afterDoc.Range
-        resultStr = TestHelpers.compareRanges(testRange, expectedRange)
+        resultstr = TestHelpers.compareRanges(testRange, expectedRange)
     'Assert:
         Assert.Succeed
-        Assert.areequal "Same", resultStr
+        Assert.areequal "Same", resultstr
     'Cleanup:
         beforeDoc.Close savechanges:=wdDoNotSaveChanges
         afterDoc.Close savechanges:=wdDoNotSaveChanges

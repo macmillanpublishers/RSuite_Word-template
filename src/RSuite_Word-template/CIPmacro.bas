@@ -55,7 +55,7 @@ Sub Main()
     tagRequiredArray = Array(tpRequired, cpRequired, spRequired, tocRequired)
 
     ' chapter tagging handled separately
-    chNamesArray = Array("Chapter", "Chapter 2")
+    chNamesArray = Array("Chapter", "Alt Chapter")
     chTag = "ch"
     ' these backmatter strings match names in "sectionFile".
     bmSectionArray = Array("About the Author", _
