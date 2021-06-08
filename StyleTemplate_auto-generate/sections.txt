@@ -8,7 +8,7 @@ Section-Back-Matter-General (SBM), Back Matter General
 Section-Bibliography (SBI), Bibliography
 Section-Book (BOOK), Book
 Section-Chapter (SCP), Chapter
-Section-Chapter2 (SCP2), Chapter 2
+Section-Chapter2 (SCP2), Alt Chapter
 Section-Conclusion (SCL), Conclusion
 Section-Contents (STC), Contents
 Section-Copyright (SCR), Copyright
