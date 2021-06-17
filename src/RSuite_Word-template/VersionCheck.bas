@@ -7,7 +7,7 @@ Sub AttachedVersion()
     Dim templateNameStr As String
     Dim strTemplatePath As String
     Dim installVersion As String, cdpVersion As String, attachVersion As String
-    Dim msgstr As String
+    Dim msgstr As String, err_msgstr As String
     
     templateFile = "RSuite.dotx"  'the template file you are checking
     templateFileNoColor = "RSuite_NoColor.dotx"
@@ -26,12 +26,13 @@ Sub AttachedVersion()
     
     ' if valid template files not attached, check version from DocProps
     If attachVersion = "" Then
+        err_msgstr = "Unable to determine this document's RSuite-styles version:" + vbCr + vbCr + _
+                "Please click 'Activate Template' in the RSuite Tools toolbar and check again."
         cdpVersion = customDocPropValue("Version")
         templateNameStr = customDocPropValue("TemplateName")
         ' nothing currently attached, nothing ever attached:
         If cdpVersion = "" Then
-            msgstr = "Unable to determine this document's RSuite-styles version:" + vbCr + vbCr + _
-                "Please click 'Activate Template' in the RSuite Tools toolbar and check again."
+            msgstr = err_msgstr
             GoTo ShowMsgbox
         ' let's see if installed version matches
         Else
@@ -39,9 +40,11 @@ Sub AttachedVersion()
             installVersion = GetVersion(strTemplatePath, templateNameStr)
             ' if no installversion, versions match, or comparison fails, use cdpversion:
             If installVersion = "none" Or _
-                versionCompare(cdpVersion, installVersion) = "same" Or _
-                versionCompare(cdpVersion, installVersion) = "unable to compare" Then
+                versionCompare(cdpVersion, installVersion) = "same" Then
                 attachVersion = cdpVersion
+                GoTo ShowMsgbox
+            ElseIf versionCompare(cdpVersion, installVersion) = "unable to compare" Then
+                msgstr = err_msgstr
                 GoTo ShowMsgbox
             ' warn if local style-template is older
             ElseIf versionCompare(cdpVersion, installVersion) = ">" Then
@@ -51,14 +54,15 @@ Sub AttachedVersion()
                     "Please contact workflows@macmillan.com for assistance in getting your installed template updated!"
                 GoTo ShowMsgbox
             ' warn if docstyles are older
-            ElseIf versionCompare(cdpVersion, installVersion) = "<" And cdpVersion >= 6 Then
+            ElseIf versionCompare(cdpVersion, installVersion) = "<" And (versionCompare(cdpVersion, "6") = ">" Or _
+                versionCompare(cdpVersion, "6") = "same") Then
                 msgstr = "The version of RSuite styles in this document (v" & cdpVersion & _
                     ") is older than the version of RSuite styles in your installed RSuite style-template (v" & installVersion & _
                     ")" & vbCr & vbCr & _
                     "Please click 'Activate Template' in the RSuite Tools toolbar to update this document to the latest RSuite styles!"
                 GoTo ShowMsgbox
             ' warn if pre-rsuite styles as per older version cdp declaration
-            ElseIf cdpVersion < 6 Then
+            ElseIf versionCompare(cdpVersion, "6") = "<" Then
                  msgstr = "This document may be styled with Macmillan's legacy, pre-RSuite style-set." & vbCr & vbCr & _
                     "You may want to update/edit styles using the old Macmillan template, or you can click 'Activate Template'" & _
                     " in the RSuite Tools toolbar to add RSuite styles." & vbCr & vbCr & _
