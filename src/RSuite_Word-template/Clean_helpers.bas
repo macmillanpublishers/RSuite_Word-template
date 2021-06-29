@@ -53,7 +53,26 @@ Public Function TrimLeadingSpace(ByVal sFind As String, ByVal sReplace As String
     With Rg.Find
         .Text = sFind
         While .Execute
-            If Rg.Characters.First = " " Then
+            ' skipping space removal for blank notes
+            If storyNumber = 3 Then
+                If Rg.Endnotes.Count = 1 Then
+                    If Rg.Endnotes(1).Range.Text <> "" Then
+                        If Rg.Characters.First = " " Then
+                            Rg.Characters.First = ""
+                            Rg.Collapse wdCollapseEnd
+                        End If
+                    End If
+                End If
+            ElseIf storyNumber = 2 Then
+                If Rg.Footnotes.Count = 1 Then
+                    If Rg.Footnotes(1).Range.Text <> "" Then
+                        If Rg.Characters.First = " " Then
+                            Rg.Characters.First = ""
+                            Rg.Collapse wdCollapseEnd
+                        End If
+                    End If
+                End If
+            ElseIf Rg.Characters.First = " " Then
                 Rg.Characters.First = ""
                 Rg.Collapse wdCollapseEnd
             End If
