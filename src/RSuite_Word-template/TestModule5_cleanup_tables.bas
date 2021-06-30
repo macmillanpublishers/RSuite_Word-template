@@ -561,7 +561,7 @@ Private Sub TestTables_wdv387spaces() 'TODO Rename test
     Dim testTableIndex As Long
     On Error GoTo TestFail
     'Arrange:
-        Const C_PROC_NAME = "TestTables_trimNoteSpaces"  '<-- name of this test procedure
+        Const C_PROC_NAME = "TestTables_wdv387spaces"  '<-- name of this test procedure
         'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
         expected_str = vbCr + "cat" + vbCr
         testTableIndex = 16

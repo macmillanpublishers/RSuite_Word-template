@@ -30,17 +30,57 @@ Public Function FindReplaceSimple(ByVal sFind As String, ByVal sReplace As Strin
 
 End Function
 
-Public Function FindReplaceSimpleWthRng(myRng As Range, ByVal sFind As String, ByVal sReplace As String)
-    
-    Call ClearSearch
-    
-    With myRng.Find
-        .Text = sFind
-        .Replacement.Text = sReplace
-        .Execute Replace:=wdReplaceAll, Forward:=True
-      End With
+'Public Function FindReplaceSimpleWthRng(myRng As Range, ByVal sFind As String, ByVal sReplace As String)
+'
+'    Call ClearSearch
+'
+'    With myRng.Find
+'        .Text = sFind
+'        .Replacement.Text = sReplace
+'        .Execute Replace:=wdReplaceAll, Forward:=True
+'      End With
+'
+'End Function
 
+Public Function TrimLeadingSpace(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
+' This is a mirror of the function below (sans exclude):
+' to trim leading spaces from paras within a note, instead of running an F&R inside each note as done previously.
+    Dim Rg As Range
+    Set Rg = ActiveDocument.StoryRanges(storyNumber)
+
+    Call ClearSearch
+
+    With Rg.Find
+        .Text = sFind
+        While .Execute
+            ' skipping space removal for blank notes
+            If storyNumber = 3 Then
+                If Rg.Endnotes.Count = 1 Then
+                    If Rg.Endnotes(1).Range.Text <> "" Then
+                        If Rg.Characters.First = " " Then
+                            Rg.Characters.First = ""
+                            Rg.Collapse wdCollapseEnd
+                        End If
+                    End If
+                End If
+            ElseIf storyNumber = 2 Then
+                If Rg.Footnotes.Count = 1 Then
+                    If Rg.Footnotes(1).Range.Text <> "" Then
+                        If Rg.Characters.First = " " Then
+                            Rg.Characters.First = ""
+                            Rg.Collapse wdCollapseEnd
+                        End If
+                    End If
+                End If
+            ElseIf Rg.Characters.First = " " Then
+                Rg.Characters.First = ""
+                Rg.Collapse wdCollapseEnd
+            End If
+        Wend
+    End With
+        
 End Function
+
 Public Function TrimTrailingSpace_WithExclude(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
 ' When we used straight up f&r for this, if range spanned 2 differently styled paras it would restyle para 1 to match 2.
 '   By just trimming the space, without replacing the ^p, we leave the first para alone entirely.
@@ -258,54 +298,38 @@ Public Function AtStartOfDocument() As Boolean
     End Select
 End Function
 
-Public Function TrimNoteSpaces(storyNumber As Variant)
-Dim oRng As Range
-' Can optionally fully trim note whitespace with commented whiles & Wends below,
-'   But this is not necessary since previous f&r's are trimming multispaces to 1
-' 4/2/20 - adding ' ^p' cleanup here, b/c it still creates extra ^ps with blank notes.
-'   Here it's easy to finely tune our replacements since we are handling note ranges already
-
-If storyNumber = 2 Then 'footnotes
-    For Each note In ActiveDocument.Footnotes
-        Set oRng = note.Range
-        With oRng
-            If .Characters.Last = " " Then    'While
-                .Characters.Last = ""
-            End If    'Wend
-            If .Characters.First = " " Then   'While
-                .Characters.First = ""
-            End If    'Wend
-        End With
-        ' strip trailing space from non-note ending paras:
-        ' we skip empty notes due to false positives, and undeletable note-ending ^p's
-        '   they can result in extra ^p's being inserted.
-        If oRng.Text <> "" Then
-            FindReplaceSimpleWthRng oRng, " " + ChrW(13), "^p"
-            FindReplaceSimpleWthRng oRng, " ^p", "^p"
-        End If
-    Next note
-ElseIf storyNumber = 3 Then 'endnotes
-    For Each note In ActiveDocument.Endnotes
-        Set oRng = note.Range
-        With oRng
-            If .Characters.Last = " " Then    'While
-                .Characters.Last = ""
-            End If    'Wend
-            If .Characters.First = " " Then   'While
-                .Characters.First = ""
-            End If    'Wend
-        End With
-        ' strip trailing space from non-note ending paras:
-        ' we skip empty notes due to false positives, and undeletable note-ending ^p's
-        '   they can result in extra ^p's being inserted.
-        If oRng.Text <> "" Then
-            FindReplaceSimpleWthRng oRng, " " + ChrW(13), "^p"
-            FindReplaceSimpleWthRng oRng, " ^p", "^p"
-        End If
-    Next note
-End If
-
-End Function
+'Public Function TrimNoteSpaces(storyNumber As Variant)
+'Dim oRng As Range
+'' Can optionally fully trim note whitespace with commented whiles & Wends below,
+''   But this is not necessary since previous f&r's are trimming multispaces to 1
+'
+'If storyNumber = 2 Then 'footnotes
+'    For Each note In ActiveDocument.Footnotes
+'        Set oRng = note.Range
+'        With oRng
+'            If .Characters.Last = " " Then    'While
+'                .Characters.Last = ""
+'            End If    'Wend
+'            If .Characters.First = " " Then   'While
+'                .Characters.First = ""
+'            End If    'Wend
+'        End With
+'    Next note
+'ElseIf storyNumber = 3 Then 'endnotes
+'    For Each note In ActiveDocument.Endnotes
+'        Set oRng = note.Range
+'        With oRng
+'            If .Characters.Last = " " Then    'While
+'                .Characters.Last = ""
+'            End If    'Wend
+'            If .Characters.First = " " Then   'While
+'                .Characters.First = ""
+'            End If    'Wend
+'        End With
+'    Next note
+'End If
+'
+'End Function
 Function fnoteRefText()
 Dim fnote As Footnote
 For Each fnote In ActiveDocument.Footnotes

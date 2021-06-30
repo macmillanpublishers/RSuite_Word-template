@@ -138,15 +138,11 @@ Sub Spaces(MyStoryNo)
     '  note: replacing with ^p using WithExclude function requires 'vbnewline' instead
     Clean_helpers.FindReplaceSimple_WithExclude "^l", vbNewLine, MyStoryNo
     
-    'spaces before/after line breaks; run 'trim spaces' instead/beforehand for Note storys:
-    '  as per wdv-354 bug
-    If MyStoryNo = 2 Or MyStoryNo = 3 Then
-        Clean_helpers.TrimNoteSpaces (MyStoryNo)
-    ElseIf MyStoryNo = 1 Then
-        Clean_helpers.FindReplaceSimple " " + ChrW(13), "^p", MyStoryNo
-        Clean_helpers.FindReplaceSimple " ^p", "^p", MyStoryNo
-    End If
-    
+   ' these 2 modified f-and-r's (along with TrimTrailingSpace below (from wdv-387)) help with
+   '    extra para problem surfaced in wdv-354, but are more efficient with notes as per wdv-395
+    Clean_helpers.TrimLeadingSpace " " + ChrW(13), "^p", MyStoryNo
+    Clean_helpers.TrimLeadingSpace " ^p", "^p", MyStoryNo
+        
     ' these 2 f-and-r's get special attention because they span 2 paras.
     Clean_helpers.TrimTrailingSpace_WithExclude ChrW(13) + " ", vbNewLine, MyStoryNo
     Clean_helpers.TrimTrailingSpace_WithExclude "^p ", vbNewLine, MyStoryNo
