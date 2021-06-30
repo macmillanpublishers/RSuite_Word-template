@@ -279,6 +279,31 @@ Public Function EndofTableReached()
     End If
 End Function
 
+Public Function EndofNoteReached(MyStoryNo)
+' including selection.end -1 b/c the para trailing a note is actually past the range by 1
+    If MyStoryNo = 3 Then
+        If Selection.Endnotes.Count <> 0 Then
+            Select Case Selection.Endnotes(1).Range.End
+                Case Selection.End, Selection.End + 1, Selection.End - 1
+                    EndofNoteReached = True
+                Case Else
+                    EndofNoteReached = False
+            End Select
+        End If
+    ElseIf MyStoryNo = 2 Then
+        If Selection.Footnotes.Count <> 0 Then
+            Select Case Selection.Footnotes(1).Range.End
+                Case Selection.End, Selection.End + 1, Selection.End - 1
+                    EndofNoteReached = True
+                Case Else
+                    EndofNoteReached = False
+            End Select
+        End If
+    Else
+        EndofNoteReached = False
+    End If
+End Function
+
 Public Function EndOfStoryReached(storyNumber As Variant) As Boolean
     Select Case ActiveDocument.StoryRanges(storyNumber).End
         Case Selection.End, Selection.End + 1
@@ -350,6 +375,94 @@ For Each enote In ActiveDocument.Endnotes
 Next enote
 enoteRefText = False
 End Function
+
+Function CleanConsecutiveBreaks(MyStoryNo As Variant)
+
+Dim last_count As Integer, found_count As Integer
+last_count = 0
+
+Call ClearSearch
+
+found_count = FixConsecutiveBreaks_SinglePass(MyStoryNo)
+
+' we make sure we don't get stuck in a loop by verifying
+'   the count is decreasing each run
+While found_count > 0 And last_count <> found_count
+    last_count = found_count
+    found_count = FixConsecutiveBreaks_SinglePass(MyStoryNo)
+Wend
+
+End Function
+
+Function FixConsecutiveBreaks_SinglePass(MyStoryNo As Variant) As Integer
+' expected that we will make multiple passes of this
+
+    Dim Rg As Range
+    Set Rg = ActiveDocument.StoryRanges(MyStoryNo)
+    Dim found_count As Integer
+    found_count = 0
+    
+    'Call ClearSearch ' < will call this in parent procedure
+
+    With Rg.Find
+        .Text = "^p^p"
+        .Wrap = wdFindStop
+        While .Execute
+            found_count = found_count + 1
+            ' select the range to accurately check for end of note / story.
+            ' it's simpler/faster/cleaner to remove the last char; then you keep the
+            '   desired style of the first para.
+            ' but we can't do that at end of story (doesn't work) or end of note (throws error!)
+            ' so in those cases we set the style (if present) from the 1st para to last para,
+            '   then rm the first para
+            'Rg.Select
+            'If EndofNoteReached(MyStoryNo) Or EndOfStoryReached(MyStoryNo) Then
+                If Not Rg.Characters.First.Style Is Nothing Then
+                    Rg.Characters.Last.Style = Rg.Characters.First.Style
+                End If
+                Rg.Characters.First = ""
+            'Else
+            '    Rg.Characters.Last = ""
+            'End If
+            Rg.Collapse wdCollapseEnd
+        Wend
+    End With
+    
+    FixConsecutiveBreaks_SinglePass = found_count
+    
+End Function
+Sub test()
+If Not Selection.Style Is Nothing Then
+Debug.Print Selection.Style
+End If
+End Sub
+
+Sub CleanBreakPairs_SinglePass()
+Dim MyStoryNo As Variant
+MyStoryNo = 1
+' expected that we will make multiple passes of this
+
+    Dim Rg As Range
+    Set Rg = ActiveDocument.StoryRanges(MyStoryNo)
+    Dim found_count As Integer
+    found_count = 0
+    
+    'Call ClearSearch
+
+    With Rg.Find
+        .Text = "^p^p"
+        .Wrap = wdFindStop
+        While .Execute
+            Rg.Characters.Last = ""
+            Rg.Collapse wdCollapseEnd
+            found_count = found_count + 1
+          '      Debug.Print counter
+            'End If
+        Wend
+    End With
+    Debug.Print found_count
+End Sub
+
 
 Sub TitleCase()
             

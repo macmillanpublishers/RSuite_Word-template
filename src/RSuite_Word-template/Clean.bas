@@ -771,6 +771,16 @@ Function MakeTitleCase(MyStoryNo)
     If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
 
 End Function
+
+Sub callcb()
+    Dim t As Single
+    t = Timer
+    CleanBreaks (1)
+    CleanBreaks (2)
+    CleanBreaks (3)
+    Debug.Print Timer - t
+End Sub
+
 Function CleanBreaks(MyStoryNo)
 
     thisstatus = "Cleaning breaks "
@@ -780,42 +790,9 @@ Function CleanBreaks(MyStoryNo)
     ' ^ replacing with ^p with WithExclude function must be done with vbnewline instead
     FindReplaceSimple "^m", "^p", MyStoryNo
     FindReplaceSimple "^b", "^p", MyStoryNo
+    
+    Call Clean_helpers.CleanConsecutiveBreaks(MyStoryNo)
 
-    ActiveDocument.StoryRanges(MyStoryNo).Select
-    Selection.Collapse Direction:=wdCollapseStart
-    
-    With Selection.Find
-        .ClearFormatting
-        .Replacement.ClearFormatting
-        .Text = "^p^p"
-        .Forward = True
-        .Wrap = wdFindContinue
-        .Execute
-    End With
-    
-    ' adding a counter to make sure we don't get caught in a loop trying to rm
-    '   unremoveable consectuive breaks (happened with consecutive breaks with
-    '   shape object in between in testing.
-    Dim counter As Integer
-    counter = 0
-    
-    Do While Selection.Find.Found
-        If EndOfStoryReached(MyStoryNo) = False And counter < 3 Then
-            FindReplaceSimple "^p^p", "^p", MyStoryNo
-            With Selection.Find
-                .ClearFormatting
-                .Replacement.ClearFormatting
-                .Text = "^p^p"
-                .Forward = True
-                .Wrap = wdFindStop
-                .Execute
-            End With
-            counter = counter + 1
-        Else
-            Exit Do
-        End If
-    Loop
-    
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
