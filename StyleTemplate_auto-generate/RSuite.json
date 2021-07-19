@@ -12846,7 +12846,7 @@
     "Font.Borders(1).Color": "wdColorAutomatic",
     "Font.Borders(1).LineStyle": "0",
     "Font.Borders(1).LineWidth": "0",
-    "Font.Shading.BackgroundPatternColor": "204,255,255",
+    "Font.Shading.BackgroundPatternColor": "255,232,243",
     "BaseStyle": "Default Paragraph Font",
     "ListLevelNumber": "",
     "NoProofing": "False"
@@ -12914,7 +12914,7 @@
     "Font.Borders(1).Color": "wdColorAutomatic",
     "Font.Borders(1).LineStyle": "0",
     "Font.Borders(1).LineWidth": "0",
-    "Font.Shading.BackgroundPatternColor": "204,255,255",
+    "Font.Shading.BackgroundPatternColor": "255,212,218",
     "BaseStyle": "Default Paragraph Font",
     "ListLevelNumber": "",
     "NoProofing": "False"
@@ -12982,7 +12982,7 @@
     "Font.Borders(1).Color": "wdColorAutomatic",
     "Font.Borders(1).LineStyle": "0",
     "Font.Borders(1).LineWidth": "0",
-    "Font.Shading.BackgroundPatternColor": "204,255,255",
+    "Font.Shading.BackgroundPatternColor": "255,192,193",
     "BaseStyle": "Default Paragraph Font",
     "ListLevelNumber": "",
     "NoProofing": "False"
@@ -13050,7 +13050,7 @@
     "Font.Borders(1).Color": "wdColorAutomatic",
     "Font.Borders(1).LineStyle": "0",
     "Font.Borders(1).LineWidth": "0",
-    "Font.Shading.BackgroundPatternColor": "204,255,255",
+    "Font.Shading.BackgroundPatternColor": "255,172,168",
     "BaseStyle": "Default Paragraph Font",
     "ListLevelNumber": "",
     "NoProofing": "False"
@@ -13118,7 +13118,7 @@
     "Font.Borders(1).Color": "wdColorAutomatic",
     "Font.Borders(1).LineStyle": "0",
     "Font.Borders(1).LineWidth": "0",
-    "Font.Shading.BackgroundPatternColor": "204,255,255",
+    "Font.Shading.BackgroundPatternColor": "255,152,143",
     "BaseStyle": "Default Paragraph Font",
     "ListLevelNumber": "",
     "NoProofing": "False"
@@ -13186,7 +13186,7 @@
     "Font.Borders(1).Color": "wdColorAutomatic",
     "Font.Borders(1).LineStyle": "0",
     "Font.Borders(1).LineWidth": "0",
-    "Font.Shading.BackgroundPatternColor": "204,255,255",
+    "Font.Shading.BackgroundPatternColor": "255,132,128",
     "BaseStyle": "Default Paragraph Font",
     "ListLevelNumber": "",
     "NoProofing": "False"
