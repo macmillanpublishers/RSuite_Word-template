@@ -313,6 +313,7 @@
     }
   },
   "legacy": [
+    ".Text-MessageTmg"
   ],
   "footnotetextselector": [
     "div.footnote"

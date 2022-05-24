@@ -15,7 +15,7 @@
           <button id="AttachTemplateMacro.zz_AttachBoundMSTemplate" label="Remove Color Guides" image="removefile" size="normal" onAction="RibbonControl.LaunchMacros" />
           <!--<button id="PrintStyles.PrintStyles" label="Print Styles in Margin" image="print" size="normal" onAction="RibbonControl.LaunchMacros" />-->
           <button id="ViewStyles.StylesViewLaunch" size="normal" image="eye" onAction="RibbonControl.LaunchMacros" label="View Styles"/>
-		  <button id="CIPMacro.Main" label="CIP Application" image="index" size="normal" onAction="RibbonControl.LaunchMacros" />
+	    <button id="CIPMacro.Main" label="CIP Application" image="index" size="normal" onAction="RibbonControl.LaunchMacros" />
         </group>
 
         <!--<group id="CustGrp2" label="Manuscript Tools" >
@@ -37,7 +37,7 @@
 
           <button id="sty1" label="Num" screentip="Number" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Number (Num)" />
           <button id="sty2" label="Ttl" screentip="Title" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Title (Ttl) " />
-		  <button id="sty3" label="Txc" screentip="Body-Text Continued" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Body-Text-Continued (Txc)" />
+ 	    <button id="sty3" label="Txc" screentip="Body-Text Continued" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Body-Text-Continued (Txc)" />
 
           <button id="sty4" label="Ahead" screentip="A-Head" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="A-Head (Ahead)" />
           <button id="sty5" label="Bhead" screentip="B-Head" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="B-Head (Bhead)" />
@@ -55,7 +55,7 @@
           <button id="sty14" label="Epiv" screentip="Epigraph Verse" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Epigraph-Verse (Epiv)" />
           <button id="sty15" label="Episrc" screentip="Epigraph Source" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Epigraph-Source (Episrc)" />
 
-          <button id="sty16" label="Tmg" screentip="Text Message" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Text-Message (Tmg)" />
+          <button id="sty16" label="Tmg1" screentip="Text-Message1" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Text-Message1 (Tmg1)" />
           <button id="sty17" label="Dia1" screentip="Dialogue1" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Dialogue1 (Dia1)" />
           <button id="sty18" label="Dia2" screentip="Dialogue2" size="normal" onAction="ApplyStyle.ApplyParaStyle" tag="Dialogue2 (Dia2)" />
 
