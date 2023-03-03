@@ -92,12 +92,12 @@ Public Function TrimTrailingSpace_WithExclude(ByVal sFind As String, ByVal sRepl
     With Rg.Find
         .Text = sFind
         While .Execute
-        If Rg.Style Is Nothing Then
+        If Rg.style Is Nothing Then
             If Rg.Characters.Last = " " Then
                 Rg.Characters.Last = ""
                 Rg.Collapse wdCollapseEnd
             End If
-        ElseIf Rg.Style <> excludeStyle Then
+        ElseIf Rg.style <> excludeStyle Then
             If Rg.Characters.Last = " " Then
                 Rg.Characters.Last = ""
                 Rg.Collapse wdCollapseEnd
@@ -116,10 +116,10 @@ Public Function FindReplaceSimple_WithExclude(ByVal sFind As String, ByVal sRepl
     With Rg.Find
         .Text = sFind
         While .Execute
-            If Rg.Style Is Nothing Then
+            If Rg.style Is Nothing Then
                 Rg.Text = sReplace
                 Rg.Collapse wdCollapseEnd
-            ElseIf Rg.Style <> excludeStyle Then
+            ElseIf Rg.style <> excludeStyle Then
                 Rg.Text = sReplace
                 Rg.Collapse wdCollapseEnd
             End If
@@ -137,11 +137,11 @@ Public Function FindReplaceSimple_WithExcludeOrHyperlink(ByVal sFind As String, 
     With Rg.Find
         .Text = sFind
         While .Execute
-            If Rg.Style Is Nothing Then
+            If Rg.style Is Nothing Then
                 Rg.Text = sReplace
                 Rg.Collapse wdCollapseEnd
-            ElseIf Rg.Style <> excludeStyle And _
-                Rg.Style <> "Hyperlink" Then
+            ElseIf Rg.style <> excludeStyle And _
+                Rg.style <> "Hyperlink" Then
                 Rg.Text = sReplace
                 Rg.Collapse wdCollapseEnd
             End If
@@ -179,10 +179,10 @@ Public Function FindReplaceComplex_WithExclude(ByVal sFind As String, _
         End If
         .Font.SmallCaps = bSmallCaps
         While .Execute
-            If Rg.Style Is Nothing Then
+            If Rg.style Is Nothing Then
                 Rg.Text = sReplace
                 Rg.Collapse wdCollapseEnd
-            ElseIf Rg.Style <> excludeStyle Then
+            ElseIf Rg.style <> excludeStyle Then
                 Rg.Text = sReplace
                 Rg.Collapse wdCollapseEnd
             End If
@@ -435,6 +435,40 @@ Function MessageBox(Title As String, Msg As String, Optional ByVal buttonType As
     MessageBox = MsgBox(Msg, buttonType, Title)
 End Function
 
+Function GetNonFormatCharStyles() As Collection
+'Dim t As Single
+'t = Timer
+    Dim formatCharstyleList As Variant
+    Dim sColl As New Collection
+    Dim dstyle As style
+    Dim fstyle As Variant
+    
+    For Each dstyle In ActiveDocument.styles
+        If (dstyle.Type = wdStyleTypeCharacter And Right(dstyle.NameLocal, 1) = ")") _
+        Or dstyle.NameLocal = "Endnote Reference" _
+        Or dstyle.NameLocal = "Footnote Reference" _
+        Then
+            sColl.Add dstyle, dstyle.NameLocal
+        End If
+    Next
+    
+    formatCharstyleList = getFormatCharStyles
+    For Each fstyle In formatCharstyleList
+        On Error Resume Next
+        sColl.Remove (fstyle)
+        On Error GoTo 0
+    Next
+    
+'    Dim sname As Variant
+'    For Each sname In sColl
+'        Debug.Print sname
+'    Next
+
+    Set GetNonFormatCharStyles = sColl
+'Debug.Print Timer - t
+End Function
+
+
 Public Function ConvertLocalFormatting(MyStoryNo, Optional ByVal ItalTF As Boolean = False, _
                                         Optional ByVal BoldTF As Boolean = False, _
                                         Optional ByVal CapsTF As Boolean = False, _
@@ -447,7 +481,7 @@ Public Function ConvertLocalFormatting(MyStoryNo, Optional ByVal ItalTF As Boole
                      
         Application.ScreenUpdating = False
         
-        Dim oStyle As Style
+        Dim oStyle As style
         Dim oRng As Range
         Dim tRng As Range
         Dim currentPage, CurrentCol, CurrentLine, PrevPage, PrevCol, PrevLine
@@ -477,9 +511,9 @@ Public Function ConvertLocalFormatting(MyStoryNo, Optional ByVal ItalTF As Boole
             
             Do While Selection.Find.Found
                 CurrSel = Selection.Text
-                Set oStyle = Selection.Style
+                Set oStyle = Selection.style
                 If CurrSel = PrevSel Then
-                    If oStyle = "Endnote Reference" Then
+                    If oStyle = "Endnote Reference" Or oStyle = "Footnote Reference" Then
                         GoTo NextOne
                     End If
                 ' vbcr + chr7 combine to make table 'end-of-cell' character.
@@ -496,79 +530,85 @@ Public Function ConvertLocalFormatting(MyStoryNo, Optional ByVal ItalTF As Boole
                     Selection.MoveEnd Unit:=wdCharacter, Count:=-1
                 End If
                 
+'                ' skip already char-styled selection with suffix "(code)"
+'                If (oStyle.Type = wdStyleTypeCharacter And Right(oStyle, 1) = ")") _
+'                Or oStyle = "Endnote Reference" Or oStyle = "Footnote Reference" Then
+'                    GoTo NextOne
+'                End If
+                
                 Select Case NewStyle
                     Case "bold-ital (bi)"
                         If Not oStyle.Font.Italic And Not oStyle.Font.Bold Then
-                            Selection.Style = NewStyle
+                            Selection.style = NewStyle
                         ElseIf oStyle.Font.Italic And Not oStyle.Font.Bold Then
-                            Selection.Style = "bold (b)"
+                            Selection.style = "bold (b)"
                         ElseIf Not oStyle.Font.Italic And oStyle.Font.Bold Then
-                            Selection.Style = "ital (i)"
+                            Selection.style = "ital (i)"
                         End If
                     Case "smallcaps-ital (sci)"
                         If Not oStyle.Font.Italic And Not oStyle.Font.SmallCaps Then
-                            Selection.Style = NewStyle
+                            Selection.style = NewStyle
                         ElseIf oStyle.Font.Italic And Not oStyle.Font.SmallCaps Then
-                            Selection.Style = "smallcaps (sc)"
+                            Selection.style = "smallcaps (sc)"
                         ElseIf Not oStyle.Font.Italic And oStyle.Font.SmallCaps Then
-                            Selection.Style = "ital (i)"
+                            Selection.style = "ital (i)"
                         End If
                     Case "smallcaps-bold (scb)"
                         If Not oStyle.Font.Bold And Not oStyle.Font.SmallCaps Then
-                            Selection.Style = NewStyle
+                            Selection.style = NewStyle
                         ElseIf oStyle.Font.Bold And Not oStyle.Font.SmallCaps Then
-                            Selection.Style = "smallcaps (sc)"
+                            Selection.style = "smallcaps (sc)"
                         ElseIf Not oStyle.Font.Bold And oStyle.Font.SmallCaps Then
-                            Selection.Style = "bold (b)"
+                            Selection.style = "bold (b)"
                         End If
                     Case "smallcaps-bold-ital (scbi)"
                         If Not oStyle.Font.Bold And Not oStyle.Font.SmallCaps And Not oStyle.Font.Italic Then
-                            Selection.Style = NewStyle
+                            Selection.style = NewStyle
                         ElseIf oStyle.Font.Bold And Not oStyle.Font.SmallCaps And Not oStyle.Font.Italic Then
-                            Selection.Style = "smallcaps-ital (sci)"
+                            Selection.style = "smallcaps-ital (sci)"
                         ElseIf Not oStyle.Font.Bold And Not oStyle.Font.SmallCaps And oStyle.Font.Italic Then
-                            Selection.Style = "smallcaps-bold (scb)"
+                            Selection.style = "smallcaps-bold (scb)"
                         ElseIf Not oStyle.Font.Bold And oStyle.Font.SmallCaps And oStyle.Font.Italic Then
-                            Selection.Style = "bold (b)"
+                            Selection.style = "bold (b)"
                         ElseIf oStyle.Font.Bold And oStyle.Font.SmallCaps And Not oStyle.Font.Italic Then
-                            Selection.Style = "ital (i)"
+                            Selection.style = "ital (i)"
                         ElseIf oStyle.Font.Bold And Not oStyle.Font.SmallCaps And oStyle.Font.Italic Then
-                            Selection.Style = "smallcaps (sc)"
+                            Selection.style = "smallcaps (sc)"
                         End If
                     Case "super-ital (supi)"
                         If Not oStyle.Font.Superscript And Not oStyle.Font.Italic Then
-                            Selection.Style = NewStyle
+                            Selection.style = NewStyle
                         ElseIf Not oStyle.Font.Superscript And oStyle.Font.Italic Then
-                            Selection.Style = "super (sup)"
+                            Selection.style = "super (sup)"
                         ElseIf oStyle.Font.Superscript And Not oStyle.Font.Italic Then
-                            Selection.Style = "ital (i)"
+                            Selection.style = "ital (i)"
                         End If
                     Case "ital (i)"
                         If Not oStyle.Font.Italic Then
-                            Selection.Style = NewStyle
+                            Selection.style = NewStyle
                         End If
                     Case "bold (b)"
                         If Not oStyle.Font.Bold Then
-                            Selection.Style = NewStyle
+                            Selection.style = NewStyle
                         End If
                     Case "smallcaps (sc)"
                         If Not oStyle.Font.SmallCaps Then
-                            Selection.Style = NewStyle
+                            Selection.style = NewStyle
                         End If
                     Case "underline (u)"
                         If Not oStyle.Font.Underline Then
-                            Selection.Style = NewStyle
+                            Selection.style = NewStyle
                         End If
                     Case "super (sup)"
                         If Not oStyle.Font.Superscript Then
-                            Selection.Style = NewStyle
+                            Selection.style = NewStyle
                         End If
                     Case "sub (sub)"
                         If Not oStyle.Font.Subscript Then
-                            Selection.Style = NewStyle
+                            Selection.style = NewStyle
                         End If
                     Case "strike (str)"
-                        Selection.Style = NewStyle
+                        Selection.style = NewStyle
                 End Select
 NextOne:
                 PrevSel = Selection.Text

@@ -61,9 +61,9 @@ End Sub
 Private Sub TestInitialize()
     'This method runs before every test in the module..
    ' Create new test docx from template
-   Set testDocx = Application.Documents.Add(testdotx_filepath, visible:=False)
+   'Set testDocx = Application.Documents.Add(testdotx_filepath, visible:=False)
    ' or create doc visibly, for debug:
-   'Set testDocx = Application.Documents.Add(testdotx_filepath)
+   Set testDocx = Application.Documents.Add(testdotx_filepath)
    testDocx.Activate
    MyStoryNo = 1 '1 = Main Body, 2 = Footnotes, 3 = Endnotes. Can override this value per test as needed
     
@@ -73,7 +73,7 @@ End Sub
 Private Sub TestCleanup()
     'this method runs after every test in the module.
     'Unload pBar
-    Application.Documents(testDocx).Close savechanges:=wdDoNotSaveChanges
+    'Application.Documents(testDocx).Close savechanges:=wdDoNotSaveChanges
     Set testDocx = Nothing
 End Sub
 
@@ -656,5 +656,34 @@ TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
 
-
+'@TestMethod("CharStylesMacro")
+' RST-1231 revert local formatting when it has a valid char style
+Private Sub TestRevertStyledLocalFormatting() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        ' for the other 2 wdv-321 tests we are using the CheckAppliedStyles content; bu tthis one has a brk that is handled
+        '   differently by the LocalFormatting macro, resulting in slightly different expected output.
+        Const C_PROC_NAME = "TestRevertStyledLocalFormatting"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.FixAppliedCharStyles(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.areequal "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
 

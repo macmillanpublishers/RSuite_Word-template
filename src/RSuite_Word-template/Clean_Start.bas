@@ -74,9 +74,10 @@ Sub LaunchTagCharacterStyles()
             Clean_helpers.updateStatus ("")
                
             ' Clean up characters!
+            Call Clean.FixAppliedCharStyles(MyStoryNo)
             Call Clean.LocalFormatting(MyStoryNo)
             Call Clean.CheckSpecialCharactersPC(MyStoryNo)
-            Call CheckAppliedCharStyles(MyStoryNo)
+            Call Clean.CheckAppliedCharStyles(MyStoryNo)
             
         End If
     Next
