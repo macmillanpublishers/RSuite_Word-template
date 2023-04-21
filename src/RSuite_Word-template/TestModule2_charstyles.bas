@@ -656,5 +656,66 @@ TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
 
+'@TestMethod("CharStylesMacro")
+' RST-1231 revert local formatting when it has a valid char style
+Private Sub TestRevertStyledLocalFormatting() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        ' for the other 2 wdv-321 tests we are using the CheckAppliedStyles content; bu tthis one has a brk that is handled
+        '   differently by the LocalFormatting macro, resulting in slightly different expected output.
+        Const C_PROC_NAME = "TestRevertStyledLocalFormatting"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.FixAppliedCharStyles(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.areequal "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
 
+'@TestMethod("CharStylesMacro")
+Private Sub TestAllCStyleMacros() 'TODO Rename test
+    Dim results_actual As Range, results_expected As Range
+    Dim testResultsDocx As Document
+    Dim result_compareStr As String
+    On Error GoTo TestFail
+    'Arrange:
+        ' for the other 2 wdv-321 tests we are using the CheckAppliedStyles content; bu tthis one has a brk that is handled
+        '   differently by the LocalFormatting macro, resulting in slightly different expected output.
+        Const C_PROC_NAME = "TestAllCStyleMacros"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.FixAppliedCharStyles(MyStoryNo)
+        Call Clean.CheckAppliedCharStyles(MyStoryNo)
+        Call Clean.LocalFormatting(MyStoryNo)
+        Set results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
+        Set results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, 1, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.areequal "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
 

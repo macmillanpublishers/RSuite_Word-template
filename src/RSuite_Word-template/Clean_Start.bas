@@ -29,6 +29,7 @@ Sub LaunchTagCharacterStyles()
     Dim StoryNo As Range
     Dim StoryName As Variant
     
+    Call Clean_helpers.CheckTemplate
     
     ' ======= Run startup checks ========
     ' True means a check failed (e.g., doc protection on)
@@ -51,7 +52,6 @@ Sub LaunchTagCharacterStyles()
     completeStatus = "Starting Character Style Replacement"
     pBar.Status.Caption = completeStatus
         
-    
     For Each StoryNo In ActiveDocument.StoryRanges
         
         If StoryNo.StoryType < 4 Then
@@ -72,16 +72,39 @@ Sub LaunchTagCharacterStyles()
                             "Cleaning " & StoryName + vbNewLine + _
                             "========================="
             Clean_helpers.updateStatus ("")
-               
-            ' Clean up characters!
-            Call Clean.LocalFormatting(MyStoryNo)
+            
+            ''''' Clean up characters!
+            
+            ' ' \/ Configure timers for dev & testing
+            ' Debug.Print StoryName & ": " & ActiveDocument.Name
+            ' Dim t As Single
+            ' Dim fa As Single
+            ' Dim ca As Single
+            ' Dim cs As Single
+            ' Dim lf As Single
+            't = Timer
+            
+            'ca = Timer
+            Call Clean.CheckAppliedCharStyles(MyStoryNo)
+            'Debug.Print "Check applied time2: " & Timer - ca
+            'fa = Timer
+            Call Clean.FixAppliedCharStyles(MyStoryNo)
+            'Debug.Print "Fix applied time: " & Timer - fa
+            'cs = Timer
             Call Clean.CheckSpecialCharactersPC(MyStoryNo)
-            Call CheckAppliedCharStyles(MyStoryNo)
+            'Debug.Print "Special Chars time: " & Timer - cs
+            'lf = Timer
+            Call Clean.LocalFormatting(MyStoryNo)
+            'Debug.Print "Local formatting time: " & Timer - lf
+            
+            'Debug.Print "Total time: " & Timer - t
             
         End If
     Next
     
     Unload pBar
+    
+    Clean_helpers.ClearSearch
     
     Call Clean_helpers.MessageBox("Done", "Character Styles is complete!", vbOK)
     
@@ -94,6 +117,10 @@ ErrorHandler:
     Else
         Clean_helpers.MessageBox buttonType:=vbOKOnly, Title:="UNEXPECTED ERROR", Msg:="Sorry, an error occurred: " & Err.Number & " - " & Err.Description
     End If
+    'reset environment
+    Unload pBar
+    Application.ScreenUpdating = True
+    Clean_helpers.ClearSearch
     
 End Sub
 

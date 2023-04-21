@@ -137,16 +137,16 @@ Sub Spaces(MyStoryNo)
     'soft returns to hard returns
     '  note: replacing with ^p using WithExclude function requires 'vbnewline' instead
     Clean_helpers.FindReplaceSimple_WithExclude "^l", vbNewLine, MyStoryNo
-    
+
    ' these 2 modified f-and-r's (along with TrimTrailingSpace below (from wdv-387)) help with
    '    extra para problem surfaced in wdv-354, but are more efficient with notes as per wdv-395
     Clean_helpers.TrimLeadingSpace " " + ChrW(13), "^p", MyStoryNo
     Clean_helpers.TrimLeadingSpace " ^p", "^p", MyStoryNo
-        
+
     ' these 2 f-and-r's get special attention because they span 2 paras.
     Clean_helpers.TrimTrailingSpace_WithExclude ChrW(13) + " ", vbNewLine, MyStoryNo
     Clean_helpers.TrimTrailingSpace_WithExclude "^p ", vbNewLine, MyStoryNo
-    
+
     'space before/after brackets to no space
     Clean_helpers.FindReplaceSimple_WithExclude "( ", "(", MyStoryNo
     Clean_helpers.FindReplaceSimple_WithExclude "[ ", "[", MyStoryNo
@@ -618,8 +618,8 @@ Sub Dashes(MyStoryNo)
              
              While Selection.Find.Found
                  If Not (Selection.FormattedText.HighlightColorIndex = wdPink) And _
-                    Not (Selection.Style = "Hyperlink") And _
-                    Not (Selection.Style = excludeStyle) Then
+                    Not (Selection.style = "Hyperlink") And _
+                    Not (Selection.style = excludeStyle) Then
                      Selection.TypeText LTrim(i) & ENDASH & LTrim(j)
                  End If
                  
@@ -755,7 +755,7 @@ Function MakeTitleCase(MyStoryNo)
     
         With Selection.Find
             .Wrap = wdFindStop
-            .Style = tc
+            .style = tc
             .Execute
         End With
         
@@ -973,7 +973,7 @@ Function RemoveHyperlinks(Optional MyStoryNo As Variant = 1)
     Do While ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks.Count > 0 And link_count <> ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks.Count
         link_count = ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks.Count
         For Each h In ActiveDocument.StoryRanges(MyStoryNo).Hyperlinks
-            h.Range.Style = "Hyperlink"
+            h.Range.style = "Hyperlink"
             h.Delete
         Next
     Loop
@@ -982,7 +982,6 @@ Function RemoveHyperlinks(Optional MyStoryNo As Variant = 1)
     If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
 
 End Function
-
 Sub LocalFormatting(MyStoryNo)
 
     thisstatus = "Replacing Local Formatting with Character Styles "
@@ -1033,45 +1032,94 @@ Sub LocalFormatting(MyStoryNo)
 
 End Sub
 
-Sub CheckAppliedCharStyles(MyStoryNo)
 
-    thisstatus = "Checking Applied Character Styles "
-    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
-        Application.ScreenUpdating = False
+Function getFormatCharStyles() As Variant
 
-        Dim styleList() As Variant
-        Dim defaultStyle As Variant
-        Dim B, i, sc, subs, sup, strk, u As Boolean
-        Dim numChars As Integer
-        Dim selectedChar As Range
-
-        defaultStyle = WdBuiltinStyle.wdStyleDefaultParagraphFont
-
-        If MyStoryNo < 1 Then MyStoryNo = 1
-
-        styleList = Array("bold (b)", "ital (i)", "smallcaps (sc)", "underline (u)", "super (sup)", "sub (sub)", _
+getFormatCharStyles = Array("bold (b)", "ital (i)", "smallcaps (sc)", "underline (u)", "super (sup)", "sub (sub)", _
                           "bold-ital (bi)", "smallcaps-ital (sci)", "smallcaps-bold (scb)", _
                           "smallcaps-bold-ital (scbi)", "super-ital (supi)", "strike (str)")
 
+End Function
+Sub AppliedCharStylesHelper(selectedChar)
+    Dim defaultStyle As Variant
+    defaultStyle = WdBuiltinStyle.wdStyleDefaultParagraphFont
+    With selectedChar.Font
+        If .Italic Then
+            If .Bold Then
+                If .SmallCaps Then
+                    selectedChar.style = "smallcaps-bold-ital (scbi)"
+                Else
+                    selectedChar.style = "bold-ital (bi)"
+                End If
+            ElseIf .Superscript Then
+                selectedChar.style = "super-ital (supi)"
+            ElseIf .SmallCaps Then
+                selectedChar.style = "smallcaps-ital (sci)"
+            Else
+                selectedChar.style = "ital (i)"
+            End If
+        ElseIf .Bold Then
+            If .SmallCaps Then
+                selectedChar.style = "smallcaps-bold (scb)"
+            Else
+                selectedChar.style = "bold (b)"
+            End If
+        ElseIf .SmallCaps Then
+            selectedChar.style = "smallcaps (sc)"
+        ElseIf .Superscript Then
+            selectedChar.style = "super (sup)"
+        ElseIf .Underline Then
+            selectedChar.style = "underline (u)"
+        ElseIf .StrikeThrough Then
+            selectedChar.style = "strike (str)"
+        ElseIf .Subscript Then
+            selectedChar.style = "sub (sub)"
+        Else
+            selectedChar.style = defaultStyle
+        End If
+    End With
+End Sub
+
+
+Sub CheckAppliedCharStyles(MyStoryNo)
+' this version removes extraneous direct formatting, to match the applied style
+    thisstatus = "Checking Applied Character-Format Styles "
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
+        
+      '  Dim t As Single
+      '  t = Timer
+        
+        Application.ScreenUpdating = False
+
+        Dim styleList() As Variant
+        Dim B, i, sc, subs, sup, strk, u As Boolean
+        Dim styleApplied As Boolean
+        Dim numChars As Integer
+        Dim selectedChar As Range
+
+        If MyStoryNo < 1 Then MyStoryNo = 1
+
+        styleList = getFormatCharStyles
         Clean_helpers.ClearSearch
 
         For Each myStyle In styleList
             ActiveDocument.StoryRanges(MyStoryNo).Select
             Selection.Collapse Direction:=wdCollapseStart
-
+            
+            On Error Resume Next
             With Selection.Find
-                .Style = ActiveDocument.styles(myStyle)
+                .style = ActiveDocument.styles(myStyle)
                 .Execute
-                
             End With
+            On Error GoTo 0
 
             Do While Selection.Find.Found
                 numChars = Selection.Characters.Count
+                'styleApplied = False
                 ' cycle through characters of selected range
                 For k = 1 To numChars
                     Set selectedChar = Selection.Characters(k)
-
                     B = selectedChar.Font.Bold
                     i = selectedChar.Font.Italic
                     sc = selectedChar.Font.SmallCaps
@@ -1079,85 +1127,40 @@ Sub CheckAppliedCharStyles(MyStoryNo)
                     sup = selectedChar.Font.Superscript
                     strk = selectedChar.Font.StrikeThrough
                     u = selectedChar.Font.Underline
-
+                    
                     Select Case myStyle
-
                         Case "bold (b)"
-                            If Not B Then selectedChar.Style = defaultStyle
-
+                            If Not B Or i Or sc Then Call AppliedCharStylesHelper(selectedChar)
                         Case "ital (i)"
-                           If Not i Then selectedChar.Style = defaultStyle
-
+                           If Not i Or B Or sc Or sup Then Call AppliedCharStylesHelper(selectedChar)
                         Case "smallcaps (sc)"
-                            If Not sc Then selectedChar.Style = defaultStyle
-
+                            If Not sc Or B Or i Then Call AppliedCharStylesHelper(selectedChar)
                         Case "underline (u)"
-                            If Not u Then selectedChar.Style = defaultStyle
-
+                            If Not u Then Call AppliedCharStylesHelper(selectedChar)
                         Case "super (sup)"
-                            If Not sup Then selectedChar.Style = defaultStyle
-
+                            If Not sup Or i Then Call AppliedCharStylesHelper(selectedChar)
                         Case "sub (sub)"
-                            If Not subs Then selectedChar.Style = defaultStyle
-
+                            If Not subs Then Call AppliedCharStylesHelper(selectedChar)
                         Case "bold-ital (bi)"
-                            If Not B And Not i Then
-                                selectedChar.Style = defaultStyle
-                            ElseIf Not B Then
-                                selectedChar.Style = "ital (i)"
-                            ElseIf Not i Then
-                                selectedChar.Style = "bold (b)"
-                            End If
-
+                            If sc Or Not B Or Not i Then Call AppliedCharStylesHelper(selectedChar)
                         Case "smallcaps-ital (sci)"
-                            If Not sc And Not i Then
-                                selectedChar.Style = defaultStyle
-                            ElseIf Not sc Then
-                                selectedChar.Style = "ital (i)"
-                            ElseIf Not i Then
-                                selectedChar.Style = "smallcaps (sc)"
-                            End If
-
+                            If B Or Not sc Or Not i Then Call AppliedCharStylesHelper(selectedChar)
                         Case "smallcaps-bold (scb)"
-                            If Not sc And Not B Then
-                                selectedChar.Style = defaultStyle
-                            ElseIf Not sc Then
-                                selectedChar.Style = "bold (b)"
-                            ElseIf Not B Then
-                                selectedChar.Style = "smallcaps (sc)"
-                            End If
-
+                            If i Or Not sc Or Not B Then Call AppliedCharStylesHelper(selectedChar)
                         Case "smallcaps-bold-ital (scbi)"
-                            If Not sc And Not B And Not i Then
-                                selectedChar.Style = defaultStyle
-                            ElseIf Not sc And Not i Then
-                                selectedChar.Style = "bold (b)"
-                            ElseIf Not sc And Not B Then
-                                selectedChar.Style = "ital (i)"
-                            ElseIf Not B And Not i Then
-                                selectedChar.Style = "smallcaps (sc)"
-                            ElseIf Not sc Then
-                                selectedChar.Style = "bold-ital (bi)"
-                            ElseIf Not B Then
-                                selectedChar.Style = "smallcaps-ital (sci)"
-                            ElseIf Not i Then
-                                selectedChar.Style = "smallcaps-bold (scb)"
-                            End If
-
+                            If Not sc Or Not B Or Not i Then Call AppliedCharStylesHelper(selectedChar)
                         Case "super-ital (supi)"
-                            If Not sup And Not i Then
-                                selectedChar.Style = defaultStyle
-                            ElseIf Not sup Then
-                                selectedChar.Style = "ital (i)"
-                            ElseIf Not i Then
-                                selectedChar.Style = "super (sup)"
-                            End If
-
+                            If Not sup Or Not i Then Call AppliedCharStylesHelper(selectedChar)
                         Case "strike (str)"
-                            If Not strk Then selectedChar.Style = defaultStyle
-
+                            If Not strk Then Call AppliedCharStylesHelper(selectedChar)
                     End Select
                 Next k
+                
+                ' \/ strip out any direct formatting beyond our determined cstyle
+                'Selection.ClearCharacterDirectFormatting
+                '^^ mirroring what was done before: ital-styled ital/underline, underline is left alone
+                '   uncomment to change that
+                
                 ' \/ this Collapse assures that the selection keeps moving forward & all items are found
                 Selection.Collapse Direction:=wdCollapseEnd
                 If Clean_helpers.EndOfStoryReached(MyStoryNo) Then Exit Do
@@ -1171,10 +1174,64 @@ Sub CheckAppliedCharStyles(MyStoryNo)
             Loop
         Next
 
+   ' Debug.Print Timer - t
+    ActiveDocument.UndoClear
+    
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
 
 End Sub
+'As per RST-1231: reverting direct formatting for already char-styled content
+' exempting "format" charstyles, to allow 2nd & 3rd subs (localformatting & checkapplied) to do their jobs
+' running this before local formatting cleanup so that can remain cs-agnostic
+Sub FixAppliedCharStyles(MyStoryNo)
+
+    thisstatus = "Checking Other Applied Character Styles "
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
+
+        Application.ScreenUpdating = False
+
+        Dim styleList As Collection
+        Dim myStyle As Variant
+
+        If MyStoryNo < 1 Then MyStoryNo = 1
+
+        Set styleList = GetNonFormatCharStyles
+        Clean_helpers.ClearSearch
+
+        For Each myStyle In styleList
+            ActiveDocument.StoryRanges(MyStoryNo).Select
+            Selection.Collapse Direction:=wdCollapseStart
+
+            With Selection.Find
+                .style = ActiveDocument.styles(myStyle)
+                .Execute
+                
+            End With
+
+            Do While Selection.Find.Found
+            
+                Selection.ClearCharacterDirectFormatting
+
+                ' \/ this Collapse assures that the selection keeps moving forward & all items are found
+                Selection.Collapse Direction:=wdCollapseEnd
+                If Clean_helpers.EndOfStoryReached(MyStoryNo) Then Exit Do
+                ' this prevents getting stuck in a table cell (wdv-359)
+                If Selection.Tables.Count <> 0 Then
+                    If Clean_helpers.EndofTableCellReached Then
+                        Selection.MoveRight Unit:=wdCharacter, Count:=1
+                    End If
+                End If
+                Selection.Find.Execute
+            Loop
+            ActiveDocument.UndoClear
+        Next
+
+    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
+    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
+
+End Sub
+
 
 
 Sub CheckSpecialCharactersPC(MyStoryNo)
@@ -1204,15 +1261,16 @@ Sub CheckSpecialCharactersPC(MyStoryNo)
                             'do nothing
                         Case Else:
                             If R.Italic Then
-                                R.Style = "symbols-ital (symi)"
+                                R.style = "symbols-ital (symi)"
                             Else
-                                R.Style = "symbols (sym)"
+                                R.style = "symbols (sym)"
                             End If
                     End Select
                 End If
             Next
-            
         Next
+        
+        ActiveDocument.UndoClear
         
         completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
         If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
@@ -1236,7 +1294,7 @@ Sub NextElementRoutine()
         Exit Sub
     End If
     
-    While Selection.Style = "Body-Text (Tx)"
+    While Selection.style = "Body-Text (Tx)"
         Selection.Move Unit:=wdParagraph, Count:=1
             If Clean_helpers.EndOfDocumentReached = True Then
                 MsgBox "End of document reached."
@@ -1258,7 +1316,7 @@ Sub ValidateCharStyles()
 
     Dim docActive As Document
     Dim strMessage As String
-    Dim styleLoop As Style
+    Dim styleLoop As style
     Dim allStyles() As Variant
     Dim charStyles() As Variant
     Dim badStyles() As Variant
@@ -1300,19 +1358,19 @@ Sub ValidateCharStyles()
                   With Selection.Find
                       .ClearFormatting
                       .Text = ""
-                      .Style = styleLoop.NameLocal
+                      .style = styleLoop.NameLocal
                       .Wrap = wdFindStop
                       .Execute Format:=True
                    End With
                   
                    Do While Selection.Find.Found = True
                         If GetIndex(styleLoop.NameLocal, removeStyles, False) >= 0 Then
-                           Selection.Style = wdStyleDefaultParagraphFont
+                           Selection.style = wdStyleDefaultParagraphFont
                         ElseIf GetIndex(styleLoop.NameLocal, replaceStyles, True) >= 0 Then
                             Dim y, z
                             y = GetIndex(styleLoop.NameLocal, replaceStyles, True)
                             z = replaceStyles(y)(1)
-                            Selection.Style = z
+                            Selection.style = z
                         ElseIf GetIndex(styleLoop.NameLocal, skipStyles, False) >= 0 Then
                             'continue to next
                         Else
