@@ -73,16 +73,16 @@ Sub LaunchTagCharacterStyles()
                             "========================="
             Clean_helpers.updateStatus ("")
             
-            ' Clean up characters!
+            ''''' Clean up characters!
             
-            Dim t As Single
-            Dim fa As Single
-            Dim ca As Single
-            Dim cs As Single
-            Dim lf As Single
-            
+            ' ' \/ Configure timers for dev & testing
             ' Debug.Print StoryName & ": " & ActiveDocument.Name
-            't = Timer   ' <this and all subsequent timers are for dev & testing
+            ' Dim t As Single
+            ' Dim fa As Single
+            ' Dim ca As Single
+            ' Dim cs As Single
+            ' Dim lf As Single
+            't = Timer
             
             'ca = Timer
             Call Clean.CheckAppliedCharStyles(MyStoryNo)

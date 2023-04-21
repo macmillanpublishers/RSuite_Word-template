@@ -61,9 +61,9 @@ End Sub
 Private Sub TestInitialize()
     'This method runs before every test in the module..
    ' Create new test docx from template
-   'Set testDocx = Application.Documents.Add(testdotx_filepath, visible:=False)
+   Set testDocx = Application.Documents.Add(testdotx_filepath, visible:=False)
    ' or create doc visibly, for debug:
-   Set testDocx = Application.Documents.Add(testdotx_filepath)
+   'Set testDocx = Application.Documents.Add(testdotx_filepath)
    testDocx.Activate
    MyStoryNo = 1 '1 = Main Body, 2 = Footnotes, 3 = Endnotes. Can override this value per test as needed
     

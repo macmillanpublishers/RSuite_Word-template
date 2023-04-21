@@ -982,56 +982,6 @@ Function RemoveHyperlinks(Optional MyStoryNo As Variant = 1)
     If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
 
 End Function
-Sub LocalFormatting_old(MyStoryNo)
-
-    thisstatus = "Replacing Local Formatting with Character Styles "
-    If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
-
-    'Application.ScreenUpdating = False '< should already be off unless we are running standalone
-
-    'small caps bold italic
-    Call ConvertLocalFormattingOld(MyStoryNo, SmallCapsTF:=True, ItalTF:=True, BoldTF:=True, NewStyle:="smallcaps-bold-ital (scbi)")
-
-    'bold ital
-    Call ConvertLocalFormattingOld(MyStoryNo, ItalTF:=True, BoldTF:=True, NewStyle:="bold-ital (bi)")
-
-    'small caps bold
-    Call ConvertLocalFormattingOld(MyStoryNo, SmallCapsTF:=True, BoldTF:=True, NewStyle:="smallcaps-bold (scb)")
-
-    'small caps ital
-    Call ConvertLocalFormattingOld(MyStoryNo, SmallCapsTF:=True, ItalTF:=True, NewStyle:="smallcaps-ital (sci)")
-
-    'strikethrough
-    Call ConvertLocalFormattingOld(MyStoryNo, StrikeTF:=True, NewStyle:="strike (str)")
-
-    'superscript italic
-    Call ConvertLocalFormattingOld(MyStoryNo, superTF:=True, ItalTF:=True, NewStyle:="super-ital (supi)")
-
-    'superscript
-    Call ConvertLocalFormattingOld(MyStoryNo, superTF:=True, NewStyle:="super (sup)")
-
-    'subscript
-    Call ConvertLocalFormattingOld(MyStoryNo, subTF:=True, NewStyle:="sub (sub)")
-
-    'ital
-    Call ConvertLocalFormattingOld(MyStoryNo, ItalTF:=True, NewStyle:="ital (i)")
-    
-    'bold
-    Call ConvertLocalFormattingOld(MyStoryNo, BoldTF:=True, NewStyle:="bold (b)")
-
-    'small caps
-    Call ConvertLocalFormattingOld(MyStoryNo, SmallCapsTF:=True, NewStyle:="smallcaps (sc)")
-
-    'underline
-    Call ConvertLocalFormattingOld(MyStoryNo, UnderlineTF:=True, NewStyle:="underline (u)")
-
-    completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
-    If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
-    
-    'Application.ScreenUpdating = True '<for debug only
-
-End Sub
-
 Sub LocalFormatting(MyStoryNo)
 
     thisstatus = "Replacing Local Formatting with Character Styles "
