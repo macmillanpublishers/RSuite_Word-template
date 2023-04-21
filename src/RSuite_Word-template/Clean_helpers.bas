@@ -444,9 +444,10 @@ Function GetNonFormatCharStyles() As Collection
     Dim fstyle As Variant
     
     For Each dstyle In ActiveDocument.styles
-        If (dstyle.Type = wdStyleTypeCharacter And Right(dstyle.NameLocal, 1) = ")") _
-        Or dstyle.NameLocal = "Endnote Reference" _
-        Or dstyle.NameLocal = "Footnote Reference" _
+        If (dstyle.Type = wdStyleTypeCharacter And Right(dstyle.NameLocal, 1) = ")") Then ' _
+        '' \/ leaving these out, as they are v. time consuming, and formatting of noterefs is not important downstream
+        ' Or dstyle.NameLocal = "Endnote Reference" _
+        ' Or dstyle.NameLocal = "Footnote Reference" _
         Then
             sColl.Add dstyle, dstyle.NameLocal
         End If
@@ -490,12 +491,169 @@ Public Function ConvertLocalFormatting(MyStoryNo, Optional ByVal ItalTF As Boole
         If MyStoryNo < 1 Then MyStoryNo = 1
         
         Clean_helpers.ClearSearch
+                
+        ActiveDocument.StoryRanges(MyStoryNo).Select
+        Selection.Collapse Direction:=wdCollapseStart
+        
+            With Selection.Find
+                .Text = ""
+                .style = "Default Paragraph Font"
+                .Format = True
+                .Font.Italic = ItalTF
+                .Font.Bold = BoldTF
+                .Font.AllCaps = CapsTF
+                .Font.SmallCaps = SmallCapsTF
+                .Font.Underline = UnderlineTF
+                .Font.StrikeThrough = StrikeTF
+                .Font.Superscript = superTF
+                .Font.Subscript = subTF
+            End With
+            
+            Selection.Find.Execute
+            
+            Do While Selection.Find.Found
+                CurrSel = Selection.Text
+                Set oStyle = Selection.style
+                If CurrSel = PrevSel Then
+                    If oStyle = "Endnote Reference" Or oStyle = "Footnote Reference" Then
+                        GoTo NextOne
+                    End If
+                ' vbcr + chr7 combine to make table 'end-of-cell' character.
+                ElseIf Selection.Tables.Count <> 0 And CurrSel = vbCr + Chr(7) Then
+                    Dim eod As Boolean
+                    eod = False
+                    Do While Selection.Text = vbCr + Chr(7)
+                        Selection.MoveRight Unit:=wdCharacter, Count:=1
+                        If Clean_helpers.EndOfDocumentReached Then
+                            eod = True
+                            Exit Do
+                        End If
+                    Loop
+                    If eod Then Exit Do
+                End If
+                
+                If CurrSel = vbCr Or CurrSel = vbLf Or CurrSel = vbCrLf Or CurrSel = vbNewLine Or CurrSel = "" Then
+                    Selection.Font.Reset
+                    GoTo NextOne
+                End If
+                
+                If InStr(CurrSel, vbCr) Or InStr(currse1, vbLf) Or InStr(CurrSel, vbCrLf) Or InStr(CurrSel, vbNewLine) Then
+                    Selection.MoveEnd Unit:=wdCharacter, Count:=-1
+                End If
+                
+                Select Case NewStyle
+                    Case "bold-ital (bi)"
+                        If Not oStyle.Font.Italic And Not oStyle.Font.Bold Then
+                            Selection.style = NewStyle
+                        ElseIf oStyle.Font.Italic And Not oStyle.Font.Bold Then
+                            Selection.style = "bold (b)"
+                        ElseIf Not oStyle.Font.Italic And oStyle.Font.Bold Then
+                            Selection.style = "ital (i)"
+                        End If
+                    Case "smallcaps-ital (sci)"
+                        If Not oStyle.Font.Italic And Not oStyle.Font.SmallCaps Then
+                            Selection.style = NewStyle
+                        ElseIf oStyle.Font.Italic And Not oStyle.Font.SmallCaps Then
+                            Selection.style = "smallcaps (sc)"
+                        ElseIf Not oStyle.Font.Italic And oStyle.Font.SmallCaps Then
+                            Selection.style = "ital (i)"
+                        End If
+                    Case "smallcaps-bold (scb)"
+                        If Not oStyle.Font.Bold And Not oStyle.Font.SmallCaps Then
+                            Selection.style = NewStyle
+                        ElseIf oStyle.Font.Bold And Not oStyle.Font.SmallCaps Then
+                            Selection.style = "smallcaps (sc)"
+                        ElseIf Not oStyle.Font.Bold And oStyle.Font.SmallCaps Then
+                            Selection.style = "bold (b)"
+                        End If
+                    Case "smallcaps-bold-ital (scbi)"
+                        If Not oStyle.Font.Bold And Not oStyle.Font.SmallCaps And Not oStyle.Font.Italic Then
+                            Selection.style = NewStyle
+                        ElseIf oStyle.Font.Bold And Not oStyle.Font.SmallCaps And Not oStyle.Font.Italic Then
+                            Selection.style = "smallcaps-ital (sci)"
+                        ElseIf Not oStyle.Font.Bold And Not oStyle.Font.SmallCaps And oStyle.Font.Italic Then
+                            Selection.style = "smallcaps-bold (scb)"
+                        ElseIf Not oStyle.Font.Bold And oStyle.Font.SmallCaps And oStyle.Font.Italic Then
+                            Selection.style = "bold (b)"
+                        ElseIf oStyle.Font.Bold And oStyle.Font.SmallCaps And Not oStyle.Font.Italic Then
+                            Selection.style = "ital (i)"
+                        ElseIf oStyle.Font.Bold And Not oStyle.Font.SmallCaps And oStyle.Font.Italic Then
+                            Selection.style = "smallcaps (sc)"
+                        End If
+                    Case "super-ital (supi)"
+                        If Not oStyle.Font.Superscript And Not oStyle.Font.Italic Then
+                            Selection.style = NewStyle
+                        ElseIf Not oStyle.Font.Superscript And oStyle.Font.Italic Then
+                            Selection.style = "super (sup)"
+                        ElseIf oStyle.Font.Superscript And Not oStyle.Font.Italic Then
+                            Selection.style = "ital (i)"
+                        End If
+                    Case "ital (i)"
+                        If Not oStyle.Font.Italic Then
+                            Selection.style = NewStyle
+                        End If
+                    Case "bold (b)"
+                        If Not oStyle.Font.Bold Then
+                            Selection.style = NewStyle
+                        End If
+                    Case "smallcaps (sc)"
+                        If Not oStyle.Font.SmallCaps Then
+                            Selection.style = NewStyle
+                        End If
+                    Case "underline (u)"
+                        If Not oStyle.Font.Underline Then
+                            Selection.style = NewStyle
+                        End If
+                    Case "super (sup)"
+                        If Not oStyle.Font.Superscript Then
+                            Selection.style = NewStyle
+                        End If
+                    Case "sub (sub)"
+                        If Not oStyle.Font.Subscript Then
+                            Selection.style = NewStyle
+                        End If
+                    Case "strike (str)"
+                        If Not oStyle.Font.StrikeThrough Then
+                            Selection.style = NewStyle
+                        End If
+                End Select
+
+NextOne:
+                PrevSel = Selection.Text
+                Selection.MoveRight Unit:=wdCharacter, Count:=1
+                If Clean_helpers.EndOfDocumentReached Then Exit Do
+                Selection.Find.Execute
+            Loop
+
+End Function
+Public Function ConvertLocalFormattingOld(MyStoryNo, Optional ByVal ItalTF As Boolean = False, _
+                                        Optional ByVal BoldTF As Boolean = False, _
+                                        Optional ByVal CapsTF As Boolean = False, _
+                                        Optional ByVal SmallCapsTF As Boolean = False, _
+                                        Optional ByVal UnderlineTF As Boolean = False, _
+                                        Optional ByVal StrikeTF As Boolean = False, _
+                                        Optional ByVal superTF As Boolean = False, _
+                                        Optional ByVal subTF As Boolean = False, _
+                                        Optional ByVal NewStyle As String = "")
+                     
+        Application.ScreenUpdating = False
+        
+        Dim oStyle As style
+        Dim oRng As Range
+        Dim tRng As Range
+        Dim currentPage, CurrentCol, CurrentLine, PrevPage, PrevCol, PrevLine
+        Dim CurrSel As String
+        
+        If MyStoryNo < 1 Then MyStoryNo = 1
+        
+       Clean_helpers.ClearSearch
         
         ActiveDocument.StoryRanges(MyStoryNo).Select
         Selection.Collapse Direction:=wdCollapseStart
         
             With Selection.Find
                 .Text = ""
+                .style = "Default Paragraph Font"
                 .Format = True
                 .Font.Italic = ItalTF
                 .Font.Bold = BoldTF
@@ -588,6 +746,7 @@ Public Function ConvertLocalFormatting(MyStoryNo, Optional ByVal ItalTF As Boole
                             Selection.style = NewStyle
                         End If
                     Case "bold (b)"
+                        
                         If Not oStyle.Font.Bold Then
                             Selection.style = NewStyle
                         End If
@@ -614,11 +773,17 @@ NextOne:
                 PrevSel = Selection.Text
                 Selection.MoveRight Unit:=wdCharacter, Count:=1
                 If Clean_helpers.EndOfDocumentReached Then Exit Do
+                If Selection.Tables.Count <> 0 And Selection.Text = vbCr + Chr(7) Then
+                    Do While Selection.Text = vbCr + Chr(7)
+                        If Clean_helpers.EndOfDocumentReached Then Exit Do
+                        Selection.MoveRight Unit:=wdCharacter, Count:=1
+                    Loop
+                    If Clean_helpers.EndOfDocumentReached Then Exit Do
+                End If
                 Selection.Find.Execute
             Loop
 
 End Function
-
 Function updateStatus(ByVal update As String)
 
     ' we use this bit to 'scroll' message up when the end of the window is reached
