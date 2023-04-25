@@ -641,7 +641,8 @@ Private Sub TestLocalFormatting_secondrun() 'TODO Rename test
         result_compareStr = TestHelpers.compareRanges(results_actual, results_expected)
     'Compare function 2
         Set results_tables_actual = TestHelpers.returnTestResultRange("TestLocalFormatting_tables", MyStoryNo, testDocx)
-        Set results_tables_expected = TestHelpers.returnTestResultRange("TestLocalFormatting_tables", 1, testResultsDocx)
+        ' \/ tables second run result is legit different b/c of wdv-479 fix cleaning up table-end char from first run
+        Set results_tables_expected = TestHelpers.returnTestResultRange("TestLocalFormatting_tables_second_run", 1, testResultsDocx)
         ' Compare known good output and output from just now
         results_tables_compareStr = TestHelpers.compareRanges(results_tables_actual, results_tables_expected)
     ' Close results doc

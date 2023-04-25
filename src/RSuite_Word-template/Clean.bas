@@ -747,7 +747,7 @@ Function MakeTitleCase(MyStoryNo)
     Dim tcStyles() As Variant
     tcStyles = Array("Title (Ttl)", "Number (Num)", "Main-Head (MHead)")
     
-    For Each tc In tcStyles
+    For Each TC In tcStyles
         Clean_helpers.ClearSearch
         
         ActiveDocument.StoryRanges(MyStoryNo).Select
@@ -755,7 +755,7 @@ Function MakeTitleCase(MyStoryNo)
     
         With Selection.Find
             .Wrap = wdFindStop
-            .style = tc
+            .style = TC
             .Execute
         End With
         
@@ -988,6 +988,9 @@ Sub LocalFormatting(MyStoryNo)
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
     'Application.ScreenUpdating = False '< should already be off unless we are running standalone
+    
+    ' fix for wdv-479
+    Call TableEndCharFontReset
     
     'small caps bold italic
     Call ConvertLocalFormatting(MyStoryNo, SmallCapsTF:=True, ItalTF:=True, BoldTF:=True, NewStyle:="smallcaps-bold-ital (scbi)")

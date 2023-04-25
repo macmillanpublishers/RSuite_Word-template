@@ -82,7 +82,7 @@ Sub LaunchTagCharacterStyles()
             ' Dim ca As Single
             ' Dim cs As Single
             ' Dim lf As Single
-            't = Timer
+            ' t = Timer
             
             'ca = Timer
             Call Clean.CheckAppliedCharStyles(MyStoryNo)

@@ -12,8 +12,6 @@ Public Function CheckTemplate()
     End If
     
 End Function
-
-
 Public Function FindReplaceSimple(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
     
     ActiveDocument.StoryRanges(storyNumber).Select
@@ -29,6 +27,40 @@ Public Function FindReplaceSimple(ByVal sFind As String, ByVal sReplace As Strin
       End With
 
 End Function
+
+Sub TableEndCharFontReset()
+
+'Dim t As Single
+'t = Timer
+                          
+Dim TB As Table
+Dim TR As Row
+Dim TC As Cell
+Dim Rg As Range
+
+For Each TB In ActiveDocument.Tables
+    For Each TR In TB.Rows
+        For Each TC In TR.Cells
+            Set Rg = TC.Range.Characters.Last
+            Rg.Font.Reset
+        Next
+        Set Rg = TR.Range.Characters.Last
+        Rg.Font.Reset
+    Next
+    Set Rg = TB.Range.Characters.Last
+    Rg.Font.Reset
+Next
+
+'Debug.Print "tecfr time: " & Timer - t
+
+End Sub
+
+
+
+
+
+
+
 
 'Public Function FindReplaceSimpleWthRng(myRng As Range, ByVal sFind As String, ByVal sReplace As String)
 '
