@@ -68,7 +68,7 @@ Please read sections: _PC install_ and _Mac install_, for installation target di
 # VBA Development
 
 #### Dependencies
-* if using gradle install/pkg tools, gradle requires installation of jdk 8 or higher, available [here](https://jdk.java.net/) (The first 'Ready to Use' version should be fine).
+* if using gradle install/pkg tools, gradle requires installation of jdk on host system: the jdk version needs to be compatible with the gradle version set in _./_gradle-install/gradle/wrapper/gradle-wrapper.properties_ see compatibility info [here](https://docs.gradle.org/current/userguide/compatibility.html). Currently it is set to 8.5 so we install jdk version 21.
 * To use the 'devTools' macros below, you may need to enable the following libraries in your VBA editor (Tools > References):
   * ``Microsoft Visual Basic For Applications Extensibility 5.3``
   * ``Microsoft Scripting Runtime``
@@ -93,7 +93,7 @@ Once ready for UAT, Pre-Releases are created in git, named based on a version nu
 Following UAT and approval by the business, a 'pre-release' is transitioned to regular release in git. They are deployed to production and staging servers via manual checkout by release-tag, in coordination with Desktop Support (to match their deployment to user workstations).
 
 ##### Version Numbering
-Versions for this product are named like 'x.y.z', where x y and z are whole numbers (ex: '6.3.1'). The 'x' indicates a new major version, the 'y' indicates a feature release indicating changes in Style-templates, and the 'z' indicates a release with changes to macros/back-end only
+Versions for this product are named like 'x.y.z', where x y and z are whole numbers (ex: '6.3.1'). The 'x' indicates a new major version, the 'y' indicates a feature release with addition or change of styles in Style-templates (wherein rsuite_Validate might issue a warning for older template used), and the 'z' indicates a release with changes to macros/back-end only.
 
 ##### Version Maintenance
 The version is set via file _./version.txt_.

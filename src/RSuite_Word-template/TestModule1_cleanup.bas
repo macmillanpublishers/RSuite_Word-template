@@ -1004,8 +1004,9 @@ Private Sub TestDashes_notes() 'TODO Rename test
         results_enotes_links
     On Error GoTo TestFail
     'Arrange:
-        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToEndNotes
         copyBodyContentsToFootNotes
+        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
     'Act:
         Call Clean.Dashes(MyStoryNo)
         results_fnotes = TestHelpers.returnTestResultString("TestDashes", MyStoryNo)
@@ -1014,7 +1015,6 @@ Private Sub TestDashes_notes() 'TODO Rename test
         results_fnotes_links = TestHelpers.returnTestResultString("TestDashes_links_wdv357", MyStoryNo)
     'Arrange:
         MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
-        copyBodyContentsToEndNotes
     'Act:
         Call Clean.Dashes(MyStoryNo)
         results_enotes = TestHelpers.returnTestResultString("TestDashes", MyStoryNo)
@@ -1115,14 +1115,14 @@ Private Sub TestTitlecase_notes_and_secondrun() 'TODO Rename test
     Dim results_fnotes As String, results_enotes As String, results_secondrun As String
     On Error GoTo TestFail
     'Arrange (setup for footnotes):
-        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
         copyBodyContentsToFootNotes
+        copyBodyContentsToEndNotes
+        MyStoryNo = 2 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
     'Act:
         Call Clean.MakeTitleCase(MyStoryNo)
         results_fnotes = TestHelpers.returnTestResultString("TestTitlecase", MyStoryNo)
     'Arrange (setup for endnotes):
         MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
-        copyBodyContentsToEndNotes
     'Act:
         Call Clean.MakeTitleCase(MyStoryNo)
         results_enotes = TestHelpers.returnTestResultString("TestTitlecase", MyStoryNo)
