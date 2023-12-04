@@ -1273,6 +1273,9 @@ Sub CheckSpecialCharactersPC(MyStoryNo)
             Next
         Next
         
+        ' for rst-1283
+        CheckSpecialCharacters_supplemental (MyStoryNo)
+        
         ActiveDocument.UndoClear
         
         completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
@@ -1280,6 +1283,35 @@ Sub CheckSpecialCharactersPC(MyStoryNo)
     
         Application.ScreenUpdating = MyUpdate
         Selection.HomeKey Unit:=wdStory
+End Sub
+Sub CheckSpecialCharacters_supplemental(MyStoryNo)
+        
+    If MyStoryNo < 1 Then MyStoryNo = 1
+    
+    Clean_helpers.ClearSearch
+    Dim activeRng As Range
+    Dim supplemental_syms
+    
+    supplemental_syms = Array(322, 380)
+    ' ^ decimal unicode encodings for polish l, z
+    
+    For Each sup_sym_code In supplemental_syms
+        Set activeRng = ActiveDocument.StoryRanges(MyStoryNo)
+        With activeRng.Find
+            .Text = ChrW(sup_sym_code)
+            .MatchWildcards = False
+            While .Execute
+                If activeRng.Italic Then
+                    activeRng.style = "symbols-ital (symi)"
+                    activeRng.Collapse wdCollapseEnd
+                Else
+                    activeRng.style = "symbols (sym)"
+                    activeRng.Collapse wdCollapseEnd
+                End If
+            Wend
+        End With
+    Next
+        
 End Sub
 
 
