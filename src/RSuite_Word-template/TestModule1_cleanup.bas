@@ -71,7 +71,7 @@ SP_wdv387_expected = "Para 1 with style A." + vbCr + "Para 2 with leading space,
 PN_expected = "Multicomma, multiperiods. Non-breaking-hyphens, optionalhyphens."
 DSH_expected = "Bar" + EMDASH + "character, figure" + ENDASH + "dash, triple" + EMDASH + "dash, double" + EMDASH _
             + "dash, double" + EMDASH + "andspaces" + vbCr _
-            + "Space-space, dash-space, space-dash" + vbCr _
+            + "Space-space, dash-space, space-dash" + " Negative1-2 exponent-1-4-" + vbCr _
             + "Space" + EMDASH + "endash, endash" + ENDASH + "space, emdash" + EMDASH + "space, space" + EMDASH + "emdash"
 DSH_exclude_expected = "triple---dash, double--dash, double -- andspaces" + vbCr + "Space - space, dash- space, space -dash" + vbCr _
             + "Space " + ENDASH + "endash, endash" + ENDASH + " space, emdash" + EMDASH + " space, space " + EMDASH + "emdash" + vbCr _
@@ -157,7 +157,7 @@ Private Sub TestInitialize()
     ' Create new test docx from template
     Set testDocx = Application.Documents.Add(testdotx_filepath, visible:=False)
     ' for debug, make the doc visible:
-    ' Set testDocx = Application.Documents.Add(testdotx_filepath)
+'     Set testDocx = Application.Documents.Add(testdotx_filepath)
     testDocx.Activate
     MyStoryNo = 1 '1 = Main Body, 2 = Footnotes, 3 = Endnotes. Can override this value per test as needed
     
