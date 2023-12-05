@@ -583,7 +583,7 @@ Function IsYear(theNumber) As Boolean
 End Function
 
 Sub Dashes(MyStoryNo)
-    
+   
     thisstatus = "Fixing dashes "
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
@@ -595,40 +595,40 @@ Sub Dashes(MyStoryNo)
     Call HighlightNumber("\([0-9]{3}\) [0-9]{3}-[0-9]{4}", MyStoryNo)
     Call HighlightNumber("[0-9]{3}-[0-9]{3}-[0-9]{4}", MyStoryNo)
     
-'    FOLLOWING CAN BE USED TO FIND ISBN PATTERN AND FLAG FOR NO CHANGE
-     Call HighlightNumber("97[89]-[0-9]{10,14}", MyStoryNo)
-     Call HighlightNumber("97[89]-[0-9]-[0-9]{3}-[0-9]{5}-[0-9]", MyStoryNo)
+    ' FOLLOWING CAN BE USED TO FIND ISBN PATTERN AND FLAG FOR NO CHANGE
+    Call HighlightNumber("97[89]-[0-9]{10,14}", MyStoryNo)
+    Call HighlightNumber("97[89]-[0-9]-[0-9]{3}-[0-9]{5}-[0-9]", MyStoryNo)
      
     thisstatus = "Fixing dashes: 10%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
-     
+
+    Dim activeRng As Range
+    Dim h As Range
     For i = 0 To 9
         For j = 0 To 9
-            ActiveDocument.StoryRanges(MyStoryNo).Select
-            Selection.Collapse Direction:=wdCollapseStart
-            
-            With Selection.Find
-                 .ClearFormatting
-                 .Forward = True
-                 .Wrap = wdFindStop
-                 .Text = LTrim(i) & "-" & LTrim(j)
-                 .MatchWildcards = False
-                 .Execute
+        
+            Set activeRng = ActiveDocument.StoryRanges(MyStoryNo)
+    
+            With activeRng.Find
+                .ClearFormatting
+                .Forward = True
+                .Wrap = wdFindStop
+                .Text = LTrim(i) & ("-") & LTrim(j)
+                .MatchWildcards = False
+                While .Execute
+                    ' rst-1249 -- exempting superscript hyphens too
+                    If Not (activeRng.FormattedText.HighlightColorIndex = wdPink) And _
+                    Not (activeRng.Characters(2).Font.Superscript = True) And _
+                    Not (activeRng.style = "Hyperlink") And _
+                    Not (activeRng.style = excludeStyle) Then
+                        activeRng.Text = LTrim(i) & ENDASH & LTrim(j)
+                    End If
+                    activeRng.Collapse wdCollapseEnd
+                Wend
              End With
-             
-             While Selection.Find.Found
-                 If Not (Selection.FormattedText.HighlightColorIndex = wdPink) And _
-                    Not (Selection.style = "Hyperlink") And _
-                    Not (Selection.style = excludeStyle) Then
-                     Selection.TypeText LTrim(i) & ENDASH & LTrim(j)
-                 End If
-                 
-                 Selection.MoveRight
-                 Selection.Find.Execute
-             Wend
         Next
     Next
-    
+
     thisstatus = "Fixing dashes: 20%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
 
@@ -636,49 +636,49 @@ Sub Dashes(MyStoryNo)
     FindReplaceSimple ChrW(-3906), EMDASH, MyStoryNo
     'bar character = emdash
     FindReplaceSimple ChrW(8213), EMDASH, MyStoryNo
-    
+
     thisstatus = "Fixing dashes: 30%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
-    
+
     'figure dash=endash
     FindReplaceSimple ChrW(8210), ENDASH, MyStoryNo
     'hyphen.hyphen.hyphen=endash
     FindReplaceSimple_WithExcludeOrHyperlink "---", EMDASH, MyStoryNo
     'space.hyphen.space=emdash
     FindReplaceSimple_WithExclude " - ", "-", MyStoryNo
-    
+
     thisstatus = "Fixing dashes: 40%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
-    
+
     'space.hyphen.hyphen.space=emdash
     FindReplaceSimple_WithExclude " -- ", EMDASH, MyStoryNo
     'hyphen.hyphen=emdash
     FindReplaceSimple_WithExcludeOrHyperlink "--", EMDASH, MyStoryNo
-    
+
     thisstatus = "Fixing dashes: 50%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
-    
+
    'dash.space=dash
     FindReplaceSimple_WithExclude "-" & aSPACE, "-", MyStoryNo
     'space.dash=dash
     FindReplaceSimple_WithExclude aSPACE & "-", "-", MyStoryNo
-    
+
     thisstatus = "Fixing dashes: 60%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
-    
+
     'space.endash=emdash
     FindReplaceSimple_WithExclude aSPACE & ENDASH, EMDASH, MyStoryNo
     'endash.space=emdash
     FindReplaceSimple_WithExclude ENDASH & aSPACE, ENDASH, MyStoryNo
-    
+
     thisstatus = "Fixing dashes: 70%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
-    
+
     'emdash.space=emdash
     FindReplaceSimple_WithExclude EMDASH & aSPACE, EMDASH, MyStoryNo
     'space.emdash=emdash
     FindReplaceSimple_WithExclude aSPACE & EMDASH, EMDASH, MyStoryNo
-    
+
     thisstatus = "Fixing dashes: 80%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
     
@@ -714,7 +714,6 @@ Function HighlightNumber(myPattern, Optional storyNumber As Variant = 1)
     Loop
 
 End Function
-
 
 Function removeHighlight(Optional storyNumber As Variant = 1)
     ActiveDocument.StoryRanges(storyNumber).Select
