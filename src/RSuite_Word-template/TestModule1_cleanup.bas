@@ -12,7 +12,8 @@ Private DQ_simplefinds_expected As String, DQ_emdash_expected As String, DQ_spac
     SQ_fandr_expected As String, EL_frbasic_expected As String, EL_fr4dots_expected As String, EL_spaces_expected As String, _
     EL_emdashes_expected As String, SP_nbsps_expected As String, SP_brackets_expected As String, SP_breaks_expected As String, _
     SP_exclude_expected As String, PN_expected As String, DSH_numbers_expected As String, DSH_expected As String, _
-    DSH_exclude_expected As String, DSH_links_expected As String, MTC_expected As String, BR_expected As String, SP_wdv387_expected As String
+    DSH_exclude_expected As String, DSH_links_expected As String, MTC_expected As String, BR_expected As String, BR2_expected As String, _
+    SP_wdv387_expected As String
 Private HL_expected As Integer
 
 Private testDocx As Document
@@ -88,6 +89,8 @@ MTC_expected = "Testing All of the Lowercase" + vbCr _
             + "The the HBO HTML V past the Down"
 HL_expected = 4  ' < 3 in links test, +1 in dashes_links test
 BR_expected = "Line" + vbCr + "break. Now excluded Line" + vbVerticalTab + "break. Now page" + vbCr + "break. Now double new" + vbCr + "paras. Now five new" + vbCr + "paras."
+BR2_expected = "Lots of breaks" + vbCr + "trailing set of breaks (must be final test in doc)"
+
 
 End Function
 
@@ -119,6 +122,7 @@ DSH_links_expected = vbNullString
 MTC_expected = vbNullString
 HL_expected = 0
 BR_expected = vbNullString
+BR2_expected = vbNullString
 
 End Function
 
@@ -157,7 +161,7 @@ Private Sub TestInitialize()
     ' Create new test docx from template
     Set testDocx = Application.Documents.Add(testdotx_filepath, visible:=False)
     ' for debug, make the doc visible:
-'     Set testDocx = Application.Documents.Add(testdotx_filepath)
+'    Set testDocx = Application.Documents.Add(testdotx_filepath)
     testDocx.Activate
     MyStoryNo = 1 '1 = Main Body, 2 = Footnotes, 3 = Endnotes. Can override this value per test as needed
     
@@ -1091,7 +1095,64 @@ TestExit:
 TestFail:
     Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
 End Sub
-
+'@TestMethod("CleanupMacro")
+Private Sub TestBreaks_wdv396() 'TODO Rename test
+    Dim results_enotes As String, results_secondrun As String
+    Dim testDocx_local As Document
+    On Error GoTo TestFail
+    'Arrange:
+        ' this test requires document be opened with visibility, else it loses track of activedoc.
+        '   so we open our own just for this test
+        Set testDocx_local = Application.Documents.Add(testdotx_filepath)
+        MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+        copyBodyContentsToEndNotes middleNote:=True  ' we need to test an endnote that is not th elast endnote to reproduce err
+        copyBodyContentsToEndNotes lastNote:=True
+    'Act:
+        Call Clean.CleanBreaks(MyStoryNo)
+        results_enotes = TestHelpers.returnTestResultString("TestBreaks_wdv396", MyStoryNo)
+        Debug.Print results_enotes
+     'Act:
+        Call Clean.CleanBreaks(MyStoryNo)
+        results_secondrun = TestHelpers.returnTestResultString("TestBreaks_wdv396", MyStoryNo)
+     'Assert:
+        Assert.Succeed
+        Assert.areequal BR2_expected, results_secondrun
+        Assert.areequal BR2_expected, results_enotes
+     'Cleanup:
+        testDocx_local.Close savechanges:=wdDoNotSaveChanges
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+'@TestMethod("CleanupMacro")
+Private Sub TestBreaks_stylepersist() 'TODO Rename test
+    Dim testResultsDocx As Document
+    Dim results As String, result_compareStr As String
+    Dim rng_results_expected As Range, rng_results_actual As Range
+    On Error GoTo TestFail
+    'Arrange:
+        Const C_PROC_NAME = "TestBreaks_stylepersist"  '<-- name of this test procedure
+        'MyStoryNo = 1 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
+    'Act:
+        Call Clean.CleanBreaks(MyStoryNo)
+        'results = TestHelpers.returnTestResultString(C_PROC_NAME, MyStoryNo)
+        Set rng_results_actual = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testDocx)
+        ' Create new results docx from template
+        Set testResultsDocx = Application.Documents.Add(testresults_dotx_filepath, visible:=False)
+        Set rng_results_expected = TestHelpers.returnTestResultRange(C_PROC_NAME, MyStoryNo, testResultsDocx)
+        ' Compare known good output and output from just now
+        result_compareStr = TestHelpers.compareRanges(rng_results_actual, rng_results_expected)
+        ' Close results doc
+        Application.Documents(testResultsDocx).Close savechanges:=wdDoNotSaveChanges
+    'Assert:
+        Assert.Succeed
+        Assert.areequal "Same", result_compareStr
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
 '@TestMethod("CleanupMacro")
 Private Sub TestTitlecase() 'TODO Rename test
     Dim results As String

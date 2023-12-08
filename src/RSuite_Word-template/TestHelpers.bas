@@ -51,7 +51,7 @@ Function compareParaStylesInRange(testRange As Range, expectedRange As Range) As
         Exit Function
     End If
     For i = 1 To testRange.Paragraphs.Count
-        If testRange.Paragraphs(i).Style <> expectedRange.Paragraphs(i).Style Then
+        If testRange.Paragraphs(i).style <> expectedRange.Paragraphs(i).style Then
             If resultstr = "" Then
                 resultstr = "Mismatched parastyles found; para number(s): " & i
             Else
@@ -82,10 +82,10 @@ ElseIf actualRange.Text <> expectedRange.Text Then
 Else
     For i = 1 To actualRange.Characters.Count
         ' namelocal reports char style where present, otherwise give para style
-        If actualRange.Characters(i).Style.NameLocal <> expectedRange.Characters(i).Style.NameLocal Then
+        If actualRange.Characters(i).style.NameLocal <> expectedRange.Characters(i).style.NameLocal Then
             returnString = "Different styles detected for char #" + str(i) + " ('" + actualRange.Characters(i) + _
-                "'), expected: '" + expectedRange.Characters(i).Style.NameLocal + "', actual: '" + _
-                actualRange.Characters(i).Style.NameLocal + "'"
+                "'), expected: '" + expectedRange.Characters(i).style.NameLocal + "', actual: '" + _
+                actualRange.Characters(i).style.NameLocal + "'"
             GoTo TheEnd
         ' checking local formatting types one by one
         ElseIf actualRange.Characters(i).Font.Bold <> expectedRange.Characters(i).Font.Bold Then
@@ -179,7 +179,7 @@ With FindEndRange.Find
     End If
 End With
 
-returnTestResultStyle = resultRng.Style.NameLocal
+returnTestResultStyle = resultRng.style.NameLocal
 
 End Function
 
@@ -234,6 +234,8 @@ With FindEndRange.Find
     If .Found = True Then
         'FindEndRange.Select ' < helpful for debug
         resultRng.End = FindEndRange.Start
+    ElseIf MyStoryNo = 3 Then
+        resultRng.End = FindEndRange.Endnotes(1).Range.End
     Else
         'if we are at end of story, that is the end of range ...
         resultRng.End = ActiveDocument.StoryRanges(MyStoryNo).End
@@ -333,13 +335,15 @@ Next vbProj
 getRepoPath = repo_pathStr  'includes trailing backslash
 End Function
 
-Sub copyBodyContentsToEndNotes()
+Sub copyBodyContentsToEndNotes(Optional middleNote As Boolean = False, Optional lastNote As Boolean = False)
 Dim mainContentsRng As Range
-Set mainContentsRng = ActiveDocument.StoryRanges(1)
+Dim mainRngEnd As Range
 
 ' add trailing 'end' tag to main doc
 Set mainContentsRng = ActiveDocument.StoryRanges(1)
-mainContentsRng.InsertAfter (vbCr + "__END_TESTS__")
+If middleNote = False Then
+    mainContentsRng.InsertAfter (vbCr + "__END_TESTS__")
+End If
 
 ' add an empty note referencing last char of main doc
 Set mainRngEnd = ActiveDocument.StoryRanges(1)
@@ -348,8 +352,15 @@ ActiveDocument.Endnotes.Add Range:=mainRngEnd
 
 ' paste contents of main doc into the note (minus trailing note ref and vbcr)
 mainContentsRng.MoveEnd Unit:=wdCharacter, Count:=-2
-mainContentsRng.Copy
-ActiveDocument.Endnotes(1).Range.Paste
+If lastNote = False Then
+    mainContentsRng.Copy
+    ActiveDocument.Endnotes(ActiveDocument.Endnotes.Count).Range.Paste
+'Else
+'    Dim testtxt As Range
+'    Set testtxt = "emptynote"
+'    testtxt.Copy
+End If
+
 End Sub
 
 Sub copyBodyContentsToFootNotes()
@@ -368,7 +379,7 @@ ActiveDocument.Footnotes.Add Range:=mainRngEnd
 ' paste contents of main doc into the note (minus trailing note ref and vbcr)
 mainContentsRng.MoveEnd Unit:=wdCharacter, Count:=-2
 mainContentsRng.Copy
-ActiveDocument.Footnotes(1).Range.Paste
+ActiveDocument.Footnotes(ActiveDocument.Footnotes.Count).Range.Paste
 
 End Sub
 
