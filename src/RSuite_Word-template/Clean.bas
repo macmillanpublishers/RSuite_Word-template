@@ -770,6 +770,7 @@ Function MakeTitleCase(MyStoryNo)
     If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
 
 End Function
+
 Function CleanBreaks(MyStoryNo)
 
     thisstatus = "Cleaning breaks "
@@ -780,40 +781,7 @@ Function CleanBreaks(MyStoryNo)
     FindReplaceSimple "^m", "^p", MyStoryNo
     FindReplaceSimple "^b", "^p", MyStoryNo
 
-    ActiveDocument.StoryRanges(MyStoryNo).Select
-    Selection.Collapse Direction:=wdCollapseStart
-    
-    With Selection.Find
-        .ClearFormatting
-        .Replacement.ClearFormatting
-        .Text = "^p^p"
-        .Forward = True
-        .Wrap = wdFindContinue
-        .Execute
-    End With
-    
-    ' adding a counter to make sure we don't get caught in a loop trying to rm
-    '   unremoveable consectuive breaks (happened with consecutive breaks with
-    '   shape object in between in testing.
-    Dim counter As Integer
-    counter = 0
-    
-    Do While Selection.Find.Found
-        If EndOfStoryReached(MyStoryNo) = False And counter < 3 Then
-            FindReplaceSimple "^p^p", "^p", MyStoryNo
-            With Selection.Find
-                .ClearFormatting
-                .Replacement.ClearFormatting
-                .Text = "^p^p"
-                .Forward = True
-                .Wrap = wdFindStop
-                .Execute
-            End With
-            counter = counter + 1
-        Else
-            Exit Do
-        End If
-    Loop
+    Call Clean_helpers.CleanConsecutiveBreaks(MyStoryNo)
     
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")

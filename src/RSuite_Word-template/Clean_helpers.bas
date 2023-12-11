@@ -320,6 +320,55 @@ Public Function EndOfStoryReached(storyNumber As Variant) As Boolean
     End Select
 End Function
 
+Function CleanConsecutiveBreaks(MyStoryNo As Variant)
+
+Dim last_count As Integer, found_count As Integer
+last_count = 0
+
+Call ClearSearch
+
+found_count = CleanConsecutiveBreaks_SinglePass(MyStoryNo)
+
+' we make sure we don't get stuck in a loop by verifying
+'   the count is decreasing each run
+While found_count > 0 And last_count <> found_count
+    last_count = found_count
+    found_count = CleanConsecutiveBreaks_SinglePass(MyStoryNo)
+Wend
+
+End Function
+
+Function CleanConsecutiveBreaks_SinglePass(MyStoryNo As Variant) As Integer
+' expected that we will make multiple passes of this
+
+    Dim Rg As Range
+    Set Rg = ActiveDocument.StoryRanges(MyStoryNo)
+    Dim found_count As Integer
+    found_count = 0
+
+    'Call ClearSearch ' < will call this in parent procedure
+
+    With Rg.Find
+        .Text = "^p^p"
+        .Wrap = wdFindStop
+        While .Execute
+            found_count = found_count + 1
+            ' it's simpler/faster/cleaner to remove the last char; then you keep the
+            '   desired style of the first para.
+            ' but we can't do that at end of story (doesn't work) or end of note (throws error!)
+            ' so instead we set the style (if present) from the 1st para to last para,
+            '   then rm the first para
+            If Not Rg.Characters.First.ParagraphStyle Is Nothing Then
+                Rg.Characters.Last.style = Rg.Characters.First.ParagraphStyle
+            End If
+            Rg.Characters.First = ""
+            Rg.Collapse wdCollapseEnd
+        Wend
+    End With
+
+    CleanConsecutiveBreaks_SinglePass = found_count
+
+End Function
 
 Public Function AtStartOfDocument() As Boolean
     Select Case ActiveDocument.Content.Start
