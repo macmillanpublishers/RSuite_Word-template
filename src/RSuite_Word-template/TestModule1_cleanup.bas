@@ -1105,7 +1105,7 @@ Private Sub TestBreaks_wdv396() 'TODO Rename test
         '   so we open our own just for this test
         Set testDocx_local = Application.Documents.Add(testdotx_filepath)
         MyStoryNo = 3 '<< override test_init here as needed: use 1 for Main body of docx: use 2 for footnotes, 3 for endnotes
-        copyBodyContentsToEndNotes middleNote:=True  ' we need to test an endnote that is not th elast endnote to reproduce err
+        copyBodyContentsToEndNotes firstNote:=True  ' we need to test an endnote that is not the last endnote to reproduce err
         copyBodyContentsToEndNotes lastNote:=True
     'Act:
         Call Clean.CleanBreaks(MyStoryNo)

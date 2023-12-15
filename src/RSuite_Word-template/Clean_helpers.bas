@@ -27,7 +27,25 @@ Public Function FindReplaceSimple(ByVal sFind As String, ByVal sReplace As Strin
       End With
 
 End Function
-
+'  Did a lot of testing on using the Range version of this find function vs Select version"
+'   with the exception of 1 long doc (where rng find saved 20 seconds out of 200), most docs (med-long, short, notes or not)
+'   were slightly faster with select find, ditto unittests. Or the difference was moot or minor or inconsistent
+'Public Function FindReplaceSimple_rng(ByVal sFind As String, ByVal sReplace As String, Optional storyNumber As Variant = 1)
+'
+'    Dim Rg As Range
+'    Set Rg = ActiveDocument.StoryRanges(storyNumber)
+'
+'    Call ClearSearch
+'
+'    With Rg.Find
+'        While .Execute(FindText:=sFind, ReplaceWith:=sReplace)
+'            Rg.Collapse wdCollapseEnd
+'        Wend
+'        Err.Clear
+'        On Error GoTo 0
+'    End With
+'
+'End Function
 Sub TableEndCharFontReset()
 
 'Dim t As Single
@@ -225,6 +243,48 @@ Public Function FindReplaceComplex_WithExclude(ByVal sFind As String, _
       
 End Function
 
+' Testing this vs equiv select find, this appeared to be slower in limited tests.
+'   leaving it in but commented out so I don't try the same thing again in a year or two:)
+'Public Function FindReplaceComplex_rng(ByVal sFind As String, _
+'                                    ByVal sReplace As String, _
+'                                    Optional bMatchCase As Boolean = False, _
+'                                    Optional bUseWildcards As Boolean = False, _
+'                                    Optional bSmallCaps As Boolean = False, _
+'                                    Optional bIncludeFormat As Boolean = False, _
+'                                    Optional storyNumber As Variant = 1)
+'
+'    Call ClearSearch
+'
+'    Dim Rg As Range
+'    Set Rg = ActiveDocument.StoryRanges(storyNumber)
+'
+'    With Rg.Find
+'        .Forward = True
+'        .Text = sFind
+'        .Wrap = wdFindContinue
+'        .MatchWildcards = bUseWildcards
+'        .MatchSoundsLike = False
+'        .MatchCase = bMatchCase
+'        .MatchWholeWord = False
+'        .MatchAllWordForms = False
+'        If bIncludeFormat = True Then
+'            .Format = True
+'        Else: .Format = False
+'        End If
+'        .Font.SmallCaps = bSmallCaps
+'        While .Execute(Replace:=wdReplaceAll, ReplaceWith:=sReplace)
+'            With .Replacement
+'              .ClearFormatting
+'              .Font.SmallCaps = False
+'            End With
+'            Rg.Collapse wdCollapseEnd
+'        Wend
+'        Err.Clear
+'        On Error GoTo 0
+'      End With
+'
+'End Function
+'
 Public Function FindReplaceComplex(ByVal sFind As String, _
                                     ByVal sReplace As String, _
                                     Optional bMatchCase As Boolean = False, _
@@ -263,6 +323,7 @@ Public Function FindReplaceComplex(ByVal sFind As String, _
       End With
       
 End Function
+
 
 Function ClearSearch()
 
@@ -347,7 +408,6 @@ Function CleanConsecutiveBreaks_SinglePass(MyStoryNo As Variant) As Integer
     found_count = 0
 
     'Call ClearSearch ' < will call this in parent procedure
-
     With Rg.Find
         .Text = "^p^p"
         .Wrap = wdFindStop
@@ -356,20 +416,26 @@ Function CleanConsecutiveBreaks_SinglePass(MyStoryNo As Variant) As Integer
             ' it's simpler/faster/cleaner to remove the last char; then you keep the
             '   desired style of the first para.
             ' but we can't do that at end of story (doesn't work) or end of note (throws error!)
-            ' so instead we set the style (if present) from the 1st para to last para,
-            '   then rm the first para
-            If Not Rg.Characters.First.ParagraphStyle Is Nothing Then
-                Rg.Characters.Last.style = Rg.Characters.First.ParagraphStyle
-            End If
-            Rg.Characters.First = ""
+            ' so then we trap err, set the style (if present) from the 1st para to last para,
+            '   & rm the first para
+            On Error GoTo TrapError
+            Rg.Characters.Last = ""
+            On Error GoTo 0
             Rg.Collapse wdCollapseEnd
         Wend
     End With
-
+    GoTo Theend
+    
+TrapError:
+    If Not Rg.Characters.First.ParagraphStyle Is Nothing Then
+        Rg.Characters.Last.style = Rg.Characters.First.ParagraphStyle
+    End If
+    Rg.Characters.First = ""
+    Resume Next
+Theend:
     CleanConsecutiveBreaks_SinglePass = found_count
 
 End Function
-
 Public Function AtStartOfDocument() As Boolean
     Select Case ActiveDocument.Content.Start
         Case Selection.Start

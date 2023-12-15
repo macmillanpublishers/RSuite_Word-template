@@ -75,10 +75,10 @@ returnString = "Same"
 If actualRange.Characters.Count <> expectedRange.Characters.Count Then
     returnString = "Compared ranges are different lengths, expected: " + str(expectedRange.Characters.Count) + _
         ", actual: " + str(actualRange.Characters.Count)
-    GoTo TheEnd
+    GoTo Theend
 ElseIf actualRange.Text <> expectedRange.Text Then
     returnString = "Range text mismatch, expected: '" + actualRange.Text + "', actual: '" + expectedRange.Text + "'"
-    GoTo TheEnd
+    GoTo Theend
 Else
     For i = 1 To actualRange.Characters.Count
         ' namelocal reports char style where present, otherwise give para style
@@ -86,36 +86,36 @@ Else
             returnString = "Different styles detected for char #" + str(i) + " ('" + actualRange.Characters(i) + _
                 "'), expected: '" + expectedRange.Characters(i).style.NameLocal + "', actual: '" + _
                 actualRange.Characters(i).style.NameLocal + "'"
-            GoTo TheEnd
+            GoTo Theend
         ' checking local formatting types one by one
         ElseIf actualRange.Characters(i).Font.Bold <> expectedRange.Characters(i).Font.Bold Then
             returnString = "Diff in 'bold' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
-            GoTo TheEnd
+            GoTo Theend
         ElseIf actualRange.Characters(i).Font.Italic <> expectedRange.Characters(i).Font.Italic Then
             returnString = "Diff in 'italic' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
-            GoTo TheEnd
+            GoTo Theend
         ElseIf actualRange.Characters(i).Font.SmallCaps <> expectedRange.Characters(i).Font.SmallCaps Then
             returnString = "Diff in 'smallcaps' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
-            GoTo TheEnd
+            GoTo Theend
         ElseIf actualRange.Characters(i).Font.Subscript <> expectedRange.Characters(i).Font.Subscript Then
             returnString = "Diff in 'Subscript' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
-            GoTo TheEnd
+            GoTo Theend
         ElseIf actualRange.Characters(i).Font.Superscript <> expectedRange.Characters(i).Font.Superscript Then
             returnString = "Diff in 'Superscript' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
-            GoTo TheEnd
+            GoTo Theend
         ElseIf actualRange.Characters(i).Font.StrikeThrough <> expectedRange.Characters(i).Font.StrikeThrough Then
             returnString = "Diff in 'strikethrough' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
-            GoTo TheEnd
+            GoTo Theend
         ElseIf actualRange.Characters(i).Font.Underline <> expectedRange.Characters(i).Font.Underline Then
             returnString = "Diff in 'underline' found for char #" + str(i) + " ('" + actualRange.Characters(i) + "')"
-            GoTo TheEnd
+            GoTo Theend
         End If
     Next i
 End If
 
 compareRanges = returnString
 
-TheEnd:
+Theend:
     compareRanges = returnString
 
 End Function
@@ -335,30 +335,29 @@ Next vbProj
 getRepoPath = repo_pathStr  'includes trailing backslash
 End Function
 
-Sub copyBodyContentsToEndNotes(Optional middleNote As Boolean = False, Optional lastNote As Boolean = False)
+Sub copyBodyContentsToEndNotes(Optional firstNote As Boolean = False, Optional lastNote As Boolean = False)
 Dim mainContentsRng As Range
 Dim mainRngEnd As Range
 
+' added optional params for wdv_396, where we need the second to last note to have the body/test-content
+
 ' add trailing 'end' tag to main doc
 Set mainContentsRng = ActiveDocument.StoryRanges(1)
-If middleNote = False Then
+If firstNote = False Then
     mainContentsRng.InsertAfter (vbCr + "__END_TESTS__")
 End If
+' paste contents of main doc into the note (minus trailing note ref and vbcr)
+mainContentsRng.MoveEnd Unit:=wdCharacter, Count:=-2
 
 ' add an empty note referencing last char of main doc
 Set mainRngEnd = ActiveDocument.StoryRanges(1)
 mainRngEnd.Collapse Direction:=wdCollapseEnd
 ActiveDocument.Endnotes.Add Range:=mainRngEnd
 
-' paste contents of main doc into the note (minus trailing note ref and vbcr)
-mainContentsRng.MoveEnd Unit:=wdCharacter, Count:=-2
+' if last is true it means there was a first note with test content, so we're leaving final note blank
 If lastNote = False Then
     mainContentsRng.Copy
-    ActiveDocument.Endnotes(ActiveDocument.Endnotes.Count).Range.Paste
-'Else
-'    Dim testtxt As Range
-'    Set testtxt = "emptynote"
-'    testtxt.Copy
+    ActiveDocument.Endnotes(1).Range.Paste
 End If
 
 End Sub
@@ -379,7 +378,7 @@ ActiveDocument.Footnotes.Add Range:=mainRngEnd
 ' paste contents of main doc into the note (minus trailing note ref and vbcr)
 mainContentsRng.MoveEnd Unit:=wdCharacter, Count:=-2
 mainContentsRng.Copy
-ActiveDocument.Footnotes(ActiveDocument.Footnotes.Count).Range.Paste
+ActiveDocument.Footnotes(1).Range.Paste
 
 End Sub
 
