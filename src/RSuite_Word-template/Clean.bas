@@ -42,7 +42,7 @@ Sub Ellipses(MyStoryNo)
         With Selection.Find
             .MatchWildcards = False
             .ClearFormatting
-            .Execute findText:=TEMP_ELL
+            .Execute FindText:=TEMP_ELL
         End With
         While Selection.Find.Found
             
@@ -202,7 +202,7 @@ Sub DoubleQuotes(MyStoryNo)
     FindReplaceSimple SP & SP, DP, MyStoryNo
     
     ActiveDocument.StoryRanges(MyStoryNo).Select
-    Selection.Find.Execute findText:=DP
+    Selection.Find.Execute FindText:=DP
     Do While Selection.Find.Found
         ' Find / Replace tool includes DOQ and DCQ as results in a search for DP
         '   for some reason (Windows/Office2013)
@@ -327,7 +327,7 @@ Sub SingleQuotes(MyStoryNo)
     ' check backtick chars
     ActiveDocument.StoryRanges(MyStoryNo).Select
     Selection.Find.ClearFormatting
-    Selection.Find.Execute findText:="`"
+    Selection.Find.Execute FindText:="`"
     While Selection.Find.Found
         ' get preceding character
         ActiveDocument.Bookmarks.Add Name:="temp", Range:=Selection.Range
@@ -359,7 +359,7 @@ Sub SingleQuotes(MyStoryNo)
         If Not pBar Is Nothing Then Clean_helpers.updateStatus (thisstatus)
         nextPercentage = nextPercentage + 30
     
-        Selection.Find.Execute findText:=QuoStr
+        Selection.Find.Execute FindText:=QuoStr
         
         While Selection.Find.Found
             ' Find / Replace tool includes SOQ and SCQ as results in a search for SP
@@ -1127,9 +1127,8 @@ Sub CheckAppliedCharStyles(MyStoryNo)
                 Next k
                 
                 ' \/ strip out any direct formatting beyond our determined cstyle
-                'Selection.ClearCharacterDirectFormatting
-                '^^ mirroring what was done before: ital-styled ital/underline, underline is left alone
-                '   uncomment to change that
+                Selection.ClearCharacterDirectFormatting
+                ' /\ Adding this in per RST-1231
                 
                 ' \/ this Collapse assures that the selection keeps moving forward & all items are found
                 Selection.Collapse Direction:=wdCollapseEnd
