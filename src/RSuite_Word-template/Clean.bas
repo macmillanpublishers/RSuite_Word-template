@@ -995,6 +995,16 @@ Sub LocalFormatting(MyStoryNo)
     'underline
     Call ConvertLocalFormatting(MyStoryNo, UnderlineTF:=True, NewStyle:="underline (u)")
     
+    'as per RST-1231, we take some LF-combos with no RS equiv. and revert them to ones that do:
+    'bold + strikethrough = strikethrough
+    Call ConvertLocalFormatting(MyStoryNo, BoldTF:=True, StrikeTF:=True, NewStyle:="strike (str)")
+    'ital + strikethrough = strikethrough
+    Call ConvertLocalFormatting(MyStoryNo, ItalTF:=True, StrikeTF:=True, NewStyle:="strike (str)")
+    'bold + underline = underline
+    Call ConvertLocalFormatting(MyStoryNo, BoldTF:=True, UnderlineTF:=True, NewStyle:="underline (u)")
+    'ital + underline = underline
+    Call ConvertLocalFormatting(MyStoryNo, ItalTF:=True, UnderlineTF:=True, NewStyle:="underline (u)")
+    
     completeStatus = completeStatus + vbNewLine + thisstatus + "100%"
     If Not pBar Is Nothing Then Clean_helpers.updateStatus ("")
     
